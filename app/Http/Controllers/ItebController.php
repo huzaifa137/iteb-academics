@@ -13,6 +13,10 @@ use App\Models\StudentResult;
 use App\Http\Controllers\Helper;
 use Illuminate\Support\Facades\DB;
 
+use App\Exports\ExamStatisticsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class ItebController extends Controller
 {
 
@@ -872,275 +876,276 @@ class ItebController extends Controller
     {
         return view('contact');
     }
-public function examStatistics(Request $request)
-{
-    $request->validate([
-        'year' => 'required',
-        'category' => 'required',
-        'level' => 'nullable|in:A,O'
-    ]);
+    public function examStatistics(Request $request)
+    {
+        $request->validate([
+            'year' => 'required',
+            'category' => 'required',
+            'level' => 'nullable|in:A,O'
+        ]);
 
-    $year = $request->year;
-    $category = $request->category;
-    $level = $request->level ?? 'A';
+        $year = $request->year;
+        $category = $request->category;
+        $level = $request->level ?? 'A';
 
-    // Get level name for display
-    $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
+        // Get level name for display
+        $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
 
-    // Get registered schools count
-    $schoolsQuery = ClassAllocation::select('Student_ID')
-        ->where('Student_ID', 'LIKE', "%-$category-%")
-        ->where('Student_ID', 'LIKE', "%-$year")
-        ->distinct();
+        // Get registered schools count
+        $schoolsQuery = ClassAllocation::select('Student_ID')
+            ->where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct();
 
-    $schoolsCount = $schoolsQuery->get()
-        ->map(function ($item) {
-            return explode('-', $item->Student_ID)[0];
-        })
-        ->unique()
-        ->count();
+        $schoolsCount = $schoolsQuery->get()
+            ->map(function ($item) {
+                return explode('-', $item->Student_ID)[0];
+            })
+            ->unique()
+            ->count();
 
-    // Get registered students count
-    $registeredStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
-        ->where('Student_ID', 'LIKE', "%-$year")
-        ->distinct('Student_ID')
-        ->count('Student_ID');
+        // Get registered students count
+        $registeredStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->count('Student_ID');
 
-    // Get all students for this category/year
-    $allStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
-        ->where('Student_ID', 'LIKE', "%-$year")
-        ->distinct('Student_ID')
-        ->pluck('Student_ID')
-        ->toArray();
+        // Get all students for this category/year
+        $allStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->pluck('Student_ID')
+            ->toArray();
 
-    // Get subjects for this category
-    $subjectIds = $this->getSubjectIdsForCategory($category);
-    $totalPossibleMarks = count($subjectIds) * 100;
+        // Get subjects for this category
+        $subjectIds = $this->getSubjectIdsForCategory($category);
+        $totalPossibleMarks = count($subjectIds) * 100;
 
-    // Get all marks for these students
-    $marks = Mark::whereIn('student_id', $allStudents)
-        ->whereIn('subject_id', $subjectIds)
-        ->where('year', $year)
-        ->get()
-        ->groupBy('student_id');
+        // Get all marks for these students
+        $marks = Mark::whereIn('student_id', $allStudents)
+            ->whereIn('subject_id', $subjectIds)
+            ->where('year', $year)
+            ->get()
+            ->groupBy('student_id');
 
-    // Initialize grade distribution counters
-    $gradeDistribution = [
-        'D1' => ['male' => 0, 'female' => 0, 'total' => 0],
-        'D2' => ['male' => 0, 'female' => 0, 'total' => 0],
-        'C3' => ['male' => 0, 'female' => 0, 'total' => 0],
-        'C4' => ['male' => 0, 'female' => 0, 'total' => 0],
-        'F' => ['male' => 0, 'female' => 0, 'total' => 0],
-    ];
-
-    $totalMale = 0;
-    $totalFemale = 0;
-    $totalGraded = 0;
-    
-    // Array to store student performance data for top students
-    $studentPerformance = [];
-
-    // Initialize subject performance tracking
-    $subjectPerformance = [];
-    
-    // Get subject names based on category
-    if ($category == 'TH') {
-        $subjectPapers = MasterData::where(
-            'md_master_code_id',
-            config('constants.options.ThanawiPapers')
-        )->get()->keyBy('id');
-    } else {
-        $subjectPapers = MasterData::where(
-            'md_master_code_id',
-            config('constants.options.IdaadPapers')
-        )->get()->keyBy('id');
-    }
-
-    // Initialize subject performance array with subject details
-    foreach ($subjectIds as $subjectId) {
-        $subject = $subjectPapers[$subjectId] ?? null;
-        $subjectPerformance[$subjectId] = [
-            'subject_id' => $subjectId,
-            'subject_name' => $subject ? ($subject->master_name ?? $subject->master_name_ar ?? 'Unknown Subject') : 'Unknown Subject',
-            'total_marks' => 0,
-            'student_count' => 0,
-            'average' => 0,
-            'highest' => 0,
-            'lowest' => 100,
-            'pass_count' => 0,
-            'fail_count' => 0,
-            'pass_percentage' => 0
-        ];
-    }
-
-    // Process each student
-    foreach ($allStudents as $studentId) {
-        $studentMarks = $marks->get($studentId, collect());
-
-        if ($studentMarks->isEmpty()) {
-            continue; // Skip students with no marks
-        }
-
-        $totalMarks = $studentMarks->sum('mark');
-        $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
-
-        // IMPORTANT: Get ONLY the Marks type grade for the summary table
-        $grade = $this->getMarksGrade($percentage, $level);
-
-        // Get student gender
-        $gender = strtolower($this->getStudentGender($studentId));
-        
-        // Get student name/info for top students list
-        $studentInfo = $this->getStudentInfo($studentId);
-
-        // Store student performance data for top students
-        $studentPerformance[] = [
-            'student_id' => $studentId,
-            'student_name' => $studentInfo['name'] ?? 'N/A',
-            'school_name' => $studentInfo['school_name'] ?? 'N/A',
-            'total_marks' => $totalMarks,
-            'percentage' => $percentage,
-            'grade' => $grade,
-            'gender' => $gender
+        // Initialize grade distribution counters
+        $gradeDistribution = [
+            'D1' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'D2' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C3' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C4' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'F' => ['male' => 0, 'female' => 0, 'total' => 0],
         ];
 
-        // Update subject performance
-        foreach ($studentMarks as $mark) {
-            $subjectId = $mark->subject_id;
-            $markValue = $mark->mark;
-            
-            if (isset($subjectPerformance[$subjectId])) {
-                $subjectPerformance[$subjectId]['total_marks'] += $markValue;
-                $subjectPerformance[$subjectId]['student_count']++;
-                $subjectPerformance[$subjectId]['highest'] = max($subjectPerformance[$subjectId]['highest'], $markValue);
-                $subjectPerformance[$subjectId]['lowest'] = min($subjectPerformance[$subjectId]['lowest'], $markValue);
-                
-                // Count passes (assuming pass mark is 50 or more - adjust as needed)
-                if ($markValue >= 50) {
-                    $subjectPerformance[$subjectId]['pass_count']++;
-                } else {
-                    $subjectPerformance[$subjectId]['fail_count']++;
-                }
-            }
+        $totalMale = 0;
+        $totalFemale = 0;
+        $totalGraded = 0;
+
+        // Array to store student performance data for top students
+        $studentPerformance = [];
+
+        // Initialize subject performance tracking
+        $subjectPerformance = [];
+
+        // Get subject names based on category
+        if ($category == 'TH') {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.ThanawiPapers')
+            )->get()->keyBy('id');
+        } else {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.IdaadPapers')
+            )->get()->keyBy('id');
         }
 
-        // Update counters
-        if (isset($gradeDistribution[$grade])) {
-            $gradeDistribution[$grade][$gender]++;
-            $gradeDistribution[$grade]['total']++;
+        // Initialize subject performance array with subject details
+        foreach ($subjectIds as $subjectId) {
 
-            if ($gender == 'male') {
-                $totalMale++;
-            } else {
-                $totalFemale++;
-            }
-            $totalGraded++;
-        }
-    }
-
-    // Calculate averages and pass percentages for subjects
-    foreach ($subjectPerformance as &$subject) {
-        if ($subject['student_count'] > 0) {
-            $subject['average'] = round($subject['total_marks'] / $subject['student_count'], 2);
-            $subject['pass_percentage'] = round(($subject['pass_count'] / $subject['student_count']) * 100, 2);
-        }
-        
-        // Handle subjects with no data
-        if ($subject['lowest'] == 100) {
-            $subject['lowest'] = 0;
-        }
-    }
-
-    // Sort subjects by average performance
-    usort($subjectPerformance, function($a, $b) {
-        return $b['average'] <=> $a['average'];
-    });
-    
-    // Get top 10 best performing subjects
-    $bestSubjects = array_slice($subjectPerformance, 0, 10);
-    
-    // Get bottom 10 worst performing subjects (reverse order)
-    $worstSubjects = array_slice(array_reverse($subjectPerformance), 0, 10);
-
-    // Sort students by percentage (highest first) and get top 10
-    usort($studentPerformance, function($a, $b) {
-        return $b['percentage'] <=> $a['percentage'];
-    });
-    
-    $topStudents = array_slice($studentPerformance, 0, 10);
-
-    // Prepare grading summary table
-    $gradingSummary = [];
-    $serial = ['a', 'b', 'c', 'd'];
-    $gradeLabels = [
-        'D1' => 'Excellent D1',
-        'D2' => 'Very good D2',
-        'C3' => 'Good C3',
-        'C4' => 'Pass C4',
-        'F' => 'Fail F'
-    ];
-
-
-    $i = 0;
-    foreach ($gradeDistribution as $grade => $counts) {
-        if ($grade != 'F') { // Exclude Fail from main table
-            $gradingSummary[$grade] = [
-                'serial' => $serial[$i++] ?? '',
-                'label' => $gradeLabels[$grade],
-                'male_count' => $counts['male'],
-                'male_percent' => $this->calculatePercentage($counts['male'], $totalGraded),
-                'female_count' => $counts['female'],
-                'female_percent' => $this->calculatePercentage($counts['female'], $totalGraded),
-                'total' => $counts['total']
+            $subject = $subjectPapers[$subjectId] ?? null;
+            $subjectPerformance[$subjectId] = [
+                'subject_id' => $subjectId,
+                'subject_name' => $subjectId,
+                'total_marks' => 0,
+                'student_count' => 0,
+                'average' => 0,
+                'highest' => 0,
+                'lowest' => 100,
+                'pass_count' => 0,
+                'fail_count' => 0,
+                'pass_percentage' => 0
             ];
         }
+
+        // Process each student
+        foreach ($allStudents as $studentId) {
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue; // Skip students with no marks
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+
+            // IMPORTANT: Get ONLY the Marks type grade for the summary table
+            $grade = $this->getMarksGrade($percentage, $level);
+
+            // Get student gender
+            $gender = strtolower($this->getStudentGender($studentId));
+
+            // Get student name/info for top students list
+            $studentInfo = $this->getStudentInfo($studentId);
+
+            // Store student performance data for top students
+            $studentPerformance[] = [
+                'student_id' => $studentId,
+                'student_name' => $studentInfo['name'] ?? 'N/A',
+                'school_name' => $studentInfo['school_name'] ?? 'N/A',
+                'total_marks' => $totalMarks,
+                'percentage' => $percentage,
+                'grade' => $grade,
+                'gender' => $gender
+            ];
+
+            // Update subject performance
+            foreach ($studentMarks as $mark) {
+                $subjectId = $mark->subject_id;
+                $markValue = $mark->mark;
+
+                if (isset($subjectPerformance[$subjectId])) {
+                    $subjectPerformance[$subjectId]['total_marks'] += $markValue;
+                    $subjectPerformance[$subjectId]['student_count']++;
+                    $subjectPerformance[$subjectId]['highest'] = max($subjectPerformance[$subjectId]['highest'], $markValue);
+                    $subjectPerformance[$subjectId]['lowest'] = min($subjectPerformance[$subjectId]['lowest'], $markValue);
+
+                    // Count passes (assuming pass mark is 50 or more - adjust as needed)
+                    if ($markValue >= 50) {
+                        $subjectPerformance[$subjectId]['pass_count']++;
+                    } else {
+                        $subjectPerformance[$subjectId]['fail_count']++;
+                    }
+                }
+            }
+
+            // Update counters
+            if (isset($gradeDistribution[$grade])) {
+                $gradeDistribution[$grade][$gender]++;
+                $gradeDistribution[$grade]['total']++;
+
+                if ($gender == 'male') {
+                    $totalMale++;
+                } else {
+                    $totalFemale++;
+                }
+                $totalGraded++;
+            }
+        }
+
+        // Calculate averages and pass percentages for subjects
+        foreach ($subjectPerformance as &$subject) {
+            if ($subject['student_count'] > 0) {
+                $subject['average'] = round($subject['total_marks'] / $subject['student_count'], 2);
+                $subject['pass_percentage'] = round(($subject['pass_count'] / $subject['student_count']) * 100, 2);
+            }
+
+            // Handle subjects with no data
+            if ($subject['lowest'] == 100) {
+                $subject['lowest'] = 0;
+            }
+        }
+
+        // Sort subjects by average performance
+        usort($subjectPerformance, function ($a, $b) {
+            return $b['average'] <=> $a['average'];
+        });
+
+        // Get top 10 best performing subjects
+        $bestSubjects = array_slice($subjectPerformance, 0, 10);
+
+        // Get bottom 10 worst performing subjects (reverse order)
+        $worstSubjects = array_slice(array_reverse($subjectPerformance), 0, 10);
+
+        // Sort students by percentage (highest first) and get top 10
+        usort($studentPerformance, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        $topStudents = array_slice($studentPerformance, 0, 10);
+
+        // Prepare grading summary table
+        $gradingSummary = [];
+        $serial = ['a', 'b', 'c', 'd'];
+        $gradeLabels = [
+            'D1' => 'Excellent D1',
+            'D2' => 'Very good D2',
+            'C3' => 'Good C3',
+            'C4' => 'Pass C4',
+            'F' => 'Fail F'
+        ];
+
+
+        $i = 0;
+        foreach ($gradeDistribution as $grade => $counts) {
+            if ($grade != 'F') { // Exclude Fail from main table
+                $gradingSummary[$grade] = [
+                    'serial' => $serial[$i++] ?? '',
+                    'label' => $gradeLabels[$grade],
+                    'male_count' => $counts['male'],
+                    'male_percent' => $this->calculatePercentage($counts['male'], $totalGraded),
+                    'female_count' => $counts['female'],
+                    'female_percent' => $this->calculatePercentage($counts['female'], $totalGraded),
+                    'total' => $counts['total']
+                ];
+            }
+        }
+
+        // Failed students breakdown
+        $failedBreakdown = [
+            'male_failed' => $gradeDistribution['F']['male'],
+            'female_failed' => $gradeDistribution['F']['female'],
+            'total_failed' => $gradeDistribution['F']['total']
+        ];
+
+        $totals = [
+            'male_total' => $totalMale,
+            'female_total' => $totalFemale,
+            'overall_total' => $totalGraded
+        ];
+
+        // Prepare data tables
+        $schoolsTable = [
+            ['level' => $levelName, 'count' => $schoolsCount]
+        ];
+
+        $studentsRegisteredTable = [
+            ['level' => $levelName, 'count' => $registeredStudents, 'total' => $registeredStudents]
+        ];
+
+        // Get years for dropdown
+        $years = ClassAllocation::selectRaw('DISTINCT SUBSTRING(Student_ID, -4) as year')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return view('itemGrading.exam-statistics', compact(
+            'year',
+            'years',
+            'category',
+            'level',
+            'levelName',
+            'schoolsTable',
+            'studentsRegisteredTable',
+            'gradingSummary',
+            'totals',
+            'failedBreakdown',
+            'registeredStudents',
+            'totalGraded',
+            'topStudents',
+            'bestSubjects',  // Add best subjects
+            'worstSubjects'  // Add worst subjects
+        ));
     }
-
-    // Failed students breakdown
-    $failedBreakdown = [
-        'male_failed' => $gradeDistribution['F']['male'],
-        'female_failed' => $gradeDistribution['F']['female'],
-        'total_failed' => $gradeDistribution['F']['total']
-    ];
-
-    $totals = [
-        'male_total' => $totalMale,
-        'female_total' => $totalFemale,
-        'overall_total' => $totalGraded
-    ];
-
-    // Prepare data tables
-    $schoolsTable = [
-        ['level' => $levelName, 'count' => $schoolsCount]
-    ];
-
-    $studentsRegisteredTable = [
-        ['level' => $levelName, 'count' => $registeredStudents, 'total' => $registeredStudents]
-    ];
-
-    // Get years for dropdown
-    $years = ClassAllocation::selectRaw('DISTINCT SUBSTRING(Student_ID, -4) as year')
-        ->orderBy('year', 'desc')
-        ->pluck('year');
-
-    return view('itemGrading.exam-statistics', compact(
-        'year',
-        'years',
-        'category',
-        'level',
-        'levelName',
-        'schoolsTable',
-        'studentsRegisteredTable',
-        'gradingSummary',
-        'totals',
-        'failedBreakdown',
-        'registeredStudents',
-        'totalGraded',
-        'topStudents',
-        'bestSubjects',  // Add best subjects
-        'worstSubjects'  // Add worst subjects
-    ));
-}
     private function getMarksGrade($percentage, $level)
     {
         $grade = Grading::where('Type', 'Marks')
@@ -1180,7 +1185,7 @@ public function examStatistics(Request $request)
     private function getStudentInfo($studentId)
     {
         $student = StudentBasic::where('Student_ID', $studentId)->first();
-
+        // dd(args: $student);
         if (!$student) {
             return ['name' => 'N/A', 'school_name' => 'N/A'];
         }
@@ -1193,8 +1198,10 @@ public function examStatistics(Request $request)
         $schoolName = $this->getSchoolName($schoolCode);
 
         return [
-            'name' => $student->StudentName ?? $student->StudentName_AR ?? 'N/A',
-            'school_name' => $schoolName
+            // 'name' => $student->StudentName ?? $student->StudentName_AR ?? 'N/A',
+            'name' => $student->Student_ID,
+            'school_name' => $student->House
+            // 'school_name' => $schoolName
         ];
     }
 
@@ -1205,5 +1212,679 @@ public function examStatistics(Request $request)
             ->value('House');
 
         return $schoolName;
+    }
+
+
+    // Download Implementation 
+
+    // Add this method to your controller
+    public function downloadExamStatistics(Request $request)
+    {
+        $request->validate([
+            'year' => 'required',
+            'category' => 'required',
+            'level' => 'nullable|in:A,O'
+        ]);
+
+        $year = $request->year;
+        $category = $request->category;
+        $level = $request->level ?? 'A';
+        $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
+
+        // Reuse the same logic from examStatistics method
+        // Get registered schools count
+        $schoolsQuery = ClassAllocation::select('Student_ID')
+            ->where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct();
+
+        $schoolsCount = $schoolsQuery->get()
+            ->map(function ($item) {
+                return explode('-', $item->Student_ID)[0];
+            })
+            ->unique()
+            ->count();
+
+        // Get registered students count
+        $registeredStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->count('Student_ID');
+
+        // Get all students for this category/year
+        $allStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->pluck('Student_ID')
+            ->toArray();
+
+        // Get subjects for this category
+        $subjectIds = $this->getSubjectIdsForCategory($category);
+        $totalPossibleMarks = count($subjectIds) * 100;
+
+        // Get all marks for these students
+        $marks = Mark::whereIn('student_id', $allStudents)
+            ->whereIn('subject_id', $subjectIds)
+            ->where('year', $year)
+            ->get()
+            ->groupBy('student_id');
+
+        // Initialize grade distribution counters
+        $gradeDistribution = [
+            'D1' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'D2' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C3' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C4' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'F' => ['male' => 0, 'female' => 0, 'total' => 0],
+        ];
+
+        $totalMale = 0;
+        $totalFemale = 0;
+        $totalGraded = 0;
+
+        // Array to store student performance data for top students
+        $studentPerformance = [];
+
+        // Initialize subject performance tracking
+        $subjectPerformance = [];
+
+        // Get subject names based on category
+        if ($category == 'TH') {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.ThanawiPapers')
+            )->get()->keyBy('id');
+        } else {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.IdaadPapers')
+            )->get()->keyBy('id');
+        }
+
+        // Initialize subject performance array with subject details
+        foreach ($subjectIds as $subjectId) {
+            $subject = $subjectPapers[$subjectId] ?? null;
+            $subjectPerformance[$subjectId] = [
+                'subject_id' => $subjectId,
+                'subject_name' => $subjectId,
+                'total_marks' => 0,
+                'student_count' => 0,
+                'average' => 0,
+                'highest' => 0,
+                'lowest' => 100,
+                'pass_count' => 0,
+                'fail_count' => 0,
+                'pass_percentage' => 0
+            ];
+        }
+
+        // Process each student
+        foreach ($allStudents as $studentId) {
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue;
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+            $grade = $this->getMarksGrade($percentage, $level);
+            $gender = strtolower($this->getStudentGender($studentId));
+            $studentInfo = $this->getStudentInfo($studentId);
+
+            $studentPerformance[] = [
+                'student_id' => $studentId,
+                'student_name' => $studentInfo['name'] ?? 'N/A',
+                'school_name' => $studentInfo['school_name'] ?? 'N/A',
+                'total_marks' => $totalMarks,
+                'percentage' => $percentage,
+                'grade' => $grade,
+                'gender' => $gender
+            ];
+
+            // Update subject performance
+            foreach ($studentMarks as $mark) {
+                $subjectId = $mark->subject_id;
+                $markValue = $mark->mark;
+
+                if (isset($subjectPerformance[$subjectId])) {
+                    $subjectPerformance[$subjectId]['total_marks'] += $markValue;
+                    $subjectPerformance[$subjectId]['student_count']++;
+                    $subjectPerformance[$subjectId]['highest'] = max($subjectPerformance[$subjectId]['highest'], $markValue);
+                    $subjectPerformance[$subjectId]['lowest'] = min($subjectPerformance[$subjectId]['lowest'], $markValue);
+
+                    if ($markValue >= 50) {
+                        $subjectPerformance[$subjectId]['pass_count']++;
+                    } else {
+                        $subjectPerformance[$subjectId]['fail_count']++;
+                    }
+                }
+            }
+
+            // Update counters
+            if (isset($gradeDistribution[$grade])) {
+                $gradeDistribution[$grade][$gender]++;
+                $gradeDistribution[$grade]['total']++;
+
+                if ($gender == 'male') {
+                    $totalMale++;
+                } else {
+                    $totalFemale++;
+                }
+                $totalGraded++;
+            }
+        }
+
+        // Calculate averages and pass percentages for subjects
+        foreach ($subjectPerformance as &$subject) {
+            if ($subject['student_count'] > 0) {
+                $subject['average'] = round($subject['total_marks'] / $subject['student_count'], 2);
+                $subject['pass_percentage'] = round(($subject['pass_count'] / $subject['student_count']) * 100, 2);
+            }
+
+            if ($subject['lowest'] == 100) {
+                $subject['lowest'] = 0;
+            }
+        }
+
+        // Sort subjects by average performance
+        usort($subjectPerformance, function ($a, $b) {
+            return $b['average'] <=> $a['average'];
+        });
+
+        // Get top 10 best performing subjects
+        $bestSubjects = array_slice($subjectPerformance, 0, 10);
+
+        // Get bottom 10 worst performing subjects
+        $worstSubjects = array_slice(array_reverse($subjectPerformance), 0, 10);
+
+        // Sort students by percentage and get top 10
+        usort($studentPerformance, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        $topStudents = array_slice($studentPerformance, 0, 10);
+
+        // Prepare grading summary
+        $gradingSummary = [];
+        $serial = ['a', 'b', 'c', 'd'];
+        $gradeLabels = [
+            'D1' => 'Excellent D1',
+            'D2' => 'Very good D2',
+            'C3' => 'Good C3',
+            'C4' => 'Pass C4',
+            'F' => 'Fail F'
+        ];
+
+        $i = 0;
+        foreach ($gradeDistribution as $grade => $counts) {
+            if ($grade != 'F') {
+                $gradingSummary[$grade] = [
+                    'serial' => $serial[$i++] ?? '',
+                    'label' => $gradeLabels[$grade],
+                    'male_count' => $counts['male'],
+                    'male_percent' => $this->calculatePercentage($counts['male'], $totalGraded),
+                    'female_count' => $counts['female'],
+                    'female_percent' => $this->calculatePercentage($counts['female'], $totalGraded),
+                    'total' => $counts['total']
+                ];
+            }
+        }
+
+        $failedBreakdown = [
+            'male_failed' => $gradeDistribution['F']['male'],
+            'female_failed' => $gradeDistribution['F']['female'],
+            'total_failed' => $gradeDistribution['F']['total']
+        ];
+
+        $totals = [
+            'male_total' => $totalMale,
+            'female_total' => $totalFemale,
+            'overall_total' => $totalGraded
+        ];
+
+        // Generate Excel/CSV file
+        return $this->generateExcelExport(
+            $year,
+            $category,
+            $levelName,
+            $schoolsCount,
+            $registeredStudents,
+            $gradingSummary,
+            $totals,
+            $failedBreakdown,
+            $topStudents,
+            $bestSubjects,
+            $worstSubjects
+        );
+    }
+
+    private function generateExcelExport(
+        $year,
+        $category,
+        $levelName,
+        $schoolsCount,
+        $registeredStudents,
+        $gradingSummary,
+        $totals,
+        $failedBreakdown,
+        $topStudents,
+        $bestSubjects,
+        $worstSubjects
+    ) {
+        $filename = "exam_statistics_{$year}_{$category}_{$levelName}.csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
+        ];
+
+        $callback = function () use ($year, $category, $levelName, $schoolsCount, $registeredStudents, $gradingSummary, $totals, $failedBreakdown, $topStudents, $bestSubjects, $worstSubjects) {
+
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Title
+            fputcsv($file, ["EXAM STATISTICS REPORT - {$year} - {$category} - {$levelName}"]);
+            fputcsv($file, []);
+
+            // 1. Schools Registered
+            fputcsv($file, ["1. NUMBER OF SCHOOLS REGISTERED"]);
+            fputcsv($file, ["S/N", $levelName]);
+            fputcsv($file, ["1", $schoolsCount]);
+            fputcsv($file, []);
+
+            // 2. Students Registered
+            fputcsv($file, ["2. NUMBER OF STUDENTS REGISTERED"]);
+            fputcsv($file, ["S/N", $levelName, "Total"]);
+            fputcsv($file, ["1", $registeredStudents, $registeredStudents]);
+            fputcsv($file, []);
+
+            // 3. Grading Summary
+            fputcsv($file, ["3. GRADING SUMMARY - {$levelName}"]);
+            fputcsv($file, ["S/N", $levelName, "Male", "Male %", "Female", "Female %", "Total"]);
+
+            $gradeOrder = ['D1', 'D2', 'C3', 'C4'];
+            $serial = ['a', 'b', 'c', 'd'];
+            $labels = ['Excellent D1', 'Very good D2', 'Good C3', 'Pass C4'];
+
+            foreach ($gradeOrder as $index => $grade) {
+                if (isset($gradingSummary[$grade])) {
+                    fputcsv($file, [
+                        $serial[$index] . '.',
+                        $labels[$index],
+                        $gradingSummary[$grade]['male_count'],
+                        $gradingSummary[$grade]['male_percent'] . '%',
+                        $gradingSummary[$grade]['female_count'],
+                        $gradingSummary[$grade]['female_percent'] . '%',
+                        $gradingSummary[$grade]['total']
+                    ]);
+                }
+            }
+
+            // Totals row
+            fputcsv($file, [
+                '',
+                'Total',
+                $totals['male_total'],
+                $totals['male_total'] > 0 ? round(($totals['male_total'] / $totals['overall_total']) * 100, 2) . '%' : '0%',
+                $totals['female_total'],
+                $totals['female_total'] > 0 ? round(($totals['female_total'] / $totals['overall_total']) * 100, 2) . '%' : '0%',
+                $totals['overall_total']
+            ]);
+            fputcsv($file, []);
+
+            // 4. Failed Students
+            fputcsv($file, ["4. STUDENTS FAILED"]);
+            fputcsv($file, ["S/N", $levelName, "Male", "Female", "Total"]);
+            fputcsv($file, ["1", "", $failedBreakdown['male_failed'], $failedBreakdown['female_failed'], $failedBreakdown['total_failed']]);
+            fputcsv($file, []);
+
+            // 5. Top 10 Students
+            fputcsv($file, ["5. TOP 10 PERFORMING STUDENTS - {$levelName}"]);
+            fputcsv($file, ["Rank", "Student ID", "Student Name", "School", "Gender", "Total Marks", "Percentage"]);
+
+            foreach ($topStudents as $index => $student) {
+                $rank = $index + 1;
+                $rankText = $rank . ($rank == 1 ? 'st' : ($rank == 2 ? 'nd' : ($rank == 3 ? 'rd' : 'th')));
+                fputcsv($file, [
+                    $rankText,
+                    $student['student_id'],
+                    $student['student_name'],
+                    $student['school_name'],
+                    ucfirst($student['gender']),
+                    number_format($student['total_marks'], 2),
+                    number_format($student['percentage'], 2) . '%'
+                ]);
+            }
+            fputcsv($file, []);
+
+            // Top 10 summary
+            fputcsv($file, ["Top 10 Summary"]);
+            fputcsv($file, [
+                "Average Percentage: " . number_format(collect($topStudents)->avg('percentage'), 2) . "%",
+                "Male Count: " . collect($topStudents)->where('gender', 'male')->count(),
+                "Female Count: " . collect($topStudents)->where('gender', 'female')->count(),
+                "Top Score: " . (isset($topStudents[0]) ? number_format($topStudents[0]['percentage'], 2) . '%' : '0%')
+            ]);
+            fputcsv($file, []);
+
+            // 6. Best Performing Subjects
+            fputcsv($file, ["6. TOP 10 BEST PERFORMING SUBJECTS"]);
+            fputcsv($file, ["Rank", "Subject Name", "Students", "Average %", "Highest %", "Pass Rate %"]);
+
+            foreach ($bestSubjects as $index => $subject) {
+                $rank = $index + 1;
+                fputcsv($file, [
+                    $rank,
+                    $subject['subject_name'],
+                    $subject['student_count'],
+                    number_format($subject['average'], 2),
+                    $subject['highest'],
+                    $subject['pass_percentage']
+                ]);
+            }
+            fputcsv($file, []);
+
+            // 7. Worst Performing Subjects
+            fputcsv($file, ["7. TOP 10 WORST PERFORMING SUBJECTS"]);
+            fputcsv($file, ["Rank", "Subject Name", "Students", "Average %", "Lowest %", "Pass Rate %"]);
+
+            foreach ($worstSubjects as $index => $subject) {
+                $rank = $index + 1;
+                fputcsv($file, [
+                    $rank,
+                    $subject['subject_name'],
+                    $subject['student_count'],
+                    number_format($subject['average'], 2),
+                    $subject['lowest'],
+                    $subject['pass_percentage']
+                ]);
+            }
+            fputcsv($file, []);
+
+            // Overall Summary
+            fputcsv($file, ["OVERALL SUMMARY"]);
+            fputcsv($file, ["Registered Students", $registeredStudents]);
+            fputcsv($file, ["Graded Students", $totals['overall_total']]);
+            fputcsv($file, ["Failed Students", $failedBreakdown['total_failed']]);
+            fputcsv($file, [
+                "Pass Rate",
+                $totals['overall_total'] > 0 ?
+                round((($totals['overall_total'] - $failedBreakdown['total_failed']) / $totals['overall_total']) * 100, 2) . '%' : '0%'
+            ]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+
+    // Add this method for Excel download
+    public function downloadExamStatisticsExcel(Request $request)
+    {
+        $data = $this->prepareStatisticsData($request);
+        $filename = "exam_statistics_{$data['year']}_{$data['category']}_{$data['levelName']}.xlsx";
+
+        return Excel::download(new ExamStatisticsExport($data), $filename);
+    }
+
+    // Add this method for PDF download
+    public function downloadExamStatisticsPdf(Request $request)
+    {
+        $data = $this->prepareStatisticsData($request);
+
+        $pdf = PDF::loadView('itemGrading.exam-statistics-pdf', $data);
+        $pdf->setPaper('A4', 'landscape');
+
+        $filename = "exam_statistics_{$data['year']}_{$data['category']}_{$data['levelName']}.pdf";
+        return $pdf->download($filename);
+    }
+
+    // Extract common logic to prepare data
+    private function prepareStatisticsData($request)
+    {
+        $request->validate([
+            'year' => 'required',
+            'category' => 'required',
+            'level' => 'nullable|in:A,O'
+        ]);
+
+        $year = $request->year;
+        $category = $request->category;
+        $level = $request->level ?? 'A';
+        $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
+
+        // Get registered schools count
+        $schoolsQuery = ClassAllocation::select('Student_ID')
+            ->where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct();
+
+        $schoolsCount = $schoolsQuery->get()
+            ->map(function ($item) {
+                return explode('-', $item->Student_ID)[0];
+            })
+            ->unique()
+            ->count();
+
+        // Get registered students count
+        $registeredStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->count('Student_ID');
+
+        // Get all students for this category/year
+        $allStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->pluck('Student_ID')
+            ->toArray();
+
+        // Get subjects for this category
+        $subjectIds = $this->getSubjectIdsForCategory($category);
+        $totalPossibleMarks = count($subjectIds) * 100;
+
+        // Get all marks for these students
+        $marks = Mark::whereIn('student_id', $allStudents)
+            ->whereIn('subject_id', $subjectIds)
+            ->where('year', $year)
+            ->get()
+            ->groupBy('student_id');
+
+        // Initialize grade distribution counters
+        $gradeDistribution = [
+            'D1' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'D2' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C3' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C4' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'F' => ['male' => 0, 'female' => 0, 'total' => 0],
+        ];
+
+        $totalMale = 0;
+        $totalFemale = 0;
+        $totalGraded = 0;
+
+        // Array to store student performance data for top students
+        $studentPerformance = [];
+
+        // Initialize subject performance tracking
+        $subjectPerformance = [];
+
+        // Get subject names based on category
+        if ($category == 'TH') {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.ThanawiPapers')
+            )->get()->keyBy('id');
+        } else {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.IdaadPapers')
+            )->get()->keyBy('id');
+        }
+
+        // Initialize subject performance array with subject details
+        foreach ($subjectIds as $subjectId) {
+            $subject = $subjectPapers[$subjectId] ?? null;
+            $subjectPerformance[$subjectId] = [
+                'subject_id' => $subjectId,
+                'subject_name' => $subject ? ($subject->master_name ?? $subject->master_name_ar ?? 'Unknown Subject') : 'Unknown Subject',
+                'total_marks' => 0,
+                'student_count' => 0,
+                'average' => 0,
+                'highest' => 0,
+                'lowest' => 100,
+                'pass_count' => 0,
+                'fail_count' => 0,
+                'pass_percentage' => 0
+            ];
+        }
+
+        // Process each student
+        foreach ($allStudents as $studentId) {
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue;
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+            $grade = $this->getMarksGrade($percentage, $level);
+            $gender = strtolower($this->getStudentGender($studentId));
+            $studentInfo = $this->getStudentInfo($studentId);
+
+            $studentPerformance[] = [
+                'student_id' => $studentId,
+                'student_name' => $studentInfo['name'] ?? 'N/A',
+                'school_name' => $studentInfo['school_name'] ?? 'N/A',
+                'total_marks' => $totalMarks,
+                'percentage' => $percentage,
+                'grade' => $grade,
+                'gender' => $gender
+            ];
+
+            // Update subject performance
+            foreach ($studentMarks as $mark) {
+                $subjectId = $mark->subject_id;
+                $markValue = $mark->mark;
+
+                if (isset($subjectPerformance[$subjectId])) {
+                    $subjectPerformance[$subjectId]['total_marks'] += $markValue;
+                    $subjectPerformance[$subjectId]['student_count']++;
+                    $subjectPerformance[$subjectId]['highest'] = max($subjectPerformance[$subjectId]['highest'], $markValue);
+                    $subjectPerformance[$subjectId]['lowest'] = min($subjectPerformance[$subjectId]['lowest'], $markValue);
+
+                    if ($markValue >= 50) {
+                        $subjectPerformance[$subjectId]['pass_count']++;
+                    } else {
+                        $subjectPerformance[$subjectId]['fail_count']++;
+                    }
+                }
+            }
+
+            // Update counters
+            if (isset($gradeDistribution[$grade])) {
+                $gradeDistribution[$grade][$gender]++;
+                $gradeDistribution[$grade]['total']++;
+
+                if ($gender == 'male') {
+                    $totalMale++;
+                } else {
+                    $totalFemale++;
+                }
+                $totalGraded++;
+            }
+        }
+
+        // Calculate averages and pass percentages for subjects
+        foreach ($subjectPerformance as &$subject) {
+            if ($subject['student_count'] > 0) {
+                $subject['average'] = round($subject['total_marks'] / $subject['student_count'], 2);
+                $subject['pass_percentage'] = round(($subject['pass_count'] / $subject['student_count']) * 100, 2);
+            }
+
+            if ($subject['lowest'] == 100) {
+                $subject['lowest'] = 0;
+            }
+        }
+
+        // Sort subjects by average performance
+        usort($subjectPerformance, function ($a, $b) {
+            return $b['average'] <=> $a['average'];
+        });
+
+        // Get top 10 best performing subjects
+        $bestSubjects = array_slice($subjectPerformance, 0, 10);
+
+        // Get bottom 10 worst performing subjects
+        $worstSubjects = array_slice(array_reverse($subjectPerformance), 0, 10);
+
+        // Sort students by percentage and get top 10
+        usort($studentPerformance, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        $topStudents = array_slice($studentPerformance, 0, 10);
+
+        // Prepare grading summary
+        $gradingSummary = [];
+        $serial = ['a', 'b', 'c', 'd'];
+        $gradeLabels = [
+            'D1' => 'Excellent D1',
+            'D2' => 'Very good D2',
+            'C3' => 'Good C3',
+            'C4' => 'Pass C4',
+            'F' => 'Fail F'
+        ];
+
+        $i = 0;
+        foreach ($gradeDistribution as $grade => $counts) {
+            if ($grade != 'F') {
+                $gradingSummary[$grade] = [
+                    'serial' => $serial[$i++] ?? '',
+                    'label' => $gradeLabels[$grade],
+                    'male_count' => $counts['male'],
+                    'male_percent' => $this->calculatePercentage($counts['male'], $totalGraded),
+                    'female_count' => $counts['female'],
+                    'female_percent' => $this->calculatePercentage($counts['female'], $totalGraded),
+                    'total' => $counts['total']
+                ];
+            }
+        }
+
+        $failedBreakdown = [
+            'male_failed' => $gradeDistribution['F']['male'],
+            'female_failed' => $gradeDistribution['F']['female'],
+            'total_failed' => $gradeDistribution['F']['total']
+        ];
+
+        $totals = [
+            'male_total' => $totalMale,
+            'female_total' => $totalFemale,
+            'overall_total' => $totalGraded
+        ];
+
+        return [
+            'year' => $year,
+            'category' => $category,
+            'level' => $level,
+            'levelName' => $levelName,
+            'schoolsCount' => $schoolsCount,
+            'registeredStudents' => $registeredStudents,
+            'gradingSummary' => $gradingSummary,
+            'totals' => $totals,
+            'failedBreakdown' => $failedBreakdown,
+            'topStudents' => $topStudents,
+            'bestSubjects' => $bestSubjects,
+            'worstSubjects' => $worstSubjects,
+        ];
     }
 }

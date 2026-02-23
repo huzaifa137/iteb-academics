@@ -12,7 +12,7 @@
 
     <p><strong>Dear {{ $username }},</strong></p>
 
-    <p>We are thrilled to inform you that your account has been successfully created on our Idaad & Thanawi Exam System! Welcome
+    <p>We are thrilled to inform you that your account has been successfully created on our Item Academics! Welcome
         aboard!</p>
     <p><strong>Account Details</strong></p>
     <ol>

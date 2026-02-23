@@ -4,6 +4,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 @section('content')
+
+<?php
+    use App\Http\Controllers\Helper;
+?>
 <style>
     /* Subject tables styling */
 .card-header {
@@ -58,6 +62,7 @@
     color: white;
 }
 </style>
+
     <div class="side-app">
         <div class="container mt-4">
             <div class="card shadow-lg border-0 mb-4">
@@ -122,15 +127,15 @@
                         <!-- 1- Number of schools registered -->
                         <div class="row mb-4">
                             <div class="col-md-12">
-<h5 class="bg-light p-2 rounded d-flex justify-content-between align-items-center">
-    <span>
-        1- Number of schools registered for Exams {{ $year }}:
-    </span>
+                                <h5 class="bg-light p-2 rounded d-flex justify-content-between align-items-center">
+                                    <span>
+                                        1- Number of schools registered for Exams {{ $year }}:
+                                    </span>
 
-    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
-        <i class="fas fa-file-pdf me-1"></i> Download PDF
-    </button>
-</h5>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
+                                        <i class="fas fa-file-pdf me-1"></i> Download PDF
+                                    </button>
+                                </h5>
 
                                 <table class="table table-bordered table-hover">
                                     <thead class="table-secondary">
@@ -159,9 +164,15 @@
         2- Number of students registered:
     </span>
 
-    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
+<div class="d-flex gap-2">
+    <button type="button" class="btn btn-success btn-sm" onclick="downloadExcel()">
+        <i class="fas fa-file-excel me-1"></i> Download Excel
+    </button>
+    <button type="button" class="btn btn-danger btn-sm" onclick="downloadPdf()">
         <i class="fas fa-file-pdf me-1"></i> Download PDF
     </button>
+</div>
+
 </h5>
 
                                 <table class="table table-bordered table-hover">
@@ -327,6 +338,7 @@
                             </thead>
                             <tbody>
                             @forelse($topStudents ?? [] as $index => $student)
+
                             <tr>
                                 <td class="text-center fw-bold">
                                     @if($index == 0)
@@ -339,8 +351,9 @@
                                         {{ $index + 1 }}th
                                     @endif
                                 </td>
+                                
                                 <td class="text-center">{{ $student['student_id'] }}</td>
-                                <td>{{ $student['student_name'] }}</td>
+                                <td>{{ Helper::getStudentName($student['student_id'])  }}</td>
                                 <td>{{ $student['school_name'] }}</td>
                                 <td class="text-center">
                                     @if(strtolower($student['gender']) == 'male')
@@ -513,7 +526,8 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <strong>{{ $subject['subject_name'] }}</strong>
+                                       
+                                        <strong>{{Helper::item_md_name($subject['subject_name']) }} </strong>
                                         <br>
                                         <small class="text-muted">{{ $subject['student_count'] }} students</small>
                                     </td>
@@ -731,6 +745,176 @@ $('#examStatisticsForm').on('submit', function(e) {
 });
 </script>
 
+<!-- Update all download buttons with the same form data -->
+<button type="button" class="btn btn-danger btn-sm" onclick="downloadStatistics()">
+    <i class="fas fa-file-pdf me-1"></i> Download Excel
+</button>
+
+<!-- Add this JavaScript function at the bottom of your blade file -->
+<script>
+function downloadStatistics() {
+
+    const year = $('select[name="year"]').val();
+    const category = $('select[name="category"]').val();
+    const level = $('select[name="level"]').val();
+
+    if (!year || !category) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please select Year and Category before downloading.',
+            confirmButtonColor: '#17a2b8'
+        });
+        return;
+    }
+
+    // Show loading
+    Swal.fire({
+        title: 'Generating Download...',
+        text: 'Please wait while we prepare your file.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Create hidden iframe
+    let iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    iframe.onload = function () {
+        Swal.close(); // Close ONLY when server responds
+        document.body.removeChild(iframe);
+    };
+
+    // Create form
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("iteb.exam.statistics.download") }}';
+    form.target = iframe.name = "downloadFrame";
+
+    // CSRF
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = '_token';
+    csrfInput.value = '{{ csrf_token() }}';
+    form.appendChild(csrfInput);
+
+    // Year
+    const yearInput = document.createElement('input');
+    yearInput.type = 'hidden';
+    yearInput.name = 'year';
+    yearInput.value = year;
+    form.appendChild(yearInput);
+
+    // Category
+    const categoryInput = document.createElement('input');
+    categoryInput.type = 'hidden';
+    categoryInput.name = 'category';
+    categoryInput.value = category;
+    form.appendChild(categoryInput);
+
+    // Level
+    const levelInput = document.createElement('input');
+    levelInput.type = 'hidden';
+    levelInput.name = 'level';
+    levelInput.value = level;
+    form.appendChild(levelInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+</script>
+
+<script>
+function downloadExcel() {
+    downloadFile('excel');
+}
+
+function downloadPdf() {
+    downloadFile('pdf');
+}
+
+function downloadFile(type) {
+    // Get the current form values
+    const year = $('select[name="year"]').val();
+    const category = $('select[name="category"]').val();
+    const level = $('select[name="level"]').val();
+    
+    if (!year || !category) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please select Year and Category before downloading.',
+            confirmButtonColor: '#17a2b8'
+        });
+        return;
+    }
+    
+    // Determine the route based on type
+    const route = type === 'excel' 
+        ? '{{ route("iteb.exam.statistics.download.excel") }}'
+        : '{{ route("iteb.exam.statistics.download.pdf") }}';
+    
+    // Create a form and submit it to download
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = route;
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = '_token';
+    csrfInput.value = '{{ csrf_token() }}';
+    form.appendChild(csrfInput);
+    
+    // Add year
+    const yearInput = document.createElement('input');
+    yearInput.type = 'hidden';
+    yearInput.name = 'year';
+    yearInput.value = year;
+    form.appendChild(yearInput);
+    
+    // Add category
+    const categoryInput = document.createElement('input');
+    categoryInput.type = 'hidden';
+    categoryInput.name = 'category';
+    categoryInput.value = category;
+    form.appendChild(categoryInput);
+    
+    // Add level
+    const levelInput = document.createElement('input');
+    levelInput.type = 'hidden';
+    levelInput.name = 'level';
+    levelInput.value = level;
+    form.appendChild(levelInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    // Show loading message
+    Swal.fire({
+        title: `Generating ${type.toUpperCase()}...`,
+        text: 'Your file will be downloaded shortly.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    // Close the loading message after a delay
+    setTimeout(() => {
+        Swal.close();
+    }, 3000);
+}
+</script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 @endsection

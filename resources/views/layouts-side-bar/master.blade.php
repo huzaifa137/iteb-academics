@@ -5,9 +5,9 @@
 	<!-- Meta data -->
 	<meta charset="UTF-8">
 	<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
-	<meta content="Idaad & Thanawi Exam System" name="description">
+	<meta content="Item Academics" name="description">
 	<meta name="keywords"
-		content="Idaad & Thanawi Exam System, school management system, student information system, online school platform, school ERP, digital classroom tools, school attendance tracking, exam management system, timetable scheduling, fees management system, parent-teacher communication, learning management system, education technology, school reporting tools, smart education software, school administration platform" />
+		content="Item Academics, school management system, student information system, online school platform, school ERP, digital classroom tools, school attendance tracking, exam management system, timetable scheduling, fees management system, parent-teacher communication, learning management system, education technology, school reporting tools, smart education software, school administration platform" />
 
 	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 

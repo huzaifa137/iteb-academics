@@ -355,4 +355,16 @@ class Helper extends Controller
 
         return $activeUploadingYear ?? 'Upload Year Not Set';
     }
+
+
+    public static function getStudentName($studentId)
+    {
+
+        $Student_Name = DB::table('students_basic')
+            ->where('Student_ID', $studentId)
+            ->value('Student_Name');
+
+        return $Student_Name;
+    }
+
 }

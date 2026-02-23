@@ -11,7 +11,7 @@
     <!--Page header-->
     <div class="page-header">
         <div class="page-leftheader">
-            <h4 class="page-title">Idaad & Thanawi Exam System Dashboard</h4>
+            <h4 class="page-title">Item Academics Dashboard</h4>
         </div>
     </div>
     <!--End Page header-->

@@ -23,11 +23,11 @@
                             <div class="card overflow-hidden">
                                 <div class="card-header bg-light"
                                     style="display: flex; justify-content: center; align-items: center;">
-                                    <h4 style="margin: 0;">Welcome to Idaad & Thanawi Exam System Terms and Policies</h4>
+                                    <h4 style="margin: 0;">Welcome to Item Academics Terms and Policies</h4>
                                 </div>
 
                                 <div class="card-body">
-                                    <p>Welcome to Idaad & Thanawi Exam System, an online learning platform dedicated to helping
+                                    <p>Welcome to Item Academics, an online learning platform dedicated to helping
                                         users
                                         master
                                         programming and coding skills. By accessing our platform, you agree to be bound
@@ -90,7 +90,7 @@
                                 <div class="card-body">
                                     <p>All content provided on this platform, including text, code samples, videos,
                                         graphics, and tutorials,
-                                        is the property of Idaad & Thanawi Exam System or its content providers and is protected
+                                        is the property of Item Academics or its content providers and is protected
                                         by
                                         international
                                         copyright laws. You may not reproduce, distribute, or create derivative works
