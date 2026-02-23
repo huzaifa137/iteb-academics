@@ -117,6 +117,21 @@
                                     </div>
                                 </div>
                             </form>
+
+                            
+    <!-- Download Buttons - Only visible when data is loaded -->
+    @if(isset($schoolsTable))
+    <div class="d-flex justify-content-end mt-3">
+        <div class="btn-group shadow-sm" role="group" style="border-radius: 10px; overflow: hidden;">
+
+            <button type="button" class="btn btn-danger" onclick="downloadPdf()"
+                    style="padding: 10px 25px; font-weight: 500;">
+                <i class="fas fa-file-pdf me-2"></i>
+                <span>General Report Export</span>
+            </button>
+        </div>
+    </div>
+    @endif
                         </div>
                     </div>
 
@@ -132,9 +147,7 @@
                                         1- Number of schools registered for Exams {{ $year }}:
                                     </span>
 
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
-                                        <i class="fas fa-file-pdf me-1"></i> Download PDF
-                                    </button>
+                                    
                                 </h5>
 
                                 <table class="table table-bordered table-hover">
@@ -165,12 +178,7 @@
     </span>
 
 <div class="d-flex gap-2">
-    <button type="button" class="btn btn-success btn-sm" onclick="downloadExcel()">
-        <i class="fas fa-file-excel me-1"></i> Download Excel
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="downloadPdf()">
-        <i class="fas fa-file-pdf me-1"></i> Download PDF
-    </button>
+
 </div>
 
 </h5>
@@ -204,9 +212,6 @@
         3- Grading Summary - {{ $levelName }}:
     </span>
 
-    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
-        <i class="fas fa-file-pdf me-1"></i> Download PDF
-    </button>
 </h5>
 
                                 <table class="table table-bordered table-hover">
@@ -281,9 +286,6 @@
         4- Students failed:
     </span>
 
-    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
-        <i class="fas fa-file-pdf me-1"></i> Download PDF
-    </button>
 </h5>
 
                                 <table class="table table-bordered table-hover">
@@ -318,14 +320,11 @@
                                 Top 10 Performing Students - {{ $levelName }}
                             </h5>
                             <div>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
-                            <i class="fas fa-file-pdf me-1"></i> Download PDF
-                        </button>
                             </div>
                         </div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
-                            <thead class="table-dark" style="background-color: #287c44;">
+                            <thead class="table-dark" style="background-color: #287c44; color:#FFF;">
                                 <tr>
                                     <th class="text-center" width="5%">Rank</th>
                                     <th class="text-center" width="10%">Student ID</th>
@@ -364,7 +363,7 @@
                                 </td>
                                 <td class="text-center fw-bold">{{ number_format($student['total_marks'], 2) }}</td>
                                 <td class="text-center">
-                                    <span class="badge" style="background-color: #287c44;">
+                                    <span class="badge" style="background-color: #287c44; color:#FFF;">
                                         {{ number_format($student['percentage'], 2) }}%
                                     </span>
                                 </td>
@@ -425,7 +424,7 @@
                     @if($level == 'O')
                         <span class="badge bg-info ms-2">IDAAD (O Level)</span>
                     @else
-                        <span class="badge bg-primary ms-2">THANAWI (A Level)</span>
+                        <span class="badge bg-primary text-white ms-2">THANAWI (A Level)</span>
                     @endif
                 </h5>
                 
@@ -482,10 +481,6 @@
         <i class="fas fa-book-open me-2"></i>
         Subject Performance Analysis - {{ $levelName }}
     </span>
-
-    <button type="button" class="btn btn-danger btn-sm" onclick="showMissingResourcesAlert()">
-        <i class="fas fa-file-pdf me-1"></i> Download PDF
-    </button>
 </h5>
 
     
@@ -542,7 +537,7 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge" style="background-color: #287c44;">
+                                        <span class="badge" style="background-color: #287c44; color:#FFF;">
                                             {{ $subject['pass_percentage'] }}%
                                         </span>
                                     </td>
