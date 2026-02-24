@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use DB;
 use Session;
 use App\Models\User;
+use App\Models\StudentBasic;
 use App\Models\Student;
 use App\Models\AcademicYear;
 
@@ -33,7 +34,7 @@ class Helper extends Controller
     public static function subjectName($subject_id)
     {
         $schoolName = DB::table('houses')
-            ->where('Number', $school_id)
+            ->where('Number', $subject_id)
             ->value('House');
 
         return $schoolName;
@@ -365,6 +366,34 @@ class Helper extends Controller
             ->value('Student_Name');
 
         return $Student_Name;
+    }
+
+
+    public static function parseStudentId($studentId, $type = null)
+    {
+        $parts = explode('-', $studentId);
+
+        if (count($parts) !== 5) {
+            return null;
+        }
+
+        $schoolId = "{$parts[0]}-{$parts[1]}";
+        $studentIdOnly = "{$parts[2]}-{$parts[3]}";
+        $year = $parts[4];
+
+        $Student_Name =  StudentBasic::where('Student_ID', $studentId)->value('Student_Name');
+        $Student_School = StudentBasic::where('Student_ID', $studentId)->value('House');
+
+        return match ($type) {
+            'school' => $Student_School,
+            'student' => $Student_Name,
+            'year' => $year,
+            default => [
+                'school' => $Student_School,
+                'student' => $Student_Name,
+                'year' => $year
+            ]
+        };
     }
 
 }

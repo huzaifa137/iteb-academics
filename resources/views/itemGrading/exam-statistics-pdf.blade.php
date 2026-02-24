@@ -357,11 +357,11 @@ use App\Http\Controllers\Helper;
                         <td>{{ $student['student_id'] }}</td>
                         <td>{{ Helper::getStudentName($student['student_id'])  }}</td>
                         <td>{{ $student['school_name'] }}</td>
-                        <td class="text-center">
+                        <td class="text-center text-white">
                             @if(strtolower($student['gender']) == 'male')
-                                <span class="badge bg-info">♂ Male</span>
+                                <span class="badge bg-info text-white">♂ Male</span>
                             @else
-                                <span class="badge bg-danger">♀ Female</span>
+                                <span class="badge bg-danger text-white">♀ Female</span>
                             @endif
                         </td>
                         <td class="text-center">{{ number_format($student['total_marks'], 2) }}</td>

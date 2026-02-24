@@ -9,6 +9,11 @@
 <!-- Font Awesome 6 CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+@php
+    use App\Models\StudentBasic;
+    use App\Http\Controllers\Helper;
+@endphp
+
 @section('content')
     <div class="side-app">
         <div class="container mt-4">
@@ -169,75 +174,78 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Index Number</th>
-                                                <th>Total Marks</th>
-                                                <th>Max Possible</th>
-                                                <th>Percentage</th>
+                                                <th>Student Name</th>
+                                                <th>School</th>
+                                                <td>Gender</th>
                                                 <th>Grade</th>
-                                                <th>Classification</th>
+                                                <th>Percentage</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($results as $studentId => $result)
-                                                <tr>
-                                                    <td>{{ $loop->iteration }}</td>
-                                                    <td>
-                                                        {{ $studentId }}
-                                                        <input type="hidden"
-                                                            name="results[{{ $studentId }}][total_marks]"
-                                                            value="{{ $result['total_marks'] }}">
-                                                        <input type="hidden"
-                                                            name="results[{{ $studentId }}][percentage]"
-                                                            value="{{ $result['percentage'] }}">
-                                                        <input type="hidden" name="results[{{ $studentId }}][grade]"
-                                                            value="{{ $result['grade'] }}">
-                                                        <input type="hidden"
-                                                            name="results[{{ $studentId }}][classification]"
-                                                            value="{{ $result['classification'] }}">
-                                                    </td>
-                                                    <td>{{ $result['total_marks'] }}</td>
-                                                    <td>{{ $result['total_possible'] }}</td>
-                                                    <td>
-                                                        <span
-                                                            class="badge 
-                                                        @if ($result['percentage'] >= 80) bg-success
-                                                        @elseif($result['percentage'] >= 70) bg-primary text-white
-                                                        @elseif($result['percentage'] >= 60) bg-info
-                                                        @elseif($result['percentage'] >= 50) bg-warning
-                                                        @else bg-danger @endif
-                                                    ">
-                                                            {{ $result['percentage'] }}%
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <strong>{{ $result['grade'] }}</strong>
-                                                        <small
-                                                            class="d-block text-muted">{{ $result['grade_comment'] }}</small>
-                                                    </td>
-                                                    <td>
-                                                        <strong>{{ $result['classification'] }}</strong>
-                                                        <small
-                                                            class="d-block text-muted">{{ $result['classification_comment'] }}</small>
-                                                    </td>
-                                                    {{-- Update your button in the table --}}
-                                                    <td>
-                                                        <button type="button" class="btn btn-sm btn-info view-details"
-                                                            data-bs-toggle="modal" data-bs-target="#studentDetailsModal"
-                                                            data-student-id="{{ $studentId }}"
-                                                            data-marks-details='{{ json_encode($result['marks_details']) }}'
-                                                            data-total-marks="{{ $result['total_marks'] }}"
-                                                            data-total-possible="{{ $result['total_possible'] }}"
-                                                            data-percentage="{{ $result['percentage'] }}"
-                                                            data-grade="{{ $result['grade'] }}"
-                                                            data-grade-comment="{{ $result['grade_comment'] }}"
-                                                            data-classification="{{ $result['classification'] }}"
-                                                            data-classification-comment="{{ $result['classification_comment'] }}">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                </div>
-                                @endforeach
+
+                                                            <?php 
+                                                            $StudentSex = StudentBasic::where('Student_ID', $studentId)->value('StudentSex');
+                                                            ?>
+                                                            <tr>
+                                                                <td>{{ $loop->iteration }}</td>
+                                                                <td>
+                                                                    {{ $studentId }}
+                                                                    <input type="hidden" name="results[{{ $studentId }}][total_marks]"
+                                                                        value="{{ $result['total_marks'] }}">
+                                                                    <input type="hidden" name="results[{{ $studentId }}][percentage]"
+                                                                        value="{{ $result['percentage'] }}">
+                                                                    <input type="hidden" name="results[{{ $studentId }}][grade]"
+                                                                        value="{{ $result['grade'] }}">
+                                                                    <input type="hidden" name="results[{{ $studentId }}][classification]"
+                                                                        value="{{ $result['classification'] }}">
+                                                                </td>
+                                                                <td>{{ Helper::parseStudentId($studentId, 'student') }}</td>
+                                                                <td>{{ Helper::parseStudentId($studentId, 'school') }}</td>
+                                                                <td class="text-center">
+                                                                    @if(strtolower($StudentSex) == 'male')
+                                                                        <span class="badge bg-info text-white">♂ Male</span>
+                                                                    @else
+                                                                        <span class="badge bg-danger text-white">♀ Female</span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    <span
+                                                                        class="badge 
+                                                                            @if ($result['percentage'] >= 80) bg-success
+                                                                            @elseif($result['percentage'] >= 70) bg-primary text-white
+                                                                            @elseif($result['percentage'] >= 60) bg-info
+                                                                            @elseif($result['percentage'] >= 50) bg-warning
+                                                                            @else bg-danger @endif
+                                                                         ">
+                                                                        {{ $result['percentage'] }}%
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    <strong>{{ $result['grade'] }}</strong>
+                                                                    <small class="d-block text-muted">{{ $result['grade_comment'] }}</small>
+                                                                </td>
+
+                                                                {{-- Update your button in the table --}}
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-info view-details"
+                                                                        data-bs-toggle="modal" data-bs-target="#studentDetailsModal"
+                                                                        data-student-id="{{ $studentId }}"
+                                                                        data-marks-details='{{ json_encode($result['marks_details']) }}'
+                                                                        data-total-marks="{{ $result['total_marks'] }}"
+                                                                        data-total-possible="{{ $result['total_possible'] }}"
+                                                                        data-percentage="{{ $result['percentage'] }}"
+                                                                        data-grade="{{ $result['grade'] }}"
+                                                                        data-grade-comment="{{ $result['grade_comment'] }}"
+                                                                        data-classification="{{ $result['classification'] }}"
+                                                                        data-classification-comment="{{ $result['classification_comment'] }}">
+                                                                        <i class="fas fa-eye"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                </div>
+                                            @endforeach
                                 </tbody>
                                 </table>
                                 @foreach ($results as $studentId => $result)
@@ -256,8 +264,7 @@
                                                     Loading...
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                         <i class="fas fa-times me-1"></i> Close
                                                     </button>
                                                 </div>
@@ -286,8 +293,8 @@
     </div>
 
     {{-- Student Details Modal --}}
-    <div class="modal fade" id="studentDetailsModal" tabindex="-1" role="dialog"
-        aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
+    <div class="modal fade" id="studentDetailsModal" tabindex="-1" role="dialog" aria-labelledby="studentDetailsModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
@@ -316,7 +323,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             console.log('Document ready');
 
             // -------------------------
@@ -330,20 +337,20 @@
                     ],
                     dom: 'Bfrtip',
                     buttons: [{
-                            extend: 'excelHtml5',
-                            text: '<i class="fas fa-file-excel"></i> Excel',
-                            className: 'btn btn-success btn-sm',
-                            title: 'Grading_Results_{{ $schoolName }}_{{ $category }}_{{ $year }}',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            text: '<i class="fas fa-print"></i> Print',
-                            className: 'btn btn-info btn-sm',
-                            title: 'Grading Results - {{ $schoolName }} - {{ $category }} - {{ $year }}'
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        className: 'btn btn-success btn-sm',
+                        title: 'Grading_Results_{{ $schoolName }}_{{ $category }}_{{ $year }}',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5, 6]
                         }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Print',
+                        className: 'btn btn-info btn-sm',
+                        title: 'Grading Results - {{ $schoolName }} - {{ $category }} - {{ $year }}'
+                    }
                     ]
                 });
             }
@@ -351,7 +358,7 @@
             // -------------------------
             // View Details Modal
             // -------------------------
-            $('.view-details').on('click', function() {
+            $('.view-details').on('click', function () {
                 const studentId = $(this).data('student-id');
                 const marksDetails = $(this).data('marks-details');
                 const totalMarks = $(this).data('total-marks');
@@ -367,46 +374,46 @@
 
                 // Build modal content
                 let modalContent = `
-            <h6 class="mb-3">Student Index Number : <strong>${studentId}</strong></h6>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <tr>
-                        <th style="width: 30%" class="text-dark">Total Marks</th>
-                        <td>${totalMarks} / ${totalPossible}</td>
-                    </tr>
-                    <tr>
-                        <th class="text-dark">Percentage</th>
-                        <td>${percentage}%</td>
-                    </tr>
-                    <tr>
-                        <th class="text-dark">Grade</th>
-                        <td>${grade}</td>
-                    </tr>
-                    <tr>
-                        <th class="text-dark">Grade Comment</th>
-                        <td>${gradeComment || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <th class="text-dark">Classification</th>
-                        <td>${classification}</td>
-                    </tr>
-                    <tr>
-                        <th class="text-dark">Classification Comment</th>
-                        <td>${classificationComment || 'N/A'}</td>
-                    </tr>
-                </table>
-            </div>
-            <h6 class="mt-3">Subject Marks</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Subject</th>
-                            <th>Mark</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
+                                                    <h6 class="mb-3">Student Index Number : <strong>${studentId}</strong></h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <tr>
+                                                                <th style="width: 30%" class="text-dark">Total Marks</th>
+                                                                <td>${totalMarks} / ${totalPossible}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-dark">Percentage</th>
+                                                                <td>${percentage}%</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-dark">Grade</th>
+                                                                <td>${grade}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-dark">Grade Comment</th>
+                                                                <td>${gradeComment || 'N/A'}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-dark">Classification</th>
+                                                                <td>${classification}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-dark">Classification Comment</th>
+                                                                <td>${classificationComment || 'N/A'}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                    <h6 class="mt-3">Subject Marks</h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Subject</th>
+                                                                    <th>Mark</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                `;
 
                 // Add subject marks - now using subject_name directly from the data
                 if (marksDetails && marksDetails.length > 0) {
@@ -423,10 +430,10 @@
                 }
 
                 modalContent += `
-                    </tbody>
-                </table>
-            </div>
-        `;
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                `;
 
                 // Update modal content
                 $('#modalContent').html(modalContent);
@@ -437,7 +444,7 @@
                 modal.show();
 
                 // Clean up backdrops when modal is hidden
-                modalEl.addEventListener('hidden.bs.modal', function() {
+                modalEl.addEventListener('hidden.bs.modal', function () {
                     document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
                     document.body.classList.remove('modal-open');
                 }, {
@@ -448,19 +455,19 @@
             // -------------------------
             // Save Results
             // -------------------------
-            window.saveResults = function() {
+            window.saveResults = function () {
                 if (!confirm('Are you sure you want to save these grading results?')) return;
 
                 const form = document.getElementById('saveResultsForm');
                 const formData = new FormData(form);
 
                 fetch('{{ route('iteb.save.grading') }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    })
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
@@ -491,13 +498,13 @@
             // -------------------------
             // Export / Print
             // -------------------------
-            window.exportToExcel = function() {
+            window.exportToExcel = function () {
                 if ($.fn.DataTable && $.fn.DataTable.isDataTable('#resultsTable')) {
                     $('#resultsTable').DataTable().button('.buttons-excel').trigger();
                 }
             }
 
-            window.printResults = function() {
+            window.printResults = function () {
                 if ($.fn.DataTable && $.fn.DataTable.isDataTable('#resultsTable')) {
                     $('#resultsTable').DataTable().button('.buttons-print').trigger();
                 }
