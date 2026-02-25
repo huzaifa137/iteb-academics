@@ -37,18 +37,15 @@
             min-height: 100vh;
         }
 
-        /* Main Container with proper spacing */
         .stats-container {
             max-width: 1600px;
             margin: 0 auto;
         }
 
-        /* Section spacing */
         .section-wrapper {
             margin-bottom: 2rem;
         }
 
-        /* Modern Card with spacing */
         .modern-card {
             background: white;
             border-radius: 24px;
@@ -91,7 +88,6 @@
             padding: 2rem;
         }
 
-        /* Stat Cards with proper spacing */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -164,7 +160,6 @@
             gap: 0.5rem;
         }
 
-        /* Filter Section with proper spacing */
         .filter-wrapper {
             background: white;
             border-radius: 24px;
@@ -229,7 +224,6 @@
             background: linear-gradient(135deg, var(--light-green), var(--primary-green));
         }
 
-        /* Modern Tables with proper spacing */
         .table-responsive {
             border-radius: 16px;
             overflow: hidden;
@@ -269,7 +263,6 @@
             border-bottom: 1px solid var(--border-light);
         }
 
-        /* Modern Badges */
         .modern-badge {
             padding: 0.4rem 1rem;
             border-radius: 100px;
@@ -305,7 +298,6 @@
             border: 1px solid #dbeafe;
         }
 
-        /* Rank Stars with green theme */
         .rank-star {
             width: 36px;
             height: 36px;
@@ -341,7 +333,6 @@
             border: 1px solid var(--border-light);
         }
 
-        /* Section Title with green accent */
         .section-title {
             font-size: 1.25rem;
             font-weight: 700;
@@ -359,7 +350,6 @@
             font-size: 1.1rem;
         }
 
-        /* Export Buttons */
         .export-btn {
             padding: 0.5rem 1.25rem;
             border-radius: 10px;
@@ -381,7 +371,6 @@
             transform: translateY(-1px);
         }
 
-        /* Gradient Text */
         .gradient-text-green {
             background: linear-gradient(135deg, var(--primary-green), var(--light-green));
             -webkit-background-clip: text;
@@ -389,7 +378,6 @@
             font-weight: 800;
         }
 
-        /* Summary Cards Grid */
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -397,7 +385,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Subject cards grid */
         .subject-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -405,7 +392,6 @@
             margin-top: 1.5rem;
         }
 
-        /* Responsive */
         @media (max-width: 992px) {
 
             .summary-grid,
@@ -422,7 +408,431 @@
             background-color: var(--primary-green) !important;
             color: white;
         }
-    </style>
+
+        .school-performance-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            font-size: 0.9rem;
+        }
+
+        .school-performance-table th {
+            background: var(--primary-green);
+            color: white;
+            font-weight: 600;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            vertical-align: bottom;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+
+        .school-performance-table th:last-child {
+            border-right: none;
+        }
+
+        .school-performance-table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .school-performance-table .grade-header {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            height: 100px;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .school-performance-table .school-name-cell {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .grade-count-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            min-width: 40px;
+        }
+
+        .grade-count-badge.first-class {
+            background: #fbbf24;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .grade-count-badge.second-upper {
+            background: #a7f3d0;
+            color: #065f46;
+            border: 1px solid #059669;
+        }
+
+        .grade-count-badge.second-lower {
+            background: #bfdbfe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+
+        .grade-count-badge.third-class {
+            background: #fed7aa;
+            color: #9a3412;
+            border: 1px solid #f97316;
+        }
+
+        .grade-count-badge.fail {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #ef4444;
+        }
+
+        .school-rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 0 auto;
+        }
+
+        .school-rank-badge.gold {
+            background: #fbbf24;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .school-rank-badge.silver {
+            background: #e2e8f0;
+            color: #475569;
+            border: 1px solid #94a3b8;
+        }
+
+        .school-rank-badge.bronze {
+            background: #d97706;
+            color: #fffbeb;
+            border: 1px solid #b45309;
+        }
+
+        .average-cell {
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .pass-rate-cell {
+            font-weight: 600;
+        }
+
+        .section-title.d-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-title .export-btn {
+            background: white;
+            border: 2px solid var(--primary-green);
+            color: var(--primary-green);
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .section-title .export-btn:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 124, 68, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .section-title.d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-title .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .school-performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .school-performance-table th {
+            background: var(--primary-green);
+            color: white;
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            vertical-align: middle;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+            font-size: 0.85rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .school-performance-table th:last-child {
+            border-right: none;
+        }
+
+        .school-performance-table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+            text-align: center;
+            color: var(--text-dark);
+        }
+
+        .school-performance-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .school-performance-table tbody tr:hover {
+            background: rgba(40, 124, 68, 0.02);
+        }
+
+        .school-performance-table .grade-header {
+            writing-mode: horizontal-tb;
+            transform: none;
+            height: auto;
+            white-space: normal;
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+            line-height: 1.3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 70px;
+        }
+
+        .school-performance-table .grade-header small {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .school-performance-table .school-name-cell {
+            text-align: left;
+            font-weight: 600;
+            padding-left: 1.25rem;
+        }
+
+        .school-performance-table .school-name-cell .fw-bold {
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .school-performance-table .school-name-cell small {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+
+        .grade-count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 45px;
+            padding: 0.5rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .grade-count-badge.first-class {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            border: 1px solid #f59e0b;
+        }
+
+        .grade-count-badge.second-upper {
+            background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .grade-count-badge.second-lower {
+            background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+            color: #1e3a8a;
+            border: 1px solid #3b82f6;
+        }
+
+        .grade-count-badge.third-class {
+            background: linear-gradient(135deg, #fed7aa, #fdba74);
+            color: #9a3412;
+            border: 1px solid #f97316;
+        }
+
+        .grade-count-badge.fail {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .school-rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .school-rank-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .school-rank-badge.gold {
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            color: #78350f;
+            border: 1px solid #f59e0b;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+        }
+
+        .school-rank-badge.silver {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            color: #1e293b;
+            border: 1px solid #94a3b8;
+            box-shadow: 0 4px 10px rgba(100, 116, 139, 0.15);
+        }
+
+        .school-rank-badge.bronze {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: #fffbeb;
+            border: 1px solid #b45309;
+            box-shadow: 0 4px 10px rgba(180, 83, 9, 0.2);
+        }
+
+        .school-rank-badge.default {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            color: var(--text-dark);
+            border: 1px solid var(--border-light);
+        }
+
+        .average-cell {
+            font-weight: 700;
+            color: var(--primary-green);
+            font-size: 1rem;
+        }
+
+        .school-performance-table .modern-badge {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 70px;
+            justify-content: center;
+        }
+
+        .school-performance-table .text-muted {
+            color: #94a3b8 !important;
+            font-weight: 400;
+        }
+
+        @media (max-width: 1200px) {
+            .school-performance-table {
+                font-size: 0.8rem;
+            }
+            
+            .school-performance-table th,
+            .school-performance-table td {
+                padding: 0.875rem 0.5rem;
+            }
+            
+            .grade-count-badge {
+                min-width: 40px;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+
+        .school-performance-table tbody tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+
+        .school-performance-table tbody tr:nth-child(even):hover {
+            background-color: rgba(40, 124, 68, 0.04);
+        }
+
+        .modern-card .card-body.p-0 {
+            padding: 0 !important;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .school-performance-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .school-performance-table td:first-child {
+            font-weight: 600;
+        }
+
+        .school-performance-table td:nth-child(3) {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .school-performance-table td:nth-child(9) {
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .school-performance-table td:not(:last-child) {
+            border-right: 1px solid var(--border-light);
+        }
+
+        .school-performance-table th:not(:last-child) {
+            border-right: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .school-performance-table thead tr:first-child th {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-top: 1.25rem;
+            padding-bottom: 1rem;
+        }
+
+        .school-performance-table thead tr:last-child th {
+            padding-top: 0.75rem;
+            padding-bottom: 1rem;
+            font-size: 0.8rem;
+        }
+            </style>
 
     <div class="side-app">
         <div class="stats-container">
@@ -436,7 +846,7 @@
                     <div class="d-flex">
                         <button class="export-btn mr-2" onclick="downloadPdf()">
                             <i class="fas fa-file-pdf"></i>
-                            PDF Report
+                            Generate Report
                         </button>
                     </div>
                 </div>
@@ -484,9 +894,16 @@
                         </div>
                         <div class="col-md-3">
                             <label class="filter-label">&nbsp;</label>
-                            <button type="submit" class="btn-primary-green">
-                                <i class="fas fa-chart-line"></i>
-                                Generate Report
+                            <button type="submit" class="btn-primary-green" id="submitBtn">
+                                <span id="btnText">
+                                    <i class="fas fa-chart-line"></i>
+                                    Fetch Records
+                                </span>
+
+                                <span id="btnLoader" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    Fetching records...
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -528,7 +945,7 @@
                         <div class="stat-value">{{ number_format($failedBreakdown['total_failed']) }}</div>
                         <div class="stat-trend">
                             <i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i>
-                            Need attention
+                            Critical Attention
                         </div>
                     </div>
                 </div>
@@ -587,7 +1004,7 @@
                     <div class="card-header">
                         <h6>
                             <i class="fas fa-chart-bar me-2"></i>
-                            Grading Summary - {{ $levelName }}
+                            Grading Summary (Passing Grades Only) - {{ $levelName }}
                         </h6>
                     </div>
                     <div class="card-body">
@@ -622,8 +1039,27 @@
                                             <td class="text-center fw-bold">{{ $gradingSummary[$key]['total'] }}</td>
                                         </tr>
                                     @endforeach
+                                    <tr style="background: #e8f5e9; font-weight: bold;">
+                                        <td class="fw-bold">Subtotal (Passing Grades)</td>
+                                        <td class="text-center">{{ $totals['male_total'] - $failedBreakdown['male_failed'] }}
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="modern-badge success">
+                                                {{ $totals['overall_total'] > 0 ? round((($totals['male_total'] - $failedBreakdown['male_failed']) / $totals['overall_total']) * 100, 2) : 0 }}%
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $totals['female_total'] - $failedBreakdown['female_failed'] }}</td>
+                                        <td class="text-center">
+                                            <span class="modern-badge success">
+                                                {{ $totals['overall_total'] > 0 ? round((($totals['female_total'] - $failedBreakdown['female_failed']) / $totals['overall_total']) * 100, 2) : 0 }}%
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $totals['overall_total'] - $failedBreakdown['total_failed'] }}</td>
+                                    </tr>
                                     <tr style="background: #f8fafc;">
-                                        <td class="fw-bold">Total</td>
+                                        <td class="fw-bold">Total (All Students)</td>
                                         <td class="text-center fw-bold">{{ $totals['male_total'] }}</td>
                                         <td class="text-center">
                                             <span class="modern-badge info">
@@ -683,85 +1119,84 @@
                 </div>
 
                 <!-- Top Students Section -->
-<!-- Top Students Section -->
-@if(isset($topStudents) && count($topStudents) > 0)
-    <div class="section-title d-flex justify-content-between align-items-center">
-        <div>
-            <i class="fas fa-trophy"></i>
-            Top 10 Students - {{ $levelName }}
-        </div>
-        <button class="export-btn" onclick="downloadStudentsFullReport()">
-            <i class="fas fa-file-pdf"></i>
-            Download Full Report
-        </button>
-    </div>
+                @if(isset($topStudents) && count($topStudents) > 0)
+                    <div class="section-title d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-trophy"></i>
+                            Top 10 Students - {{ $levelName }}
+                        </div>
+                        <button class="export-btn" onclick="downloadStudentsFullReport()">
+                            <i class="fas fa-file-pdf"></i>
+                            Download Full Report
+                        </button>
+                    </div>
 
-    <div class="modern-card section-wrapper">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th class="text-center">Rank</th>
-                            <th>Student</th>
-                            <th>School</th>
-                            <th class="text-center">Gender</th>
-                            <th class="text-center">Marks</th>
-                            <th class="text-center">Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($topStudents as $index => $student)
-                            <tr>
-                                <td class="text-center">
-                                    @if($index == 0)
-                                        <span class="rank-star gold">
-                                            <i class="fas fa-crown"></i>
-                                        </span>
-                                    @elseif($index == 1)
-                                        <span class="rank-star silver">
-                                            <i class="fas fa-star"></i>
-                                        </span>
-                                    @elseif($index == 2)
-                                        <span class="rank-star bronze">
-                                            <i class="fas fa-star"></i>
-                                        </span>
-                                    @else
-                                        <span class="rank-star default">
-                                            {{ $index + 1 }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="fw-bold">{{ Helper::getStudentName($student['student_id']) }}</div>
-                                    <small class="text-muted">ID: {{ $student['student_id'] }}</small>
-                                </td>
-                                <td>{{ $student['school_name'] }}</td>
-                                <td class="text-center">
-                                    @if(strtolower($student['gender']) == 'male')
-                                        <span class="modern-badge info">
-                                            <i class="fas fa-mars"></i> Male
-                                        </span>
-                                    @else
-                                        <span class="modern-badge danger">
-                                            <i class="fas fa-venus"></i> Female
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="text-center fw-bold">{{ number_format($student['total_marks'], 2) }}</td>
-                                <td class="text-center">
-                                    <span class="modern-badge success">
-                                        {{ number_format($student['percentage'], 2) }}%
-                                    </span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-@endif
+                    <div class="modern-card section-wrapper">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">Rank</th>
+                                            <th>Student</th>
+                                            <th>School</th>
+                                            <th class="text-center">Gender</th>
+                                            <th class="text-center">Marks</th>
+                                            <th class="text-center">Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($topStudents as $index => $student)
+                                            <tr>
+                                                <td class="text-center">
+                                                    @if($index == 0)
+                                                        <span class="rank-star gold">
+                                                            <i class="fas fa-crown"></i>
+                                                        </span>
+                                                    @elseif($index == 1)
+                                                        <span class="rank-star silver">
+                                                           2
+                                                        </span>
+                                                    @elseif($index == 2)
+                                                        <span class="rank-star bronze">
+                                                            3
+                                                        </span>
+                                                    @else
+                                                        <span class="rank-star default">
+                                                            {{ $index + 1 }}
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold">{{ Helper::getStudentName($student['student_id']) }}</div>
+                                                    <small class="text-muted">ID: {{ $student['student_id'] }}</small>
+                                                </td>
+                                                <td>{{ $student['school_name'] }}</td>
+                                                <td class="text-center">
+                                                    @if(strtolower($student['gender']) == 'male')
+                                                        <span class="modern-badge info">
+                                                            <i class="fas fa-mars"></i> Male
+                                                        </span>
+                                                    @else
+                                                        <span class="modern-badge danger">
+                                                            <i class="fas fa-venus"></i> Female
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center fw-bold">{{ number_format($student['total_marks'], 2) }}</td>
+                                                <td class="text-center">
+                                                    <span class="modern-badge success">
+                                                        {{ number_format($student['percentage'], 2) }}%
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Subject Performance -->
                 @if(isset($bestSubjects) && isset($worstSubjects))
@@ -870,320 +1305,155 @@
                 @endif
 
                 <!-- Top Schools Performance -->
-<!-- Top Schools Performance -->
-@if(isset($topSchools) && count($topSchools) > 0)
-    <div class="section-title d-flex justify-content-between align-items-center">
-        <div>
-            <i class="fas fa-school"></i>
-            Top 10 Best Performing Schools - {{ $levelName }}
-        </div>
-        <button class="export-btn" onclick="downloadSchoolsFullReport()">
-            <i class="fas fa-file-pdf"></i>
-            Download Full Report
-        </button>
-    </div>
+                @if(isset($topSchools) && count($topSchools) > 0)
+                    <div class="section-title d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-school"></i>
+                            Top 10 Best Performing Schools - {{ $levelName }}
+                        </div>
+                        <button class="export-btn" onclick="downloadSchoolsFullReport()">
+                            <i class="fas fa-file-pdf"></i>
+                            Download Full Report
+                        </button>
+                    </div>
 
-    <div class="modern-card section-wrapper">
-        <div class="card-header" style="background: linear-gradient(135deg, var(--primary-green), #0e5e2c);">
-            <h6>
-                <i class="fas fa-trophy me-2"></i>
-                School Performance Summary
-            </h6>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="school-performance-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" style="background: #0e5e2c; width: 60px;">Rank</th>
-                            <th rowspan="2" style="background: #0e5e2c; text-align: left; min-width: 250px;">School
-                            </th>
-                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Total<br>Std</th>
-                            <th colspan="5" style="background: #0e5e2c; text-align: center;">Grade Distribution</th>
-                            <th rowspan="2" style="background: #0e5e2c; width: 70px;">Graded</th>
-                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Average<br>%</th>
-                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Pass<br>Rate</th>
-                        </tr>
-                        <tr>
-                            <th style="background: #0e5e2c;" class="grade-column">
-                                <div class="grade-header">FIRST CLASS<br><small>ممتاز</small></div>
-                            </th>
-                            <th style="background: #0e5e2c;" class="grade-column">
-                                <div class="grade-header">SECOND UPPER<br><small>جيد جدا</small></div>
-                            </th>
-                            <th style="background: #0e5e2c;" class="grade-column">
-                                <div class="grade-header">SECOND LOWER<br><small>جيد</small></div>
-                            </th>
-                            <th style="background: #0e5e2c;" class="grade-column">
-                                <div class="grade-header">THIRD CLASS<br><small>مقبول</small></div>
-                            </th>
-                            <th style="background: #0e5e2c;" class="grade-column">
-                                <div class="grade-header">FAIL<br><small>راسب</small></div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($topSchools as $index => $school)
-                            <tr>
-                                <td>
-                                    <div class="school-rank-badge 
-                                @if($index == 0) gold
-                                @elseif($index == 1) silver
-                                @elseif($index == 2) bronze
-                                @endif">
-                                        @if($index == 0)
-                                            <i class="fas fa-crown"></i>
-                                        @else
-                                            {{ $index + 1 }}
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="school-name-cell">
-                                    <div class="fw-bold">{{ $school['school_name'] }}</div>
-                                    <small class="text-muted">{{ $school['school_code'] }}</small>
-                                </td>
-                                <td class="fw-bold">{{ $school['total_students'] }}</td>
+                    <div class="modern-card section-wrapper">
+                        <div class="card-header" style="background: linear-gradient(135deg, var(--primary-green), #0e5e2c);">
+                            <h6>
+                                <i class="fas fa-trophy me-2"></i>
+                                School Performance Summary
+                            </h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="school-performance-table">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" style="background: #0e5e2c; width: 60px;">Rank</th>
+                                            <th rowspan="2" style="background: #0e5e2c; text-align: left; min-width: 250px;">School
+                                            </th>
+                                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Total<br>Std</th>
+                                            <th colspan="5" style="background: #0e5e2c; text-align: center;">Grade Distribution</th>
+                                            <th rowspan="2" style="background: #0e5e2c; width: 70px;">Graded</th>
+                                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Average<br>%</th>
+                                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Pass<br>Rate</th>
+                                        </tr>
+                                        <tr>
+                                            <th style="background: #0e5e2c;" class="grade-column">
+                                                <div class="grade-header">FIRST CLASS<br><small>ممتاز</small></div>
+                                            </th>
+                                            <th style="background: #0e5e2c;" class="grade-column">
+                                                <div class="grade-header">SECOND UPPER<br><small>جيد جدا</small></div>
+                                            </th>
+                                            <th style="background: #0e5e2c;" class="grade-column">
+                                                <div class="grade-header">SECOND LOWER<br><small>جيد</small></div>
+                                            </th>
+                                            <th style="background: #0e5e2c;" class="grade-column">
+                                                <div class="grade-header">THIRD CLASS<br><small>مقبول</small></div>
+                                            </th>
+                                            <th style="background: #0e5e2c;" class="grade-column">
+                                                <div class="grade-header">FAIL<br><small>راسب</small></div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($topSchools as $index => $school)
+                                            <tr>
+                                                <td>
+                                                    <div
+                                                        class="school-rank-badge 
+                                                            @if($index == 0) gold
+                                                            @elseif($index == 1) silver
+                                                            @elseif($index == 2) bronze
+                                                            @endif">
+                                                        @if($index == 0)
+                                                            <i class="fas fa-crown"></i>
+                                                        @else
+                                                            {{ $index + 1 }}
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td class="school-name-cell">
+                                                    <div class="fw-bold">{{ $school['school_name'] }}</div>
+                                                    <small class="text-muted">{{ $school['school_code'] }}</small>
+                                                </td>
+                                                <td class="fw-bold">{{ $school['total_students'] }}</td>
 
-                                <!-- First Class -->
-                                <td>
-                                    @if($school['grades']['FIRST CLASS'] > 0)
-                                        <span class="grade-count-badge first-class">
-                                            {{ $school['grades']['FIRST CLASS'] }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
+                                                <!-- First Class -->
+                                                <td>
+                                                    @if($school['grades']['FIRST CLASS'] > 0)
+                                                        <span class="grade-count-badge first-class">
+                                                            {{ $school['grades']['FIRST CLASS'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
 
-                                <!-- Second Upper -->
-                                <td>
-                                    @if($school['grades']['SECOND CLASS UPPER'] > 0)
-                                        <span class="grade-count-badge second-upper">
-                                            {{ $school['grades']['SECOND CLASS UPPER'] }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
+                                                <!-- Second Upper -->
+                                                <td>
+                                                    @if($school['grades']['SECOND CLASS UPPER'] > 0)
+                                                        <span class="grade-count-badge second-upper">
+                                                            {{ $school['grades']['SECOND CLASS UPPER'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
 
-                                <!-- Second Lower -->
-                                <td>
-                                    @if($school['grades']['SECOND CLASS LOWER'] > 0)
-                                        <span class="grade-count-badge second-lower">
-                                            {{ $school['grades']['SECOND CLASS LOWER'] }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
+                                                <!-- Second Lower -->
+                                                <td>
+                                                    @if($school['grades']['SECOND CLASS LOWER'] > 0)
+                                                        <span class="grade-count-badge second-lower">
+                                                            {{ $school['grades']['SECOND CLASS LOWER'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
 
-                                <!-- Third Class -->
-                                <td>
-                                    @if($school['grades']['THIRD CLASS'] > 0)
-                                        <span class="grade-count-badge third-class">
-                                            {{ $school['grades']['THIRD CLASS'] }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
+                                                <!-- Third Class -->
+                                                <td>
+                                                    @if($school['grades']['THIRD CLASS'] > 0)
+                                                        <span class="grade-count-badge third-class">
+                                                            {{ $school['grades']['THIRD CLASS'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
 
-                                <!-- Fail -->
-                                <td>
-                                    @if($school['grades']['FAIL'] > 0)
-                                        <span class="grade-count-badge fail">
-                                            {{ $school['grades']['FAIL'] }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
+                                                <!-- Fail -->
+                                                <td>
+                                                    @if($school['grades']['FAIL'] > 0)
+                                                        <span class="grade-count-badge fail">
+                                                            {{ $school['grades']['FAIL'] }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
 
-                                <td class="fw-bold">{{ $school['graded_students'] }}</td>
-                                <td class="average-cell">{{ number_format($school['average_percentage'], 2) }}%</td>
-                                <td>
-                                    @php
-                                        $passRateClass = $school['pass_rate'] >= 70 ? 'success' :
-                                            ($school['pass_rate'] >= 50 ? 'warning' : 'danger');
-                                    @endphp
-                                    <span class="modern-badge {{ $passRateClass }}">
-                                        {{ number_format($school['pass_rate'], 2) }}%
-                                    </span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-@endif
+                                                <td class="fw-bold">{{ $school['graded_students'] }}</td>
+                                                <td class="average-cell">{{ number_format($school['average_percentage'], 2) }}%</td>
+                                                <td>
+                                                    @php
+                                                        $passRateClass = $school['pass_rate'] >= 70 ? 'success' :
+                                                            ($school['pass_rate'] >= 50 ? 'warning' : 'danger');
+                                                    @endphp
+                                                    <span class="modern-badge {{ $passRateClass }}">
+                                                        {{ number_format($school['pass_rate'], 2) }}%
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
-                <style>
-                    .school-performance-table {
-                        width: 100%;
-                        border-collapse: separate;
-                        border-spacing: 0;
-                        background: white;
-                        font-size: 0.9rem;
-                    }
-
-                    .school-performance-table th {
-                        background: var(--primary-green);
-                        color: white;
-                        font-weight: 600;
-                        padding: 1rem 0.5rem;
-                        text-align: center;
-                        vertical-align: bottom;
-                        border-right: 1px solid rgba(255, 255, 255, 0.1);
-                        white-space: nowrap;
-                    }
-
-                    .school-performance-table th:last-child {
-                        border-right: none;
-                    }
-
-                    .school-performance-table td {
-                        padding: 1rem 0.75rem;
-                        border-bottom: 1px solid var(--border-light);
-                        vertical-align: middle;
-                        text-align: center;
-                    }
-
-                    .school-performance-table .grade-header {
-                        writing-mode: vertical-rl;
-                        transform: rotate(180deg);
-                        height: 100px;
-                        white-space: nowrap;
-                        font-size: 0.8rem;
-                        letter-spacing: 0.5px;
-                        font-weight: 500;
-                        line-height: 1.2;
-                    }
-
-                    .school-performance-table .school-name-cell {
-                        text-align: left;
-                        font-weight: 600;
-                    }
-
-                    .grade-count-badge {
-                        display: inline-block;
-                        padding: 0.4rem 0.8rem;
-                        border-radius: 20px;
-                        font-weight: 600;
-                        font-size: 1rem;
-                        min-width: 40px;
-                    }
-
-                    .grade-count-badge.first-class {
-                        background: #fbbf24;
-                        color: #92400e;
-                        border: 1px solid #f59e0b;
-                    }
-
-                    .grade-count-badge.second-upper {
-                        background: #a7f3d0;
-                        color: #065f46;
-                        border: 1px solid #059669;
-                    }
-
-                    .grade-count-badge.second-lower {
-                        background: #bfdbfe;
-                        color: #1e40af;
-                        border: 1px solid #3b82f6;
-                    }
-
-                    .grade-count-badge.third-class {
-                        background: #fed7aa;
-                        color: #9a3412;
-                        border: 1px solid #f97316;
-                    }
-
-                    .grade-count-badge.fail {
-                        background: #fee2e2;
-                        color: #b91c1c;
-                        border: 1px solid #ef4444;
-                    }
-
-                    .school-rank-badge {
-                        width: 32px;
-                        height: 32px;
-                        border-radius: 8px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-weight: 700;
-                        font-size: 0.9rem;
-                        margin: 0 auto;
-                    }
-
-                    .school-rank-badge.gold {
-                        background: #fbbf24;
-                        color: #92400e;
-                        border: 1px solid #f59e0b;
-                    }
-
-                    .school-rank-badge.silver {
-                        background: #e2e8f0;
-                        color: #475569;
-                        border: 1px solid #94a3b8;
-                    }
-
-                    .school-rank-badge.bronze {
-                        background: #d97706;
-                        color: #fffbeb;
-                        border: 1px solid #b45309;
-                    }
-
-                    .average-cell {
-                        font-weight: 700;
-                        color: var(--primary-green);
-                    }
-
-                    .pass-rate-cell {
-                        font-weight: 600;
-                    }
-                </style>
-
-                <style>
-                    /* Add to your existing CSS */
-.section-title.d-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.section-title .export-btn {
-    background: white;
-    border: 2px solid var(--primary-green);
-    color: var(--primary-green);
-    padding: 0.5rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.section-title .export-btn:hover {
-    background: var(--primary-green);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 124, 68, 0.2);
-}
-
-/* Responsive adjustment */
-@media (max-width: 768px) {
-    .section-title.d-flex {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .section-title .export-btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
-                </style>
             @endif
         </div>
     </div>
@@ -1193,6 +1463,24 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.getElementById('examStatisticsForm').addEventListener('submit', function () {
+
+            const button = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+
+            // Disable button
+            button.disabled = true;
+            button.style.opacity = "0.7";
+            button.style.cursor = "not-allowed";
+
+            // Swap text with loader
+            btnText.style.display = "none";
+            btnLoader.style.display = "inline-block";
+        });
+    </script>
 
     <script>
         // Your existing JavaScript functions here
@@ -1297,91 +1585,82 @@
 
     <script>
         function downloadStudentsFullReport() {
-    downloadReport('students', 'full');
-}
-
-function downloadSchoolsFullReport() {
-    downloadReport('schools', 'full');
-}
-
-function downloadReport(reportType, reportScope) {
-    const year = $('select[name="year"]').val();
-    const category = $('select[name="category"]').val();
-    const level = $('select[name="level"]').val();
-
-    if (!year || !category) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Information',
-            text: 'Please select Year and Category before downloading.',
-            confirmButtonColor: '#287c44'
-        });
-        return;
-    }
-
-    // You'll need to create these routes in your web.php
-    const route = reportType === 'students' 
-        ? '{{ route("iteb.exam.statistics.download.students") }}'
-        : '{{ route("iteb.exam.statistics.download.schools") }}';
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = route;
-
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = '_token';
-    csrfInput.value = '{{ csrf_token() }}';
-    form.appendChild(csrfInput);
-
-    const yearInput = document.createElement('input');
-    yearInput.type = 'hidden';
-    yearInput.name = 'year';
-    yearInput.value = year;
-    form.appendChild(yearInput);
-
-    const categoryInput = document.createElement('input');
-    categoryInput.type = 'hidden';
-    categoryInput.name = 'category';
-    categoryInput.value = category;
-    form.appendChild(categoryInput);
-
-    const levelInput = document.createElement('input');
-    levelInput.type = 'hidden';
-    levelInput.name = 'level';
-    levelInput.value = level;
-    form.appendChild(levelInput);
-
-    const reportTypeInput = document.createElement('input');
-    reportTypeInput.type = 'hidden';
-    reportTypeInput.name = 'report_type';
-    reportTypeInput.value = reportType;
-    form.appendChild(reportTypeInput);
-
-    const reportScopeInput = document.createElement('input');
-    reportScopeInput.type = 'hidden';
-    reportScopeInput.name = 'report_scope';
-    reportScopeInput.value = reportScope;
-    form.appendChild(reportScopeInput);
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    Swal.fire({
-        title: `Generating ${reportType} report...`,
-        text: 'Your full report will be downloaded shortly.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
+            downloadReport('students', 'full');
         }
-    });
 
-    setTimeout(() => {
-        Swal.close();
-    }, 3000);
-}
+        function downloadSchoolsFullReport() {
+            downloadReport('schools', 'full');
+        }
+
+        function downloadReport(reportType, reportScope) {
+            const year = $('select[name="year"]').val();
+            const category = $('select[name="category"]').val();
+            const level = $('select[name="level"]').val();
+
+            if (!year || !category) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please select Year and Category before downloading.',
+                    confirmButtonColor: '#287c44'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: `Generating ${reportType} report...`,
+                text: 'This may take a moment for large datasets.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const route = reportType === 'students'
+                ? '{{ route("iteb.exam.statistics.download.students") }}'
+                : '{{ route("iteb.exam.statistics.download.schools") }}';
+
+            // Create a hidden form and submit
+            const form = $('<form>', {
+                'method': 'POST',
+                'action': route,
+                'target': '_blank'
+            });
+
+            form.append($('<input>', {
+                'name': '_token',
+                'value': '{{ csrf_token() }}',
+                'type': 'hidden'
+            }));
+
+            form.append($('<input>', {
+                'name': 'year',
+                'value': year,
+                'type': 'hidden'
+            }));
+
+            form.append($('<input>', {
+                'name': 'category',
+                'value': category,
+                'type': 'hidden'
+            }));
+
+            form.append($('<input>', {
+                'name': 'level',
+                'value': level,
+                'type': 'hidden'
+            }));
+
+            $('body').append(form);
+            form.submit();
+            form.remove();
+
+            // Close the loading message after a delay
+            setTimeout(() => {
+                Swal.close();
+            }, 4000);
+        }
     </script>
 @endsection

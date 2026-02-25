@@ -403,17 +403,17 @@
 
                         <form action="{{ route('iteb.exam.statistics') }}" method="GET">
 
-                            <div class="row g-3"> <!-- Removed align-items-end -->
+                            <div class="row g-3">
 
                                 <!-- Year -->
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label fw-bold">
                                         Year <span class="text-danger">*</span>
                                     </label>
                                     <select name="year" class="form-select select2" required>
                                         <option value="">-- Select Year --</option>
                                         @foreach ($years ?? [] as $y)
-                                            <option value="{{ $y }}" {{ isset($year) && $y == $year ?: '' }}>
+                                            <option value="{{ $y }}" {{ isset($year) && $y == $year ? 'selected' : '' }}>
                                                 {{ $y }}
                                             </option>
                                         @endforeach
@@ -421,7 +421,7 @@
                                 </div>
 
                                 <!-- Category -->
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6">
                                     <label class="form-label fw-bold">
                                         Category <span class="text-danger">*</span>
                                     </label>
@@ -436,34 +436,22 @@
                                     </select>
                                 </div>
 
-                                <!-- School -->
-                                <div class="col-12 col-md-4">
-                                    <label class="form-label fw-bold">School</label>
-                                    <select name="school_number" class="form-select select2" style="height: 38px;">
-                                        <option value="">-- All Schools --</option>
-                                        @foreach ($schools ?? [] as $code => $name)
-                                            <option value="{{ $code }}" title="{{ $name }} ({{ $code }})">
-                                                {{ Str::limit($name, 30) }} ({{ $code }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div style="height: 21px;"><small class="text-muted">Optional</small></div>
-                                </div>
-
                                 <!-- Hidden Level -->
                                 <input type="hidden" name="level" id="levelInput" value="{{ $level ?? '' }}">
 
-                                <!-- Button -->
+                            </div>
+
+                            <!-- Button Row -->
+                            <div class="row mt-4 justify-content-center">
                                 <div class="col-12 col-md-4">
                                     <button type="submit" class="btn"
-                                        style="background-color: #287c44; color: white; width: 100%; white-space: normal; word-wrap: break-word; height: auto; min-height: 44px;"
-                                        onresize>
+                                        style="background-color: #287c44; color: white; width: 100%; min-height: 44px;">
                                         <i class="fas fa-magnifying-glass-chart me-2"></i>
                                         General Report
                                     </button>
                                 </div>
-
                             </div>
+
                         </form>
                     </div>
 
@@ -517,24 +505,27 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    <div style="height: 21px;"><small class="text-muted">Optional</small></div>
+                                    <div style="height: 21px;">
+                                        <small class="text-muted">Optional</small>
+                                    </div>
                                 </div>
 
                                 <!-- Hidden Level -->
                                 <input type="hidden" name="level" id="levelInput">
 
-                                <!-- Button -->
+                            </div>
+
+                            <!-- Centered Button Row -->
+                            <div class="row justify-content-center">
                                 <div class="col-12 col-md-4">
-                                    <!-- First form button -->
                                     <button type="submit" class="btn"
-                                        style="background-color: #287c44; color: white; width: 100%; white-space: normal; word-wrap: break-word; height: auto; min-height: 44px;"
-                                        onresize>
+                                        style="background-color: #287c44; color: white; width: 100%; min-height: 44px;">
                                         <i class="fas fa-magnifying-glass-chart me-2"></i>
                                         Generate School Reports
                                     </button>
                                 </div>
-
                             </div>
+
                         </form>
                     </div>
 
@@ -573,7 +564,7 @@
     </div>
     </div>
     </div>
-    
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
