@@ -2,900 +2,1375 @@
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
 @section('content')
+    <?php use App\Http\Controllers\Helper; ?>
 
-<?php
-    use App\Http\Controllers\Helper;
-?>
-<style>
-    /* Subject tables styling */
-.card-header {
-    font-weight: 600;
-    padding: 1rem 1.5rem;
-}
+    <style>
+        :root {
+            --primary-green: #287c44;
+            --dark-green: #0d4b1e;
+            --deep-green: #0d4b1f;
+            --muted-green: #253f2d;
+            --light-green: #3a9b5a;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            --hover-shadow: 0 20px 30px -10px rgba(40, 124, 68, 0.15);
+        }
 
-.card-header.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-}
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-.card-header.bg-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-}
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
 
-.table td {
-    vertical-align: middle;
-    padding: 0.75rem;
-}
+        .side-app {
+            padding: 2rem;
+            min-height: 100vh;
+        }
 
-.table tbody tr:hover {
-    background-color: rgba(0,0,0,0.02);
-}
+        /* Main Container with proper spacing */
+        .stats-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
 
-/* Subject badges */
-.badge.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+        /* Section spacing */
+        .section-wrapper {
+            margin-bottom: 2rem;
+        }
 
-.badge.bg-warning {
-    color: #212529 !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+        /* Modern Card with spacing */
+        .modern-card {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
 
-.badge.bg-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+        .modern-card:hover {
+            box-shadow: var(--hover-shadow);
+            border-color: var(--primary-green);
+        }
 
-.badge.bg-danger {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+        .modern-card .card-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            padding: 1.25rem 2rem;
+            border-bottom: none;
+        }
 
-/* Bronze badge for 3rd place */
-.badge.bg-bronze {
-    background-color: #cd7f32 !important;
-    color: white;
-}
-</style>
+        .modern-card .card-header h4,
+        .modern-card .card-header h6 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            letter-spacing: 0.02em;
+        }
+
+        .modern-card .card-header h4 i,
+        .modern-card .card-header h6 i {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .modern-card .card-body {
+            padding: 2rem;
+        }
+
+        /* Stat Cards with proper spacing */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--light-green));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-green);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.25rem;
+            background: rgba(40, 124, 68, 0.1);
+            color: var(--primary-green);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-trend {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Filter Section with proper spacing */
+        .filter-wrapper {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .filter-label {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .modern-select {
+            background: white;
+            border: 1px solid var(--border-light);
+            color: var(--text-dark);
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            width: 100%;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modern-select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(40, 124, 68, 0.1);
+        }
+
+        .modern-select option {
+            background: white;
+            color: var(--text-dark);
+        }
+
+        .btn-primary-green {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 14px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(40, 124, 68, 0.2);
+        }
+
+        .btn-primary-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(40, 124, 68, 0.3);
+            background: linear-gradient(135deg, var(--light-green), var(--primary-green));
+        }
+
+        /* Modern Tables with proper spacing */
+        .table-responsive {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+        }
+
+        .modern-table thead th {
+            background: #f8fafc;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+            white-space: nowrap;
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .modern-table tbody tr:hover {
+            background: rgba(40, 124, 68, 0.02);
+        }
+
+        .modern-table tbody td {
+            padding: 1.25rem 1.5rem;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        /* Modern Badges */
+        .modern-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .modern-badge.success {
+            background: rgba(40, 124, 68, 0.1);
+            color: var(--primary-green);
+            border: 1px solid rgba(40, 124, 68, 0.2);
+        }
+
+        .modern-badge.danger {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+        }
+
+        .modern-badge.warning {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fef3c7;
+        }
+
+        .modern-badge.info {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #dbeafe;
+        }
+
+        /* Rank Stars with green theme */
+        .rank-star {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .rank-star.gold {
+            background: #fbbf24;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .rank-star.silver {
+            background: #e2e8f0;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .rank-star.bronze {
+            background: #d97706;
+            color: #fffbeb;
+            border: 1px solid #b45309;
+        }
+
+        .rank-star.default {
+            background: #f1f5f9;
+            color: var(--text-dark);
+            border: 1px solid var(--border-light);
+        }
+
+        /* Section Title with green accent */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 2rem 0 1.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .section-title i {
+            color: var(--primary-green);
+            font-size: 1.1rem;
+        }
+
+        /* Export Buttons */
+        .export-btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-muted);
+        }
+
+        .export-btn:hover {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+            background: rgba(40, 124, 68, 0.02);
+            transform: translateY(-1px);
+        }
+
+        /* Gradient Text */
+        .gradient-text-green {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* Summary Cards Grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Subject cards grid */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+
+            .summary-grid,
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .side-app {
+                padding: 1rem;
+            }
+        }
+
+        th {
+            background-color: var(--primary-green) !important;
+            color: white;
+        }
+    </style>
 
     <div class="side-app">
-        <div class="container mt-4">
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center"
-                    style="background-color: #17a2b8;">
-                    <h4 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i> Exam Statistics : {{ $year }} - {{ $category }}
+        <div class="stats-container">
+            <!-- Header Card -->
+            <div class="modern-card section-wrapper">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>
+                        <i class="fas fa-chart-pie"></i>
+                        <span class="gradient-text-white">Exam Statistics Dashboard</span>
                     </h4>
-                    <span class="badge badge-light text-dark">Level {{ $level }}</span>
+                    <div class="d-flex">
+                        <button class="export-btn mr-2" onclick="downloadPdf()">
+                            <i class="fas fa-file-pdf"></i>
+                            PDF Report
+                        </button>
+                    </div>
                 </div>
+            </div>
 
-                <div class="card-body">
-                    <!-- Filter Form -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <form action="{{ route('iteb.exam.statistics') }}" method="POST"
-                                class="form-inline justify-content-center" id="examStatisticsForm">
-                                @csrf
-                                <div class="row g-3 align-items-end">
-                                    <div class="col-md-3">
-                                        <label class="fw-bold">Year</label>
-                                        <select name="year" class="form-control" required>
-                                            <option value="">Select Year</option>
-                                            @foreach ($years ?? [] as $y)
-                                                <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>
-                                                    {{ $y }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="fw-bold">Category</label>
-                                        <select name="category" class="form-control" required>
-                                            <option value="">Select Category</option>
-                                            <option value="ID" {{ $category == 'ID' ? 'selected' : '' }}>Idaad (ID)
-                                            </option>
-                                            <option value="TH" {{ $category == 'TH' ? 'selected' : '' }}>Thanawi (TH)
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="fw-bold">Level</label>
-                                        <select name="level" class="form-control">
-                                            <option value="A" {{ $level == 'A' ? 'selected' : '' }}>Level A</option>
-                                            <option value="O" {{ $level == 'O' ? 'selected' : '' }}>Level O</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <button type="submit" class="btn text-white px-4"
-                                            style="background-color: #17a2b8;">
-                                            <i class="fas fa-search me-2"></i> Generate Statistics
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+            <!-- Filter Section -->
+            <div class="filter-wrapper section-wrapper">
+                <form action="{{ route('iteb.exam.statistics') }}" method="POST" id="examStatisticsForm">
+                    @csrf
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <label class="filter-label">
+                                <i class="fas fa-calendar-alt me-2" style="color: var(--primary-green);"></i>
+                                Year
+                            </label>
+                            <select name="year" class="modern-select" required>
+                                <option value="">Select Year</option>
+                                @foreach ($years ?? [] as $y)
+                                    <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>
+                                        {{ $y }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="filter-label">
+                                <i class="fas fa-layer-group me-2" style="color: var(--primary-green);"></i>
+                                Category
+                            </label>
+                            <select name="category" id="categorySelect" class="modern-select" required>
+                                <option value="">Select Category</option>
+                                <option value="ID" {{ $category == 'ID' ? 'selected' : '' }}>Idaad (ID)</option>
+                                <option value="TH" {{ $category == 'TH' ? 'selected' : '' }}>Thanawi (TH)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="filter-label">
+                                <i class="fas fa-signal me-2" style="color: var(--primary-green);"></i>
+                                Level
+                            </label>
+                            <select name="level" id="levelSelect" class="modern-select">
+                                <option value="A" {{ $level == 'A' ? 'selected' : '' }}>Advanced Level (A)</option>
+                                <option value="O" {{ $level == 'O' ? 'selected' : '' }}>Ordinary Level (O)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="filter-label">&nbsp;</label>
+                            <button type="submit" class="btn-primary-green">
+                                <i class="fas fa-chart-line"></i>
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                            
-    <!-- Download Buttons - Only visible when data is loaded -->
-    @if(isset($schoolsTable))
-    <div class="d-flex justify-content-end mt-3">
-        <div class="btn-group shadow-sm" role="group" style="border-radius: 10px; overflow: hidden;">
-
-            <button type="button" class="btn btn-danger" onclick="downloadPdf()"
-                    style="padding: 10px 25px; font-weight: 500;">
-                <i class="fas fa-file-pdf me-2"></i>
-                <span>General Report Export</span>
-            </button>
-        </div>
-    </div>
-    @endif
+            @if(isset($registeredStudents))
+                <!-- Stats Cards -->
+                <div class="summary-grid section-wrapper">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-label">Registered Students</div>
+                        <div class="stat-value">{{ number_format($registeredStudents) }}</div>
+                        <div class="stat-trend">
+                            <i class="fas fa-arrow-up" style="color: var(--primary-green);"></i>
+                            Total enrollment
                         </div>
                     </div>
 
-                    <hr>
-
-                    <!-- Statistics Results -->
-                    @if (isset($schoolsTable))
-                        <!-- 1- Number of schools registered -->
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h5 class="bg-light p-2 rounded d-flex justify-content-between align-items-center">
-                                    <span>
-                                        1- Number of schools registered for Exams {{ $year }}:
-                                    </span>
-
-                                    
-                                </h5>
-
-                                <table class="table table-bordered table-hover">
-                                    <thead class="table-secondary">
-                                        <tr>
-                                            <th>S/N</th>
-                                            <th>{{ $levelName }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($schoolsTable as $index => $school)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $school['count'] }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="color: var(--primary-green);">
+                            <i class="fas fa-check-circle"></i>
                         </div>
-
-                        <!-- 2- Number of students registered -->
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h5 class="bg-light p-2 rounded d-flex justify-content-between align-items-center">
-    <span>
-        2- Number of students registered:
-    </span>
-
-<div class="d-flex gap-2">
-
-</div>
-
-</h5>
-
-                                <table class="table table-bordered table-hover">
-                                    <thead class="table-secondary">
-                                        <tr>
-                                            <th>S/N</th>
-                                            <th>{{ $levelName }}</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($studentsRegisteredTable as $index => $student)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $student['count'] }}</td>
-                                                <td>{{ $student['total'] }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="stat-label">Graded Students</div>
+                        <div class="stat-value">{{ number_format($totalGraded) }}</div>
+                        <div class="stat-trend">
+                            <i class="fas fa-check" style="color: var(--primary-green);"></i>
+                            Successfully graded
                         </div>
+                    </div>
 
-                        <!-- 3- Grading Summary (IDAAD/THANAWI LEVEL) -->
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h5 class="bg-light p-2 rounded d-flex justify-content-between align-items-center">
-    <span>
-        3- Grading Summary - {{ $levelName }}:
-    </span>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="color: #dc2626;">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-label">Failed Students</div>
+                        <div class="stat-value">{{ number_format($failedBreakdown['total_failed']) }}</div>
+                        <div class="stat-trend">
+                            <i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i>
+                            Need attention
+                        </div>
+                    </div>
+                </div>
+            @endif
 
-</h5>
+            @if(isset($schoolsTable))
+                <!-- Schools Section -->
+                <div class="modern-card section-wrapper">
+                    <div class="card-header">
+                        <h6>
+                            <i class="fas fa-school me-2"></i>
+                            Registered Schools - {{ $year }}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th width="80">#</th>
+                                        <th>Level</th>
+                                        <th>Number of School</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $levelCode = strpos($levelName, 'THANAWI') !== false ? 'TH' : 'ID';
 
-                                <table class="table table-bordered table-hover">
-                                    <thead class="table-secondary">
+                                        $schools = DB::table('class_allocation')
+                                            ->select(DB::raw("DISTINCT SUBSTRING_INDEX(Student_ID, '-', 2) as center_code"))
+                                            ->where('Student_ID', 'like', "%-$levelCode-%")
+                                            ->where('Student_ID', 'like', "%-$year")
+                                            ->get();
+
+                                        $schoolCount = $schools->count();
+                                    @endphp
+                                    @foreach ($schoolsTable as $index => $school)
                                         <tr>
-                                            <th>S/N</th>
-                                            <th>{{ $levelName }}</th>
-                                            <th>Male</th>
-                                            <th>%</th>
-                                            <th>Female</th>
-                                            <th>%</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>a.</td>
-                                            <td>Excellent D1</td>
-                                            <td>{{ $gradingSummary['D1']['male_count'] }}</td>
-                                            <td>{{ $gradingSummary['D1']['male_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['D1']['female_count'] }}</td>
-                                            <td>{{ $gradingSummary['D1']['female_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['D1']['total'] }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>b.</td>
-                                            <td>Very good D2</td>
-                                            <td>{{ $gradingSummary['D2']['male_count'] }}</td>
-                                            <td>{{ $gradingSummary['D2']['male_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['D2']['female_count'] }}</td>
-                                            <td>{{ $gradingSummary['D2']['female_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['D2']['total'] }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>c.</td>
-                                            <td>Good C3</td>
-                                            <td>{{ $gradingSummary['C3']['male_count'] }}</td>
-                                            <td>{{ $gradingSummary['C3']['male_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['C3']['female_count'] }}</td>
-                                            <td>{{ $gradingSummary['C3']['female_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['C3']['total'] }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>d.</td>
-                                            <td>Pass C4</td>
-                                            <td>{{ $gradingSummary['C4']['male_count'] }}</td>
-                                            <td>{{ $gradingSummary['C4']['male_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['C4']['female_count'] }}</td>
-                                            <td>{{ $gradingSummary['C4']['female_percent'] }}%</td>
-                                            <td>{{ $gradingSummary['C4']['total'] }}</td>
-                                        </tr>
-                                        <tr class="table-warning fw-bold">
-                                            <td colspan="2">Total</td>
-                                            <td>{{ $totals['male_total'] }}</td>
-                                            <td>{{ $totals['male_total'] > 0 ? round(($totals['male_total'] / $totals['overall_total']) * 100, 2) : 0 }}%
+                                            <td>
+                                                <span class="rank-star default">
+                                                    {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
+                                                </span>
                                             </td>
-                                            <td>{{ $totals['female_total'] }}</td>
-                                            <td>{{ $totals['female_total'] > 0 ? round(($totals['female_total'] / $totals['overall_total']) * 100, 2) : 0 }}%
+                                            <td>{{ $levelName }}</td>
+                                            <td>{{ $schoolCount }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grading Summary -->
+                <div class="modern-card section-wrapper">
+                    <div class="card-header">
+                        <h6>
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Grading Summary - {{ $levelName }}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Grade</th>
+                                        <th class="text-center">Male</th>
+                                        <th class="text-center">%</th>
+                                        <th class="text-center">Female</th>
+                                        <th class="text-center">%</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(['D1' => 'Excellent D1', 'D2' => 'Very Good D2', 'C3' => 'Good C3', 'C4' => 'Pass C4'] as $key => $label)
+                                        <tr>
+                                            <td class="fw-bold">{{ $label }}</td>
+                                            <td class="text-center">{{ $gradingSummary[$key]['male_count'] }}</td>
+                                            <td class="text-center">
+                                                <span class="modern-badge success">
+                                                    {{ $gradingSummary[$key]['male_percent'] }}%
+                                                </span>
                                             </td>
-                                            <td>{{ $totals['overall_total'] }}</td>
+                                            <td class="text-center">{{ $gradingSummary[$key]['female_count'] }}</td>
+                                            <td class="text-center">
+                                                <span class="modern-badge success">
+                                                    {{ $gradingSummary[$key]['female_percent'] }}%
+                                                </span>
+                                            </td>
+                                            <td class="text-center fw-bold">{{ $gradingSummary[$key]['total'] }}</td>
                                         </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                    @endforeach
+                                    <tr style="background: #f8fafc;">
+                                        <td class="fw-bold">Total</td>
+                                        <td class="text-center fw-bold">{{ $totals['male_total'] }}</td>
+                                        <td class="text-center">
+                                            <span class="modern-badge info">
+                                                {{ $totals['male_total'] > 0 ? round(($totals['male_total'] / $totals['overall_total']) * 100, 2) : 0 }}%
+                                            </span>
+                                        </td>
+                                        <td class="text-center fw-bold">{{ $totals['female_total'] }}</td>
+                                        <td class="text-center">
+                                            <span class="modern-badge info">
+                                                {{ $totals['female_total'] > 0 ? round(($totals['female_total'] / $totals['overall_total']) * 100, 2) : 0 }}%
+                                            </span>
+                                        </td>
+                                        <td class="text-center fw-bold">{{ $totals['overall_total'] }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- 4- Students Failed -->
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h5 class="bg-light p-2 rounded d-flex justify-content-between align-items-center">
-    <span>
-        4- Students failed:
-    </span>
-
-</h5>
-
-                                <table class="table table-bordered table-hover">
-                                    <thead class="table-danger">
-                                        <tr>
-                                            <th>S/N</th>
-                                            <th>{{ $levelName }}</th>
-                                            <th>Male</th>
-                                            <th>Female</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td>{{ $failedBreakdown['male_failed'] }}</td>
-                                            <td>{{ $failedBreakdown['female_failed'] }}</td>
-                                            <td>{{ $failedBreakdown['total_failed'] }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                <!-- Failed Students Section -->
+                <div class="modern-card section-wrapper">
+                    <div class="card-header" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                        <h6>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Students Failed - {{ $levelName }}
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-center">Male</th>
+                                        <th class="text-center">Female</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold">Failed Students</td>
+                                        <td class="text-center">
+                                            <span class="modern-badge danger">{{ $failedBreakdown['male_failed'] }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="modern-badge danger">{{ $failedBreakdown['female_failed'] }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="modern-badge danger">{{ $failedBreakdown['total_failed'] }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
+                </div>
 
-                <!-- Top 10 Students Table (For both O and A Levels) -->
-                @if(isset($level) && in_array($level, ['O', 'A']))
-                <div class="mt-5">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 style="color: #287c44;">
-                                <i class="fas fa-star me-2"></i>
-                                Top 10 Performing Students - {{ $levelName }}
-                            </h5>
-                            <div>
-                            </div>
-                        </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-dark" style="background-color: #287c44; color:#FFF;">
-                                <tr>
-                                    <th class="text-center" width="5%">Rank</th>
-                                    <th class="text-center" width="10%">Student ID</th>
-                                    <th class="text-center" width="25%">Student Name</th>
-                                    <th class="text-center" width="25%">School</th>
-                                    <th class="text-center" width="10%">Gender</th>
-                                    <th class="text-center" width="15%">Total Marks</th>
-                                    <th class="text-center" width="10%">Percentage</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @forelse($topStudents ?? [] as $index => $student)
+                <!-- Top Students Section -->
+<!-- Top Students Section -->
+@if(isset($topStudents) && count($topStudents) > 0)
+    <div class="section-title d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fas fa-trophy"></i>
+            Top 10 Students - {{ $levelName }}
+        </div>
+        <button class="export-btn" onclick="downloadStudentsFullReport()">
+            <i class="fas fa-file-pdf"></i>
+            Download Full Report
+        </button>
+    </div>
 
+    <div class="modern-card section-wrapper">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Rank</th>
+                            <th>Student</th>
+                            <th>School</th>
+                            <th class="text-center">Gender</th>
+                            <th class="text-center">Marks</th>
+                            <th class="text-center">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($topStudents as $index => $student)
                             <tr>
-                                <td class="text-center fw-bold">
+                                <td class="text-center">
                                     @if($index == 0)
-                                        <span class="badge bg-warning text-dark">🥇 1st</span>
+                                        <span class="rank-star gold">
+                                            <i class="fas fa-crown"></i>
+                                        </span>
                                     @elseif($index == 1)
-                                        <span class="badge bg-secondary">🥈 2nd</span>
+                                        <span class="rank-star silver">
+                                            <i class="fas fa-star"></i>
+                                        </span>
                                     @elseif($index == 2)
-                                        <span class="badge bg-bronze" style="background-color: #cd7f32;">🥉 3rd</span>
+                                        <span class="rank-star bronze">
+                                            <i class="fas fa-star"></i>
+                                        </span>
                                     @else
-                                        {{ $index + 1 }}th
+                                        <span class="rank-star default">
+                                            {{ $index + 1 }}
+                                        </span>
                                     @endif
                                 </td>
-                                
-                                <td class="text-center">{{ $student['student_id'] }}</td>
-                                <td>{{ Helper::getStudentName($student['student_id'])  }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ Helper::getStudentName($student['student_id']) }}</div>
+                                    <small class="text-muted">ID: {{ $student['student_id'] }}</small>
+                                </td>
                                 <td>{{ $student['school_name'] }}</td>
                                 <td class="text-center">
                                     @if(strtolower($student['gender']) == 'male')
-                                        <span class="badge bg-info">♂ Male</span>
+                                        <span class="modern-badge info">
+                                            <i class="fas fa-mars"></i> Male
+                                        </span>
                                     @else
-                                        <span class="badge bg-danger">♀ Female</span>
+                                        <span class="modern-badge danger">
+                                            <i class="fas fa-venus"></i> Female
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="text-center fw-bold">{{ number_format($student['total_marks'], 2) }}</td>
                                 <td class="text-center">
-                                    <span class="badge" style="background-color: #287c44; color:#FFF;">
+                                    <span class="modern-badge success">
                                         {{ number_format($student['percentage'], 2) }}%
                                     </span>
                                 </td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    No student data available for the selected criteria.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Optional: Summary Statistics for Top 10 -->
-                @if(!empty($topStudents))
-                <div class="row mt-3">
-                    <div class="col-md-4">
-                        <div class="bg-light p-3 rounded">
-                            <small class="text-muted">Average Percentage (Top 10)</small>
-                            <h5 class="mb-0">
-                                {{ number_format(collect($topStudents)->avg('percentage'), 2) }}%
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-light p-3 rounded">
-                            <small class="text-muted">Gender Distribution</small>
-                            <h5 class="mb-0">
-                                {{ collect($topStudents)->where('gender', 'male')->count() }} Male / 
-                                {{ collect($topStudents)->where('gender', 'female')->count() }} Female
-                            </h5>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-light p-3 rounded">
-                            <small class="text-muted">Top Score</small>
-                            <h5 class="mb-0">{{ number_format($topStudents[0]['percentage'] ?? 0, 2) }}%</h5>
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-            @endif
-
-            <!-- Top 10 Students Table (For both O and A Levels) -->
-            @if(isset($level) && in_array($level, ['O', 'A']))
-            <div class="mt-5">
-                <h5 class="mb-3" style="color: #287c44;">
-                    @if($level == 'O')
-                        <i class="fas fa-graduation-cap me-2"></i>
-                    @else
-                        <i class="fas fa-university me-2"></i>
-                    @endif
-                    Top 10 Performing Students - {{ $levelName }}
-                    @if($level == 'O')
-                        <span class="badge bg-info ms-2">IDAAD (O Level)</span>
-                    @else
-                        <span class="badge bg-primary text-white ms-2">THANAWI (A Level)</span>
-                    @endif
-                </h5>
-                
-                <!-- ... rest of the table code ... -->
-            </div>
-            @endif
-
-            <!-- Optional: Summary Statistics for Top 10 with Level Context -->
-            @if(!empty($topStudents))
-            <div class="row mt-3">
-                <div class="col-md-3">
-                    <div class="bg-light p-3 rounded">
-                        <small class="text-muted">Level</small>
-                        <h5 class="mb-0">
-                            @if($level == 'O')
-                                IDAAD (O Level)
-                            @else
-                                THANAWI (A Level)
-                            @endif
-                        </h5>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="bg-light p-3 rounded">
-                        <small class="text-muted">Average (Top 10)</small>
-                        <h5 class="mb-0">
-                            {{ number_format(collect($topStudents)->avg('percentage'), 2) }}%
-                        </h5>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="bg-light p-3 rounded">
-                        <small class="text-muted">Gender Split</small>
-                        <h5 class="mb-0">
-                            {{ collect($topStudents)->where('gender', 'male')->count() }} M / 
-                            {{ collect($topStudents)->where('gender', 'female')->count() }} F
-                        </h5>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="bg-light p-3 rounded">
-                        <small class="text-muted">Top Score</small>
-                        <h5 class="mb-0">{{ number_format($topStudents[0]['percentage'] ?? 0, 2) }}%</h5>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            <!-- Subject Performance Analysis - Best and Worst Subjects -->
-@if(isset($level) && in_array($level, ['O', 'A']) && isset($bestSubjects) && isset($worstSubjects))
-<div class="mt-5">
-<h5 class="mb-3 d-flex justify-content-between align-items-center" style="color: #287c44;">
-    <span>
-        <i class="fas fa-book-open me-2"></i>
-        Subject Performance Analysis - {{ $levelName }}
-    </span>
-</h5>
-
-    
-    <div class="row">
-        <!-- Best Performing Subjects -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-trophy me-2"></i>
-                        Top 10 Best Performing Subjects
-                    </h6>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="text-center" width="5%">Rank</th>
-                                    <th width="40%">Subject Name</th>
-                                    <th class="text-center" width="15%">Average</th>
-                                    <th class="text-center" width="15%">Highest</th>
-                                    <th class="text-center" width="15%">Pass Rate</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($bestSubjects as $index => $subject)
-                                <tr>
-                                    <td class="text-center fw-bold">
-                                        @if($index == 0)
-                                            <span class="badge bg-warning text-dark">🥇 1st</span>
-                                        @elseif($index == 1)
-                                            <span class="badge bg-secondary">🥈 2nd</span>
-                                        @elseif($index == 2)
-                                            <span class="badge bg-bronze">🥉 3rd</span>
-                                        @else
-                                            {{ $index + 1 }}
-                                        @endif
-                                    </td>
-                                    <td>
-                                       
-                                        <strong>{{Helper::item_md_name($subject['subject_name']) }} </strong>
-                                        <br>
-                                        <small class="text-muted">{{ $subject['student_count'] }} students</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-success">
-                                            {{ number_format($subject['average'], 2) }}%
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-info">
-                                            {{ $subject['highest'] }}%
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge" style="background-color: #287c44; color:#FFF;">
-                                            {{ $subject['pass_percentage'] }}%
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Worst Performing Subjects -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-danger text-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Top 10 Worst Performing Subjects
-                    </h6>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="text-center" width="5%">Rank</th>
-                                    <th width="40%">Subject Name</th>
-                                    <th class="text-center" width="15%">Average</th>
-                                    <th class="text-center" width="15%">Lowest</th>
-                                    <th class="text-center" width="15%">Pass Rate</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($worstSubjects as $index => $subject)
-                                <tr>
-                                    <td class="text-center fw-bold">
-                                        @if($index == 0)
-                                            <span class="badge bg-danger">⚠️ 1st</span>
-                                        @elseif($index == 1)
-                                            <span class="badge bg-warning text-dark">⚠️ 2nd</span>
-                                        @elseif($index == 2)
-                                            <span class="badge bg-secondary">⚠️ 3rd</span>
-                                        @else
-                                            {{ $index + 1 }}
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <strong>{{ $subject['subject_name'] }}</strong>
-                                        <br>
-                                        <small class="text-muted">{{ $subject['student_count'] }} students</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-warning text-dark">
-                                            {{ number_format($subject['average'], 2) }}%
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-danger">
-                                            {{ $subject['lowest'] }}%
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge" style="background-color: #dc3545;">
-                                            {{ $subject['pass_percentage'] }}%
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    
-    <!-- Subject Performance Summary Stats -->
-    <div class="row mt-2">
-        <div class="col-md-3">
-            <div class="bg-light p-3 rounded">
-                <small class="text-muted">Overall Subject Average</small>
-                <h5 class="mb-0">
-                    {{ number_format(collect($bestSubjects)->merge($worstSubjects)->avg('average'), 2) }}%
-                </h5>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="bg-light p-3 rounded">
-                <small class="text-muted">Best Subject</small>
-                <h5 class="mb-0">{{ $bestSubjects[0]['subject_name'] ?? 'N/A' }}</h5>
-                <small>{{ $bestSubjects[0]['average'] ?? 0 }}% avg</small>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="bg-light p-3 rounded">
-                <small class="text-muted">Worst Subject</small>
-                <h5 class="mb-0">{{ $worstSubjects[0]['subject_name'] ?? 'N/A' }}</h5>
-                <small>{{ $worstSubjects[0]['average'] ?? 0 }}% avg</small>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="bg-light p-3 rounded">
-                <small class="text-muted">Total Subjects</small>
-                <h5 class="mb-0">{{ count($bestSubjects) + count($worstSubjects) }}</h5>
-            </div>
-        </div>
-    </div>
-</div>
 @endif
 
-                        <!-- Summary Cards -->
-                        <div class="row mt-4">
-                            <div class="col-md-4">
-                                <div class="card bg-primary text-white">
-                                    <div class="card-body">
-                                        <h5>Registered Students</h5>
-                                        <h3>{{ $registeredStudents }}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-success text-white">
-                                    <div class="card-body">
-                                        <h5>Graded Students</h5>
-                                        <h3>{{ $totalGraded }}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-danger text-white">
-                                    <div class="card-body">
-                                        <h5>Failed Students</h5>
-                                        <h3>{{ $failedBreakdown['total_failed'] }}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
+                <!-- Subject Performance -->
+                @if(isset($bestSubjects) && isset($worstSubjects))
+                    <div class="section-title">
+                        <i class="fas fa-book-open"></i>
+                        Subject Performance Analysis
+                    </div>
 
-                        <!-- Back Button -->
-                        <div class="row mt-4">
-                            <div class="col-12 text-center">
-                                <a href="{{ route('iteb.grading.summary') }}" class="btn btn-secondary btn-lg">
-                                    <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
-                                </a>
+                    <div class="subject-grid section-wrapper">
+                        <!-- Best Subjects -->
+                        <div class="modern-card">
+                            <div class="card-header"
+                                style="background: linear-gradient(135deg, var(--primary-green), var(--dark-green));">
+                                <h6>
+                                    <i class="fas fa-trophy me-2"></i>
+                                    Best Performing Subjects
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="modern-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">#</th>
+                                                <th>Subject</th>
+                                                <th class="text-center">Average</th>
+                                                <th class="text-center">Pass Rate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($bestSubjects as $index => $subject)
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge success">#{{ $index + 1 }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-bold">{{ Helper::item_md_name($subject['subject_name']) }}</div>
+                                                        <small class="text-muted">{{ $subject['student_count'] }} students</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge success">
+                                                            {{ number_format($subject['average'], 2) }}%
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge info">
+                                                            {{ $subject['pass_percentage'] }}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    @endif
-                </div>
+
+                        <!-- Worst Subjects -->
+                        <div class="modern-card">
+                            <div class="card-header" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                                <h6>
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Worst Done Subjects
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="modern-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">#</th>
+                                                <th>Subject</th>
+                                                <th class="text-center">Average</th>
+                                                <th class="text-center">Pass Rate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($worstSubjects as $index => $subject)
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge danger">#{{ $index + 1 }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-bold">{{ Helper::item_md_name($subject['subject_name']) }}</div>
+                                                        <small class="text-muted">{{ $subject['student_count'] }} students</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge warning">
+                                                            {{ number_format($subject['average'], 2) }}%
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge danger">
+                                                            {{ $subject['pass_percentage'] }}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                @endif
+
+                <!-- Top Schools Performance -->
+<!-- Top Schools Performance -->
+@if(isset($topSchools) && count($topSchools) > 0)
+    <div class="section-title d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fas fa-school"></i>
+            Top 10 Best Performing Schools - {{ $levelName }}
+        </div>
+        <button class="export-btn" onclick="downloadSchoolsFullReport()">
+            <i class="fas fa-file-pdf"></i>
+            Download Full Report
+        </button>
+    </div>
+
+    <div class="modern-card section-wrapper">
+        <div class="card-header" style="background: linear-gradient(135deg, var(--primary-green), #0e5e2c);">
+            <h6>
+                <i class="fas fa-trophy me-2"></i>
+                School Performance Summary
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="school-performance-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="background: #0e5e2c; width: 60px;">Rank</th>
+                            <th rowspan="2" style="background: #0e5e2c; text-align: left; min-width: 250px;">School
+                            </th>
+                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Total<br>Std</th>
+                            <th colspan="5" style="background: #0e5e2c; text-align: center;">Grade Distribution</th>
+                            <th rowspan="2" style="background: #0e5e2c; width: 70px;">Graded</th>
+                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Average<br>%</th>
+                            <th rowspan="2" style="background: #0e5e2c; width: 80px;">Pass<br>Rate</th>
+                        </tr>
+                        <tr>
+                            <th style="background: #0e5e2c;" class="grade-column">
+                                <div class="grade-header">FIRST CLASS<br><small>ممتاز</small></div>
+                            </th>
+                            <th style="background: #0e5e2c;" class="grade-column">
+                                <div class="grade-header">SECOND UPPER<br><small>جيد جدا</small></div>
+                            </th>
+                            <th style="background: #0e5e2c;" class="grade-column">
+                                <div class="grade-header">SECOND LOWER<br><small>جيد</small></div>
+                            </th>
+                            <th style="background: #0e5e2c;" class="grade-column">
+                                <div class="grade-header">THIRD CLASS<br><small>مقبول</small></div>
+                            </th>
+                            <th style="background: #0e5e2c;" class="grade-column">
+                                <div class="grade-header">FAIL<br><small>راسب</small></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($topSchools as $index => $school)
+                            <tr>
+                                <td>
+                                    <div class="school-rank-badge 
+                                @if($index == 0) gold
+                                @elseif($index == 1) silver
+                                @elseif($index == 2) bronze
+                                @endif">
+                                        @if($index == 0)
+                                            <i class="fas fa-crown"></i>
+                                        @else
+                                            {{ $index + 1 }}
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="school-name-cell">
+                                    <div class="fw-bold">{{ $school['school_name'] }}</div>
+                                    <small class="text-muted">{{ $school['school_code'] }}</small>
+                                </td>
+                                <td class="fw-bold">{{ $school['total_students'] }}</td>
+
+                                <!-- First Class -->
+                                <td>
+                                    @if($school['grades']['FIRST CLASS'] > 0)
+                                        <span class="grade-count-badge first-class">
+                                            {{ $school['grades']['FIRST CLASS'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Second Upper -->
+                                <td>
+                                    @if($school['grades']['SECOND CLASS UPPER'] > 0)
+                                        <span class="grade-count-badge second-upper">
+                                            {{ $school['grades']['SECOND CLASS UPPER'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Second Lower -->
+                                <td>
+                                    @if($school['grades']['SECOND CLASS LOWER'] > 0)
+                                        <span class="grade-count-badge second-lower">
+                                            {{ $school['grades']['SECOND CLASS LOWER'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Third Class -->
+                                <td>
+                                    @if($school['grades']['THIRD CLASS'] > 0)
+                                        <span class="grade-count-badge third-class">
+                                            {{ $school['grades']['THIRD CLASS'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Fail -->
+                                <td>
+                                    @if($school['grades']['FAIL'] > 0)
+                                        <span class="grade-count-badge fail">
+                                            {{ $school['grades']['FAIL'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <td class="fw-bold">{{ $school['graded_students'] }}</td>
+                                <td class="average-cell">{{ number_format($school['average_percentage'], 2) }}%</td>
+                                <td>
+                                    @php
+                                        $passRateClass = $school['pass_rate'] >= 70 ? 'success' :
+                                            ($school['pass_rate'] >= 50 ? 'warning' : 'danger');
+                                    @endphp
+                                    <span class="modern-badge {{ $passRateClass }}">
+                                        {{ number_format($school['pass_rate'], 2) }}%
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+@endif
 
+                <style>
+                    .school-performance-table {
+                        width: 100%;
+                        border-collapse: separate;
+                        border-spacing: 0;
+                        background: white;
+                        font-size: 0.9rem;
+                    }
+
+                    .school-performance-table th {
+                        background: var(--primary-green);
+                        color: white;
+                        font-weight: 600;
+                        padding: 1rem 0.5rem;
+                        text-align: center;
+                        vertical-align: bottom;
+                        border-right: 1px solid rgba(255, 255, 255, 0.1);
+                        white-space: nowrap;
+                    }
+
+                    .school-performance-table th:last-child {
+                        border-right: none;
+                    }
+
+                    .school-performance-table td {
+                        padding: 1rem 0.75rem;
+                        border-bottom: 1px solid var(--border-light);
+                        vertical-align: middle;
+                        text-align: center;
+                    }
+
+                    .school-performance-table .grade-header {
+                        writing-mode: vertical-rl;
+                        transform: rotate(180deg);
+                        height: 100px;
+                        white-space: nowrap;
+                        font-size: 0.8rem;
+                        letter-spacing: 0.5px;
+                        font-weight: 500;
+                        line-height: 1.2;
+                    }
+
+                    .school-performance-table .school-name-cell {
+                        text-align: left;
+                        font-weight: 600;
+                    }
+
+                    .grade-count-badge {
+                        display: inline-block;
+                        padding: 0.4rem 0.8rem;
+                        border-radius: 20px;
+                        font-weight: 600;
+                        font-size: 1rem;
+                        min-width: 40px;
+                    }
+
+                    .grade-count-badge.first-class {
+                        background: #fbbf24;
+                        color: #92400e;
+                        border: 1px solid #f59e0b;
+                    }
+
+                    .grade-count-badge.second-upper {
+                        background: #a7f3d0;
+                        color: #065f46;
+                        border: 1px solid #059669;
+                    }
+
+                    .grade-count-badge.second-lower {
+                        background: #bfdbfe;
+                        color: #1e40af;
+                        border: 1px solid #3b82f6;
+                    }
+
+                    .grade-count-badge.third-class {
+                        background: #fed7aa;
+                        color: #9a3412;
+                        border: 1px solid #f97316;
+                    }
+
+                    .grade-count-badge.fail {
+                        background: #fee2e2;
+                        color: #b91c1c;
+                        border: 1px solid #ef4444;
+                    }
+
+                    .school-rank-badge {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 700;
+                        font-size: 0.9rem;
+                        margin: 0 auto;
+                    }
+
+                    .school-rank-badge.gold {
+                        background: #fbbf24;
+                        color: #92400e;
+                        border: 1px solid #f59e0b;
+                    }
+
+                    .school-rank-badge.silver {
+                        background: #e2e8f0;
+                        color: #475569;
+                        border: 1px solid #94a3b8;
+                    }
+
+                    .school-rank-badge.bronze {
+                        background: #d97706;
+                        color: #fffbeb;
+                        border: 1px solid #b45309;
+                    }
+
+                    .average-cell {
+                        font-weight: 700;
+                        color: var(--primary-green);
+                    }
+
+                    .pass-rate-cell {
+                        font-weight: 600;
+                    }
+                </style>
+
+                <style>
+                    /* Add to your existing CSS */
+.section-title.d-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-title .export-btn {
+    background: white;
+    border: 2px solid var(--primary-green);
+    color: var(--primary-green);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.section-title .export-btn:hover {
+    background: var(--primary-green);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 124, 68, 0.2);
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+    .section-title.d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .section-title .export-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+                </style>
+            @endif
+        </div>
+    </div>
+
+
+    <!-- Keep existing scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-function showMissingResourcesAlert() {
-    Swal.fire({
-        icon: 'error',
-        title: 'Missing Required Resources',
-        text: 'Some required resources are missing. Please update Server',
-        confirmButtonColor: '#d33',
-        confirmButtonText: 'OK'
-    });
-}
-</script>
-
-<script>
-$(document).ready(function() {
-    // Show appropriate icon/message based on level selection
-    $('select[name="level"]').on('change', function() {
-        const selectedLevel = $(this).val();
-        const levelText = selectedLevel === 'O' ? 'IDAAD (O Level)' : 'THANAWI (A Level)';
-        
-        // Optional: Update some preview text
-        console.log('Selected level:', levelText);
-    });
-});
-
-// Update the form submission handler
-$('#examStatisticsForm').on('submit', function(e) {
-    const level = $('select[name="level"]').val();
-    const category = $('select[name="category"]').val();
-    
-    if (level && category) {
-        const levelName = level === 'O' ? 'IDAAD (O Level)' : 'THANAWI (A Level)';
-        
-        Swal.fire({
-            title: 'Loading Top Students...',
-            html: `Fetching top 10 performers for <strong>${levelName}</strong>`,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-    }
-});
-</script>
-
-<!-- Update all download buttons with the same form data -->
-<button type="button" class="btn btn-danger btn-sm" onclick="downloadStatistics()">
-    <i class="fas fa-file-pdf me-1"></i> Download Excel
-</button>
-
-<!-- Add this JavaScript function at the bottom of your blade file -->
-<script>
-function downloadStatistics() {
-
-    const year = $('select[name="year"]').val();
-    const category = $('select[name="category"]').val();
-    const level = $('select[name="level"]').val();
-
-    if (!year || !category) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Information',
-            text: 'Please select Year and Category before downloading.',
-            confirmButtonColor: '#17a2b8'
-        });
-        return;
-    }
-
-    // Show loading
-    Swal.fire({
-        title: 'Generating Download...',
-        text: 'Please wait while we prepare your file.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
+        // Your existing JavaScript functions here
+        function showMissingResourcesAlert() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing Required Resources',
+                text: 'Some required resources are missing. Please update Server',
+                confirmButtonColor: '#287c44',
+                confirmButtonText: 'OK'
+            });
         }
-    });
 
-    // Create hidden iframe
-    let iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
+        document.addEventListener('DOMContentLoaded', function () {
+            const category = document.getElementById('categorySelect');
+            const level = document.getElementById('levelSelect');
 
-    iframe.onload = function () {
-        Swal.close(); // Close ONLY when server responds
-        document.body.removeChild(iframe);
-    };
+            function setLevelBasedOnCategory() {
+                if (category.value === 'ID') {
+                    level.value = 'O';
+                } else if (category.value === 'TH') {
+                    level.value = 'A';
+                }
+                level.disabled = true;
+            }
 
-    // Create form
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route("iteb.exam.statistics.download") }}';
-    form.target = iframe.name = "downloadFrame";
+            category.addEventListener('change', setLevelBasedOnCategory);
+            setLevelBasedOnCategory();
+        });
 
-    // CSRF
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = '_token';
-    csrfInput.value = '{{ csrf_token() }}';
-    form.appendChild(csrfInput);
+        function downloadPdf() {
+            downloadFile('pdf');
+        }
 
-    // Year
-    const yearInput = document.createElement('input');
-    yearInput.type = 'hidden';
-    yearInput.name = 'year';
-    yearInput.value = year;
-    form.appendChild(yearInput);
+        function downloadFile(type) {
+            const year = $('select[name="year"]').val();
+            const category = $('select[name="category"]').val();
+            const level = $('select[name="level"]').val();
 
-    // Category
-    const categoryInput = document.createElement('input');
-    categoryInput.type = 'hidden';
-    categoryInput.name = 'category';
-    categoryInput.value = category;
-    form.appendChild(categoryInput);
+            if (!year || !category) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please select Year and Category before downloading.',
+                    confirmButtonColor: '#287c44'
+                });
+                return;
+            }
 
-    // Level
-    const levelInput = document.createElement('input');
-    levelInput.type = 'hidden';
-    levelInput.name = 'level';
-    levelInput.value = level;
-    form.appendChild(levelInput);
+            const route = type === 'excel'
+                ? '{{ route("iteb.exam.statistics.download.excel") }}'
+                : '{{ route("iteb.exam.statistics.download.pdf") }}';
 
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = route;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            form.appendChild(csrfInput);
+
+            const yearInput = document.createElement('input');
+            yearInput.type = 'hidden';
+            yearInput.name = 'year';
+            yearInput.value = year;
+            form.appendChild(yearInput);
+
+            const categoryInput = document.createElement('input');
+            categoryInput.type = 'hidden';
+            categoryInput.name = 'category';
+            categoryInput.value = category;
+            form.appendChild(categoryInput);
+
+            const levelInput = document.createElement('input');
+            levelInput.type = 'hidden';
+            levelInput.name = 'level';
+            levelInput.value = level;
+            form.appendChild(levelInput);
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            Swal.fire({
+                title: `Generating ${type.toUpperCase()}...`,
+                text: 'Your file will be downloaded shortly.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            setTimeout(() => {
+                Swal.close();
+            }, 3000);
+        }
+    </script>
+
+    <script>
+        function downloadStudentsFullReport() {
+    downloadReport('students', 'full');
 }
-</script>
 
-<script>
-function downloadExcel() {
-    downloadFile('excel');
+function downloadSchoolsFullReport() {
+    downloadReport('schools', 'full');
 }
 
-function downloadPdf() {
-    downloadFile('pdf');
-}
-
-function downloadFile(type) {
-    // Get the current form values
+function downloadReport(reportType, reportScope) {
     const year = $('select[name="year"]').val();
     const category = $('select[name="category"]').val();
     const level = $('select[name="level"]').val();
-    
+
     if (!year || !category) {
         Swal.fire({
             icon: 'warning',
             title: 'Missing Information',
             text: 'Please select Year and Category before downloading.',
-            confirmButtonColor: '#17a2b8'
+            confirmButtonColor: '#287c44'
         });
         return;
     }
-    
-    // Determine the route based on type
-    const route = type === 'excel' 
-        ? '{{ route("iteb.exam.statistics.download.excel") }}'
-        : '{{ route("iteb.exam.statistics.download.pdf") }}';
-    
-    // Create a form and submit it to download
+
+    // You'll need to create these routes in your web.php
+    const route = reportType === 'students' 
+        ? '{{ route("iteb.exam.statistics.download.students") }}'
+        : '{{ route("iteb.exam.statistics.download.schools") }}';
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = route;
-    
-    // Add CSRF token
+
     const csrfInput = document.createElement('input');
     csrfInput.type = 'hidden';
     csrfInput.name = '_token';
     csrfInput.value = '{{ csrf_token() }}';
     form.appendChild(csrfInput);
-    
-    // Add year
+
     const yearInput = document.createElement('input');
     yearInput.type = 'hidden';
     yearInput.name = 'year';
     yearInput.value = year;
     form.appendChild(yearInput);
-    
-    // Add category
+
     const categoryInput = document.createElement('input');
     categoryInput.type = 'hidden';
     categoryInput.name = 'category';
     categoryInput.value = category;
     form.appendChild(categoryInput);
-    
-    // Add level
+
     const levelInput = document.createElement('input');
     levelInput.type = 'hidden';
     levelInput.name = 'level';
     levelInput.value = level;
     form.appendChild(levelInput);
-    
+
+    const reportTypeInput = document.createElement('input');
+    reportTypeInput.type = 'hidden';
+    reportTypeInput.name = 'report_type';
+    reportTypeInput.value = reportType;
+    form.appendChild(reportTypeInput);
+
+    const reportScopeInput = document.createElement('input');
+    reportScopeInput.type = 'hidden';
+    reportScopeInput.name = 'report_scope';
+    reportScopeInput.value = reportScope;
+    form.appendChild(reportScopeInput);
+
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
-    
-    // Show loading message
+
     Swal.fire({
-        title: `Generating ${type.toUpperCase()}...`,
-        text: 'Your file will be downloaded shortly.',
+        title: `Generating ${reportType} report...`,
+        text: 'Your full report will be downloaded shortly.',
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,
@@ -903,13 +1378,10 @@ function downloadFile(type) {
             Swal.showLoading();
         }
     });
-    
-    // Close the loading message after a delay
+
     setTimeout(() => {
         Swal.close();
     }, 3000);
 }
-</script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    </script>
 @endsection

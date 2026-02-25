@@ -4,7 +4,7 @@
         <div class="d-flex">
             <a class="header-brand" href="{{ url('/' . ($page = '#')) }}">
                 <img src="{{ URL::asset('assets/images/brand/logo.png') }}" class="header-brand-img desktop-lgo"
-                    alt="Item Academics logo">
+                    alt="Iteb Academics logo">
             </a>
 
 

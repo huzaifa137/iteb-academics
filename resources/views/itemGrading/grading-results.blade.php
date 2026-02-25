@@ -181,7 +181,7 @@
                                                 <th>Percentage</th>
                                                 <th>Action</th>
                                             </tr>
-                                        </thead>
+                                        <!-- </thead> -->
                                         <tbody>
                                             @foreach ($results as $studentId => $result)
 

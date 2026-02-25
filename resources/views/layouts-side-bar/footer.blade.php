@@ -6,7 +6,7 @@
 				Copyright ©
 				<script>
 					document.write(new Date().getFullYear());
-				</script> <a href="#">Item Academics</a>. All rights reserved.
+				</script> <a href="#">Iteb Academics</a>. All rights reserved.
 			</div>
 		</div>
 	</div>

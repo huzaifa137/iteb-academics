@@ -206,8 +206,9 @@ class ItebController extends Controller
             'totalStudents',
             'gradedSoFar',
             'pendingGrading',
-            'avgPerformance'
+            'avgPerformance',
         ));
+
     }
     public function processGrading(Request $request)
     {
@@ -886,7 +887,8 @@ class ItebController extends Controller
 
         $year = $request->year;
         $category = $request->category;
-        $level = $request->level ?? 'A';
+        $level = $request->level
+            ?? ($request->category === 'TH' ? 'A' : 'O');
 
         // Get level name for display
         $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
@@ -1072,7 +1074,9 @@ class ItebController extends Controller
             return $b['percentage'] <=> $a['percentage'];
         });
 
-        $topStudents = array_slice($studentPerformance, 0, 10);
+        // $topStudents = array_slice($studentPerformance, 0, 10);
+
+        $topStudents = $studentPerformance;
 
         // Prepare grading summary table
         $gradingSummary = [];
@@ -1128,6 +1132,18 @@ class ItebController extends Controller
             ->orderBy('year', 'desc')
             ->pluck('year');
 
+        // After processing all students, calculate school performance
+        $topSchools = $this->calculateSchoolPerformance(
+            $allStudents,
+            $marks,
+            $subjectIds,
+            $totalPossibleMarks,
+            $level,
+            $category,
+            $year
+        );
+
+
         return view('itemGrading.exam-statistics', compact(
             'year',
             'years',
@@ -1143,7 +1159,9 @@ class ItebController extends Controller
             'totalGraded',
             'topStudents',
             'bestSubjects',  // Add best subjects
-            'worstSubjects'  // Add worst subjects
+            'worstSubjects',  // Add worst subjects
+            'topSchools'  // Add this line
+
         ));
     }
     private function getMarksGrade($percentage, $level)
@@ -1214,6 +1232,135 @@ class ItebController extends Controller
         return $schoolName;
     }
 
+    public static function getSchoolNameSplitted($school_code)
+    {
+        // If school_code is like "IT-114", we need to extract just the code part or search appropriately
+        // Based on your houses table, the Number field might be just "IT-001" format
+        $schoolName = DB::table('houses')
+            ->where('Number', $school_code) // This should match exactly if your houses table has "IT-114"
+            ->orWhere('Number', explode('-', $school_code)[0]) // Fallback to just "IT" if needed
+            ->value('House');
+
+        return $schoolName ?: $school_code;
+    }
+
+    private function calculateSchoolPerformance($allStudents, $marks, $subjectIds, $totalPossibleMarks, $level, $category, $year)
+    {
+        $studentsBySchool = [];
+
+        // Group students by school (using full school code from student ID)
+        foreach ($allStudents as $studentId) {
+            // Extract school code (first two parts: IT-114 from IT-114-ID-001-2025)
+            $parts = explode('-', $studentId);
+            $schoolCode = $parts[0] . '-' . $parts[1]; // This gives "IT-114"
+            $studentsBySchool[$schoolCode][] = $studentId;
+        }
+
+        $schoolPerformance = [];
+
+        // Initialize grade counters for each school
+        foreach ($studentsBySchool as $schoolCode => $studentIds) {
+            $schoolName = $this->getSchoolNameSplitted($schoolCode);
+
+            $schoolPerformance[$schoolCode] = [
+                'school_code' => $schoolCode,
+                'school_name' => $schoolName ?: $schoolCode,
+                'total_students' => count($studentIds),
+                'graded_students' => 0,
+                'total_marks' => 0,
+                'average_percentage' => 0,
+                'pass_rate' => 0,
+                'grades' => [
+                    'FIRST CLASS' => 0,
+                    'SECOND CLASS UPPER' => 0,
+                    'SECOND CLASS LOWER' => 0,
+                    'THIRD CLASS' => 0,
+                    'FAIL' => 0,
+                ]
+            ];
+        }
+
+        // Process each student's marks and assign to schools
+        foreach ($allStudents as $studentId) {
+            // Extract school code consistently
+            $parts = explode('-', $studentId);
+            $schoolCode = $parts[0] . '-' . $parts[1]; // This gives "IT-114"
+
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue;
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+
+            // Get grade based on percentage and level
+            $grade = $this->getSchoolGrade($percentage, $level);
+
+            if (isset($schoolPerformance[$schoolCode])) {
+                $schoolPerformance[$schoolCode]['graded_students']++;
+                $schoolPerformance[$schoolCode]['total_marks'] += $totalMarks;
+                $schoolPerformance[$schoolCode]['grades'][$grade]++;
+            }
+        }
+
+        // Remove schools with no graded students
+        $schoolPerformance = array_filter($schoolPerformance, function ($school) {
+            return $school['graded_students'] > 0;
+        });
+
+        // Calculate averages and pass rates
+        foreach ($schoolPerformance as &$school) {
+            if ($school['graded_students'] > 0) {
+                $school['average_percentage'] = round(
+                    ($school['total_marks'] / ($school['graded_students'] * $totalPossibleMarks)) * 100,
+                    2
+                );
+
+                // Calculate pass rate (excluding FAIL)
+                $passedStudents = $school['grades']['FIRST CLASS'] +
+                    $school['grades']['SECOND CLASS UPPER'] +
+                    $school['grades']['SECOND CLASS LOWER'] +
+                    $school['grades']['THIRD CLASS'];
+
+                $school['pass_rate'] = $school['graded_students'] > 0
+                    ? round(($passedStudents / $school['graded_students']) * 100, 2)
+                    : 0;
+            }
+        }
+
+        // Sort schools by average percentage (highest first)
+        usort($schoolPerformance, function ($a, $b) {
+            return $b['average_percentage'] <=> $a['average_percentage'];
+        });
+
+        // Return top 10 schools
+        return array_slice($schoolPerformance, 0, 10);
+    }
+
+    private function getSchoolGrade($percentage, $level)
+    {
+        $grade = Grading::where('Type', 'Marks')
+            ->where('Level', $level)
+            ->where('From', '<=', $percentage)
+            ->where('To', '>=', $percentage)
+            ->first();
+
+        if (!$grade) {
+            return 'FAIL';
+        }
+
+        $gradeMapping = [
+            'D1' => 'FIRST CLASS',
+            'D2' => 'SECOND CLASS UPPER',
+            'C3' => 'SECOND CLASS LOWER',
+            'C4' => 'THIRD CLASS',
+            'F' => 'FAIL'
+        ];
+
+        return $gradeMapping[$grade->Grade] ?? 'FAIL';
+    }
 
     // Download Implementation 
 
@@ -1403,7 +1550,9 @@ class ItebController extends Controller
             return $b['percentage'] <=> $a['percentage'];
         });
 
-        $topStudents = array_slice($studentPerformance, 0, 10);
+        // $topStudents = array_slice($studentPerformance, 0, 10);
+
+        $topStudents = $studentPerformance; // all records
 
         // Prepare grading summary
         $gradingSummary = [];
@@ -1832,7 +1981,9 @@ class ItebController extends Controller
             return $b['percentage'] <=> $a['percentage'];
         });
 
-        $topStudents = array_slice($studentPerformance, 0, 10);
+        // $topStudents = array_slice($studentPerformance, 0, 10);
+        $topStudents = $studentPerformance;
+
 
         // Prepare grading summary
         $gradingSummary = [];
@@ -1886,5 +2037,60 @@ class ItebController extends Controller
             'bestSubjects' => $bestSubjects,
             'worstSubjects' => $worstSubjects,
         ];
+    }
+
+    public function downloadStudentsReport(Request $request)
+    {
+        $request->validate([
+            'year' => 'required',
+            'category' => 'required',
+            'level' => 'nullable|in:A,O'
+        ]);
+
+        // Reuse your existing logic to get all data
+        $data = $this->getExamStatisticsData($request);
+
+        // Generate PDF with all students (not just top 10)
+        $pdf = PDF::loadView('itemGrading.pdf.students-report', $data);
+
+        return $pdf->download('students_full_report_' . $request->year . '.pdf');
+    }
+
+    public function downloadSchoolsReport(Request $request)
+    {
+        $request->validate([
+            'year' => 'required',
+            'category' => 'required',
+            'level' => 'nullable|in:A,O'
+        ]);
+
+        // Reuse your existing logic to get all data
+        $data = $this->getExamStatisticsData($request);
+
+        // Calculate all schools (not just top 10)
+        $allSchools = $this->calculateAllSchoolsPerformance(
+            $data['allStudents'],
+            $data['marks'],
+            $data['subjectIds'],
+            $data['totalPossibleMarks'],
+            $data['level'],
+            $data['category'],
+            $data['year']
+        );
+
+        $data['allSchools'] = $allSchools;
+
+        // Generate PDF with all schools
+        $pdf = PDF::loadView('itemGrading.pdf.schools-report', $data);
+
+        return $pdf->download('schools_full_report_' . $request->year . '.pdf');
+    }
+
+    // Helper method to reuse existing logic
+    private function getExamStatisticsData($request)
+    {
+        // Copy the logic from your examStatistics method
+        // but return the data array instead of rendering view
+        // This avoids code duplication
     }
 }
