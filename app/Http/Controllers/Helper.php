@@ -21,6 +21,15 @@ class Helper extends Controller
         return $schoolName;
     }
 
+    public static function schoolNameByID($school_id)
+    {
+        $schoolName = DB::table('houses')
+            ->where('ID', $school_id)
+            ->value('House');
+
+        return $schoolName;
+    }
+
 
     public static function ar_schoolName($school_id)
     {
@@ -381,7 +390,7 @@ class Helper extends Controller
         $studentIdOnly = "{$parts[2]}-{$parts[3]}";
         $year = $parts[4];
 
-        $Student_Name =  StudentBasic::where('Student_ID', $studentId)->value('Student_Name');
+        $Student_Name = StudentBasic::where('Student_ID', $studentId)->value('Student_Name');
         $Student_School = StudentBasic::where('Student_ID', $studentId)->value('House');
 
         return match ($type) {

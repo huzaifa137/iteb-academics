@@ -31,4 +31,9 @@ class House extends Model
     {
         return $this->hasMany(StudentBasic::class, 'House', 'House');
     }
+
+    public function schoolPassword()
+    {
+        return $this->hasOne(SchoolPassword::class, 'school_id', 'Number');
+    }
 }

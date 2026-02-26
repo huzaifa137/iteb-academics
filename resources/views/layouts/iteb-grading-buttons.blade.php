@@ -8,13 +8,13 @@
 
     <div class="col-12 col-sm-4 mb-2">
         <a href="{{ url('/iteb/grading-summary') }}" class="btn btn-white text-dark w-100">
-            <i class="fa-solid fa-chart-column me-2"></i> Schools Grading
+            <i class="fa-solid fa-chart-column me-2"></i> Grading
         </a>
     </div>
 
-    {{-- <div class="col-12 col-sm-4 mb-2">
-        <a href="{{ url('/iteb/grading/analytics') }}" class="btn btn-white text-dark w-100">
-            <i class="fa-solid fa-chart-simple me-2"></i> General Analytics
+    <div class="col-12 col-sm-4 mb-2">
+        <a href="{{ route('school.passwords.setup') }}" class="btn btn-white text-dark w-100">
+            <i class="fa-solid fa-key me-2"></i> Schools & Passwords
         </a>
-    </div> --}}
+    </div>
 </div>

@@ -15,13 +15,14 @@ use Illuminate\Support\Facades\DB;
 
 use setasign\Fpdi\Fpdi;
 use Mpdf\Mpdf;
-use Mpdf\Config\ConfigVariables;
-use Mpdf\Config\FontVariables;
 
 use App\Exports\ExamStatisticsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
+use App\Models\SchoolPassword;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ItebController extends Controller
 {
@@ -218,6 +219,7 @@ class ItebController extends Controller
     }
     public function processGrading(Request $request)
     {
+
         $request->validate([
             'year' => 'required',
             'category' => 'required',
@@ -1211,7 +1213,7 @@ class ItebController extends Controller
     private function getStudentInfo($studentId)
     {
         $student = StudentBasic::where('Student_ID', $studentId)->first();
-        // dd(args: $student);
+
         if (!$student) {
             return ['name' => 'N/A', 'school_name' => 'N/A'];
         }
@@ -1790,76 +1792,76 @@ class ItebController extends Controller
     }
 
     // Add this method for PDF download
-public function downloadExamStatisticsPdf(Request $request)
-{
-    try {
-        $data = $this->prepareStatisticsData($request);
-        
-        // Create mPDF instance with Arabic font support
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => 'A4-L',
-            'default_font' => 'dejavusans',
-            'tempDir' => storage_path('tmp'),
-            'autoArabic' => true,
-            'autoLangToFont' => true,
-            'allow_charset_conversion' => true,
-            'charset_in' => 'UTF-8',
-            'useAdobeCJK' => true,
-            'useSubstitutions' => true,
-            'directionality' => 'ltr',
-        ]);
+    public function downloadExamStatisticsPdf(Request $request)
+    {
+        try {
+            $data = $this->prepareStatisticsData($request);
 
-        // Add custom fonts for better Arabic support
-        $mpdf->fontdata = [
-            'dejavusans' => [
-                'R' => 'DejaVuSans.ttf',
-                'B' => 'DejaVuSans-Bold.ttf',
-                'I' => 'DejaVuSans-Oblique.ttf',
-                'BI' => 'DejaVuSans-BoldOblique.ttf',
-            ],
-            'amiri' => [
-                'R' => 'amiri-regular.ttf',
-                'B' => 'amiri-bold.ttf',
-                'I' => 'amiri-italic.ttf',
-                'BI' => 'amiri-bolditalic.ttf',
-            ]
-        ];
+            // Create mPDF instance with Arabic font support
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4-L',
+                'default_font' => 'dejavusans',
+                'tempDir' => storage_path('tmp'),
+                'autoArabic' => true,
+                'autoLangToFont' => true,
+                'allow_charset_conversion' => true,
+                'charset_in' => 'UTF-8',
+                'useAdobeCJK' => true,
+                'useSubstitutions' => true,
+                'directionality' => 'ltr',
+            ]);
 
-        // Set font
-        $mpdf->SetFont('dejavusans');
-        
-        // Enable Arabic
-        $mpdf->SetDirectionality('ltr');
-        
-        // Set document properties
-        $mpdf->SetTitle("Exam Statistics Report - {$data['year']}");
-        $mpdf->SetAuthor('ITEB System');
-        
-        // Generate HTML content
-        $html = view('itemGrading.pdf.exam-statistics-mpdf', $data)->render();
-        
-        // Ensure proper encoding
-        $html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
-        
-        // Write to PDF
-        $mpdf->WriteHTML($html);
-        
-        // Generate filename
-        $filename = "exam_statistics_{$data['year']}_{$data['category']}_{$data['level']}.pdf";
-        
-        // Output PDF
-        return $mpdf->Output($filename, 'D');
-        
-    } catch (\Exception $e) {
-        \Log::error('PDF Generation Error: ' . $e->getMessage());
-        \Log::error('Stack trace: ' . $e->getTraceAsString());
-        
-        return response()->json([
-            'error' => 'Failed to generate PDF: ' . $e->getMessage()
-        ], 500);
+            // Add custom fonts for better Arabic support
+            $mpdf->fontdata = [
+                'dejavusans' => [
+                    'R' => 'DejaVuSans.ttf',
+                    'B' => 'DejaVuSans-Bold.ttf',
+                    'I' => 'DejaVuSans-Oblique.ttf',
+                    'BI' => 'DejaVuSans-BoldOblique.ttf',
+                ],
+                'amiri' => [
+                    'R' => 'amiri-regular.ttf',
+                    'B' => 'amiri-bold.ttf',
+                    'I' => 'amiri-italic.ttf',
+                    'BI' => 'amiri-bolditalic.ttf',
+                ]
+            ];
+
+            // Set font
+            $mpdf->SetFont('dejavusans');
+
+            // Enable Arabic
+            $mpdf->SetDirectionality('ltr');
+
+            // Set document properties
+            $mpdf->SetTitle("Exam Statistics Report - {$data['year']}");
+            $mpdf->SetAuthor('ITEB System');
+
+            // Generate HTML content
+            $html = view('itemGrading.pdf.exam-statistics-mpdf', $data)->render();
+
+            // Ensure proper encoding
+            $html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
+
+            // Write to PDF
+            $mpdf->WriteHTML($html);
+
+            // Generate filename
+            $filename = "exam_statistics_{$data['year']}_{$data['category']}_{$data['level']}.pdf";
+
+            // Output PDF
+            return $mpdf->Output($filename, 'D');
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'error' => 'Failed to generate PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     // Extract common logic to prepare data
     private function prepareStatisticsData($request)
@@ -2799,4 +2801,132 @@ public function downloadExamStatisticsPdf(Request $request)
 
         return $schoolPerformance; // Return ALL schools
     }
+
+    public function schoolPasswordsSetup(Request $request)
+    {
+        $houses = House::select('Number', 'House', 'House_AR')
+            ->get()
+            ->map(function ($house) {
+                return (object) [
+                    'ID' => $house->Number,
+                    'House' => $house->House,
+                    'House_AR' => $house->House_AR,
+                    'Number' => $house->Number,
+                ];
+            });
+
+        return view('itemGrading.school-passwords-setup', compact('houses'));
+    }
+
+    public function fetchPassword(Request $request)
+    {
+
+        $request->validate([
+            'school_id' => 'required|exists:houses,Number'
+        ]);
+
+        $school = House::where('Number', $request->school_id)->first();
+
+        $passwordData = null;
+
+        if ($school->schoolPassword) {
+            $passwordData = [
+                'id' => $school->schoolPassword->id,
+                'school_id' => $school->ID,
+                'school_name' => $school->House . ' - ' . $school->House_AR,
+                'password_plain' => $school->schoolPassword->password_plain,
+                'has_password' => true
+            ];
+        } else {
+            $passwordData = [
+                'school_id' => $school->ID,
+                'school_name' => $school->House . ' - ' . $school->House_AR,
+                'has_password' => false
+            ];
+        }
+
+        return response()->json($passwordData);
+    }
+
+    public function generatePassword(Request $request)
+    {
+        $request->validate([
+            'school_id' => 'required|exists:houses,ID'
+        ]);
+
+        // Generate a secure random password
+        $password = $this->generateSecurePassword();
+
+        return response()->json([
+            'school_id' => $request->school_id,
+            'generated_password' => $password
+        ]);
+    }
+
+    public function savePassword(Request $request)
+    {
+
+        $request->validate([
+            'school_id' => 'required|exists:houses,ID',
+            'password' => 'required'
+        ]);
+
+        $uniqueSchoolId = House::where('ID', $request->school_id)->value('Number');
+
+        $schoolPassword = SchoolPassword::updateOrCreate(
+            ['school_id' => $uniqueSchoolId],
+            [
+                'password_plain' => $request->password,
+                'password_hashed' => Hash::make($request->password)
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password saved successfully',
+            'data' => [
+                'id' => $schoolPassword->id,
+                'school_id' => $schoolPassword->school_id,
+                'password_plain' => $schoolPassword->password_plain
+            ]
+        ]);
+    }
+
+    // private function generateSecurePassword($length = 12)
+    // {
+    //     $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    //     $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    //     $numbers = '0123456789';
+    //     $symbols = '!@#$%^&*()_-+=';
+
+    //     $all = $uppercase . $lowercase . $numbers . $symbols;
+
+    //     // Ensure at least one character from each set
+    //     $password = '';
+    //     $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+    //     $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+    //     $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+    //     $password .= $symbols[random_int(0, strlen($symbols) - 1)];
+
+    //     // Fill the rest with random characters
+    //     for ($i = strlen($password); $i < $length; $i++) {
+    //         $password .= $all[random_int(0, strlen($all) - 1)];
+    //     }
+
+    //     // Shuffle the password to avoid predictable pattern
+    //     return str_shuffle($password);
+    // }
+
+    private function generateSecurePassword($length = 5)
+    {
+        $numbers = '0123456789';
+        $password = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        }
+
+        return $password;
+    }
+
 }

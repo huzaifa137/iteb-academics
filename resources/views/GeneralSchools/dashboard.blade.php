@@ -4,7 +4,6 @@
     <div class="side-app">
 
         <style>
-            /* Modern Stats Cards Styling */
             .stats-card {
                 border-radius: 20px;
                 overflow: hidden;
@@ -107,7 +106,6 @@
                 pointer-events: none;
             }
 
-            /* Form Labels */
             .form-label {
                 font-size: 0.9rem;
                 margin-bottom: 0.25rem;
@@ -116,7 +114,6 @@
                 white-space: nowrap;
             }
 
-            /* Form Selects */
             .form-select,
             .form-control {
                 border-radius: 0.5rem;
@@ -133,7 +130,6 @@
                 box-shadow: 0 0 0 0.2rem rgba(40, 124, 68, 0.1);
             }
 
-            /* Card Styling */
             .card {
                 border-radius: 1rem;
                 overflow: hidden;
@@ -377,21 +373,10 @@
             }
         </style>
 
-
-        <!-- Add Font Awesome if not already included -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
         <div class="container mt-4">
 
-            <div class="row">
-                <div class="col-lg-12 col-xl-12 col-md-12 col-sm-12">
-                    <div class="card bg-primary">
-                        <div class="card-header">
-                            @include('layouts.iteb-grading-buttons')
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="card shadow-lg border-0">
                 <div class="card-header text-white d-flex justify-content-between align-items-center"
@@ -404,74 +389,13 @@
 
                 <div class="card-body">
 
-                    <!-- Examination Statistics Form -->
-                    <div>
-                        <h5 class="mb-3" style="color: #287c44;">
-                            <i class="fas fa-poll me-2"></i>
-                            General Examinations Report
-                        </h5>
-
-                        <form action="{{ route('iteb.exam.statistics') }}" method="GET">
-
-                            <div class="row g-3">
-
-                                <!-- Year -->
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label fw-bold">
-                                        Year <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="year" class="form-select select2" required>
-                                        <option value="">-- Select Year --</option>
-                                        @foreach ($years ?? [] as $y)
-                                            <option value="{{ $y }}" {{ isset($year) && $y == $year ? 'selected' : '' }}>
-                                                {{ $y }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Category -->
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label fw-bold">
-                                        Category <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="category" class="form-select select2" required style="height: 38px;">
-                                        <option value="">-- Select Category --</option>
-                                        <option value="ID" {{ isset($category) && $category == 'ID' ? 'selected' : '' }}>
-                                            Idaad (ID)
-                                        </option>
-                                        <option value="TH" {{ isset($category) && $category == 'TH' ? 'selected' : '' }}>
-                                            Thanawi (TH)
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <!-- Hidden Level -->
-                                <input type="hidden" name="level" id="levelInput" value="{{ $level ?? '' }}">
-
-                            </div>
-
-                            <!-- Button Row -->
-                            <div class="row mt-4 justify-content-center">
-                                <div class="col-12 col-md-4">
-                                    <button type="submit" class="btn"
-                                        style="background-color: #287c44; color: white; width: 100%; min-height: 44px;">
-                                        <i class="fas fa-magnifying-glass-chart me-2"></i>
-                                        General Report
-                                    </button>
-                                </div>
-                            </div>
-
-                        </form>
-                    </div>
-
                     <!-- Grading Summary Form -->
                     <div class="mb-4 pb-3 mt-4 border-bottom">
                         <h5 class="mb-3" style="color: #287c44">
                             <i class="fas fa-calculator me-2"></i> Schools Grading Report
                         </h5>
 
-                        <form action="{{ route('iteb.process.grading') }}" method="POST" id="gradingFilterForm">
+                        <form action="{{ route('school.process.grading') }}" method="POST" id="gradingFilterForm">
                             @csrf
 
                             <div class="row g-3">
@@ -483,9 +407,7 @@
                                     </label>
                                     <select name="year" class="form-select select2" required style="height: 38px;">
                                         <option value="">-- Select Year --</option>
-                                        @foreach ($years as $year)
-                                            <option value="{{ $year }}">{{ $year }}</option>
-                                        @endforeach
+                                        <option value="2025" selected>2025</option>
                                     </select>
                                 </div>
 
@@ -507,22 +429,16 @@
                                 <!-- School -->
                                 <div class="col-12 col-md-4">
                                     <label class="form-label fw-bold">School</label>
-                                    <select name="school_number" class="form-select select2" style="height: 38px;">
-                                        <option value="">-- All Schools --</option>
-                                        @foreach ($schools as $code => $name)
-                                            <option value="{{ $code }}" title="{{ $name }} ({{ $code }})">
-                                                {{ Str::limit($name, 30) }} ({{ $code }})
-                                            </option>
-                                        @endforeach
+                                    <select name="school_number" class="form-select select2" style="height: 38px;" required >
+                                        <option value="{{ session('LoggedSchoolCode') }}" selected>
+                                            {{ session('LoggedSchoolName') }} ({{ session('LoggedSchoolCode') }})
+                                        </option>
                                     </select>
                                     <div style="height: 21px;">
-                                        <small class="text-muted">Optional</small>
                                     </div>
                                 </div>
 
-                                <!-- Hidden Level -->
                                 <input type="hidden" name="level" id="levelInput">
-
                             </div>
 
                             <!-- Centered Button Row -->
@@ -531,7 +447,7 @@
                                     <button type="submit" class="btn"
                                         style="background-color: #287c44; color: white; width: 100%; min-height: 44px;">
                                         <i class="fas fa-magnifying-glass-chart me-2"></i>
-                                        Generate School Reports
+                                        Generate School Report
                                     </button>
                                 </div>
                             </div>

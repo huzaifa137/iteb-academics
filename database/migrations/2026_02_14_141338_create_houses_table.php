@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('House_AR')
                   ->charset('utf8');
 
-            $table->string('Number', 6);
+            $table->string('Number', 6)->unique();
             $table->string('Location', 100);
 
             // Timestamp with CURRENT_TIMESTAMP ON UPDATE
