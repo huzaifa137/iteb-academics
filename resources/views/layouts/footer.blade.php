@@ -1,12 +1,22 @@
 <!--Footer-->
 <footer class="footer">
 	<div class="container">
-		<div class="row align-items-center flex-row-reverse">
-			<div class="col-md-12 col-sm-12 mt-3 mt-lg-0 text-center">
+		<div class="row align-items-center">
+			<!-- Left Side -->
+			<div class="col-md-6 col-sm-12 text-center text-md-start mt-2 mt-md-0">
+				Designed and developed by
+				<a href="{{ url('coming-soon') }}" target="_blank">
+					www.Techsate.com
+				</a>
+			</div>
+
+			<!-- Right Side -->
+			<div class="col-md-6 col-sm-12 text-center text-md-end mt-2 mt-md-0">
 				Copyright ©
 				<script>
 					document.write(new Date().getFullYear());
-				</script> <a href="#">Iteb Academics</a>. All rights reserved.
+				</script>
+				<a href="javascript:void()">Iteb Academics</a>. All rights reserved.
 			</div>
 		</div>
 	</div>

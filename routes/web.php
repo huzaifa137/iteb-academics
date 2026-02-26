@@ -13,6 +13,9 @@ use App\Http\Controllers\GradingController;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Route;
 
+use App\Models\House;
+use App\Models\SchoolPassword;
+use Illuminate\Support\Facades\Hash;
 
 // Route::get('/show-sessions', function () {
 //     // Get all session data
@@ -39,6 +42,46 @@ use Illuminate\Support\Facades\Route;
 //     return redirect('/');
 // });
 
+Route::get('/generate-school-passwords', function () {
+
+    function generateSecurePassword($length = 5)
+    {
+        $numbers = '0123456789';
+        $password = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        }
+
+        return $password;
+    }
+
+    $schools = House::all();
+    $createdPasswords = [];
+
+    foreach ($schools as $school) {
+
+        $plainPassword = generateSecurePassword();
+
+        $schoolPassword = SchoolPassword::updateOrCreate(
+            ['school_id' => $school->Number], // using Number like your logic
+            [
+                'password_plain' => $plainPassword,
+                'password_hashed' => Hash::make($plainPassword),
+            ]
+        );
+
+        $createdPasswords[] = [
+            'school_id' => $school->Number,
+            'password_plain' => $plainPassword
+        ];
+    }
+
+    dd('Passwords generated for all schools successfully');
+
+
+});
+
 Route::get('/logout', function () {
     if (session()->has('LoggedAdmin')) {
         session()->flush();
@@ -46,6 +89,10 @@ Route::get('/logout', function () {
 
     return redirect('/');
 })->name('logout');
+
+Route::get('/coming-soon', function () {
+    return view('coming-soon');
+})->name('coming.soon');
 
 Route::controller(UserController::class)->group(function () {
     Route::group(['prefix' => '/users'], function () {
