@@ -438,7 +438,9 @@ Route::controller(SchoolsController::class)->group(function () {
             Route::get('/grading-summary', 'schoolGradingSummary')->name('school.grading.summary');
             Route::post('/process-grading', 'processGrading')->name('school.process.grading');
             Route::post('iteb/grading/results/pdf', 'generateResultsPDF')->name('iteb.grading.results.pdf');
-
         });
     });
+
+    Route::post('/school-passwords/export-all-pdf', 'exportAllPasswordsPDF')->name('school.passwords.export-all-pdf');
+
 });

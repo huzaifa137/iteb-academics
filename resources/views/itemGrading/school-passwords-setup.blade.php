@@ -25,21 +25,27 @@
                         </div>
 
                         <div class="card-body bg-light">
-                            <!-- School Selection Form -->
+                            <!-- School Selection Form with Export Button -->
                             <div class="row mb-4">
-                                <div class="col-md-12">
+                                <div class="col-md-8">
                                     <label><strong>Select School</strong></label>
                                     <div class="input-group">
                                         <select id="schoolSelect" class="form-control select2" required>
                                             <option value="">-- Select School --</option>
                                             @foreach ($houses as $house)
-                                                <option value="{{ $house->ID }}">{{ $house->House }} - {{ $house->Number }}</option>
+                                                <option value="{{ $house->ID }}">{{ $house->House }} - {{ $house->Number }}
+                                                </option>
                                             @endforeach
                                         </select>
                                         <button type="button" id="fetchPasswordBtn" class="btn btn-primary mt-3">
                                             <i class="fa fa-search me-2"></i> Fetch Password
                                         </button>
                                     </div>
+                                </div>
+                                <div class="col-md-4 text-end mt-3">
+                                    <button type="button" id="exportAllPasswordsBtn" class="btn mt-4" style="background-color: #287c44;color:#FFF">
+                                        <i class="fa fa-download me-2"></i> Export All Passwords
+                                    </button>
                                 </div>
                             </div>
 
@@ -131,6 +137,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     $(document).ready(function () {
         let currentSchoolId = null;
@@ -192,9 +199,6 @@
 
                     $('#passwordSection').show();
                 },
-                // error: function (xhr) {
-                //     Swal.fire('Error', 'Failed to fetch password information', 'error');
-                // }
                 error: function (data) {
                     $('body').html(data.responseText);
                 }
@@ -236,9 +240,6 @@
                 error: function (xhr) {
                     Swal.fire('Error', 'Failed to generate password', 'error');
                 }
-                // error: function (data) {
-                //     $('body').html(data.responseText);
-                // }
             });
         });
 
@@ -295,13 +296,83 @@
                             $('#savePasswordBtn').prop('disabled', true);
                             hasExistingPassword = true;
                         },
-                        // error: function (xhr) {
-                        //     Swal.fire('Error', 'Failed to save password', 'error');
-                        // }
                         error: function (data) {
                             $('body').html(data.responseText);
                         }
                     });
+                }
+            });
+        });
+
+        // Export All Passwords Button Click - MOVED INSIDE document.ready
+        $('#exportAllPasswordsBtn').click(function () {
+            Swal.fire({
+                title: 'Generating PDF...',
+                text: 'Please wait while we prepare your PDF document.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: '{{ route("school.passwords.export-all-pdf") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (response, status, xhr) {
+                    Swal.close();
+
+                    // Check if response is actually a PDF
+                    const contentType = xhr.getResponseHeader('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        // This is an error response
+                        const reader = new FileReader();
+                        reader.onload = function () {
+                            const errorResponse = JSON.parse(reader.result);
+                            Swal.fire('Error', errorResponse.message || 'Failed to generate PDF', 'error');
+                        };
+                        reader.readAsText(response);
+                        return;
+                    }
+
+                    // Get filename from header or create default
+                    const disposition = xhr.getResponseHeader('content-disposition');
+                    let filename = 'school_passwords.pdf';
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        const matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, '');
+                        }
+                    }
+
+                    // Create download link
+                    const blob = new Blob([response], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(link.href);
+
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'PDF Generated Successfully!',
+                        text: 'Your PDF has been downloaded.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                },
+                error: function (data) {
+                    $('body').html(data.responseText);
                 }
             });
         });
@@ -315,7 +386,7 @@
         });
     });
 
-    // Copy password functions
+    // Copy password functions (these can stay outside document.ready since they're called directly)
     function copyPassword() {
         const passwordField = document.getElementById('passwordDisplay');
         passwordField.select();

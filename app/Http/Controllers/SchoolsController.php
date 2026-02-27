@@ -10,6 +10,10 @@ use App\Http\Controllers\Helper;
 use App\Models\Grading;
 use App\Models\MasterData;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\SchoolPassword;
+
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 
 class SchoolsController extends Controller
 {
@@ -679,4 +683,83 @@ class SchoolsController extends Controller
             'class_distribution' => $classDistribution
         ];
     }
+
+    public function exportAllPasswordsPDF(Request $request)
+    {
+
+        try {
+            // Fetch all passwords with school information
+            $passwords = SchoolPassword::with('school')
+                ->orderBy('school_id')
+                ->get()
+                ->map(function ($item, $index) {
+                    return [
+                        'sr_no' => $index + 1,
+                        'id' => $item->id,
+                        'school_id' => $item->school_id,
+                        'school_name' => $item->school
+                            ? $item->school->House
+                            : 'N/A',
+                        'password_plain' => $item->password_plain,
+                        'created_at' => $item->created_at ? $item->created_at->format('Y-m-d') : 'N/A',
+                    ];
+                });
+
+            if ($passwords->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No passwords found to export'
+                ], 404);
+            }
+
+            $data = [
+                'passwords' => $passwords,
+                'total_records' => count($passwords),
+                'export_date' => now()->format('Y-m-d H:i:s'),
+                'exported_by' => auth()->user()->name ?? 'System',
+                'title' => 'School Passwords Export',
+                'company_name' => config('app.name', 'School Management System')
+            ];
+
+            // Clean any output buffers
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            // Generate PDF
+            $pdf = Pdf::loadView('itemGrading.pdf.school-passwords', $data);
+            $pdf->setPaper('A4', 'landscape');
+
+            // Set options for better compatibility
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'isJavascriptEnabled' => false
+            ]);
+
+            $filename = 'school_passwords_' . date('Y-m-d_His') . '.pdf';
+
+            // Return with proper headers
+            return response($pdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Length' => strlen($pdf->output()),
+                'Cache-Control' => 'private, max-age=0, must-revalidate',
+                'Pragma' => 'public'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PDF Export Error: ' . $e->getMessage());
+            Log::error('PDF Export Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate PDF: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 }
