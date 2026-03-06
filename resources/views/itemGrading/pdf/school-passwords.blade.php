@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,39 +13,47 @@
             color: #333;
             margin: 20px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #287c44;
             padding-bottom: 10px;
         }
+
         .header h1 {
             color: #287c44;
             font-size: 24px;
             margin: 0 0 5px 0;
         }
+
         .header h3 {
             color: #555;
             font-size: 16px;
             margin: 0;
         }
+
         .summary {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
             padding: 10px;
             margin-bottom: 20px;
         }
+
         .summary table {
             width: 100%;
         }
+
         .summary td {
             padding: 5px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
+
         th {
             background-color: #287c44;
             color: white;
@@ -53,16 +62,20 @@
             text-align: center;
             border: 1px solid #1e5f33;
         }
+
         td {
             padding: 8px 5px;
             border: 1px solid #dee2e6;
         }
+
         tr:nth-child(even) {
             background-color: #f8f9fa;
         }
+
         .text-center {
             text-align: center;
         }
+
         .footer {
             text-align: center;
             font-size: 10px;
@@ -73,6 +86,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
@@ -96,24 +110,21 @@
     <table>
         <thead>
             <tr>
-                <th width="5%">Sr.</th>
-                <th width="8%">ID</th>
-                <th width="15%">School ID</th>
-                <th width="47%">School Name</th>
-                <th width="15%">Password</th>
-                <th width="10%">Created</th>
+                <th width="8%">Sr.</th>
+                <th width="20%">School ID</th>
+                <th width="52%">School Name</th>
+                <th width="20%">Password</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($passwords as $password)
-            <tr>
-                <td class="text-center">{{ $password['sr_no'] }}</td>
-                <td class="text-center">{{ $password['id'] }}</td>
-                <td class="text-center">{{ $password['school_id'] }}</td>
-                <td>{{ $password['school_name'] }}</td>
-                <td class="text-center" style="font-family: monospace; font-weight: bold;">{{ $password['password_plain'] }}</td>
-                <td class="text-center">{{ $password['created_at'] }}</td>
-            </tr>
+            @foreach ($passwords as $password)
+                <tr>
+                    <td class="text-center">{{ $password['sr_no'] }}</td>
+                    <td class="text-center">{{ $password['school_id'] }}</td>
+                    <td>{{ $password['school_name'] }}</td>
+                    <td class="text-center" style="font-family: monospace; font-weight: bold;">
+                        {{ $password['password_plain'] }}</td>
+                </tr>
             @endforeach
         </tbody>
     </table>
@@ -124,4 +135,5 @@
     </div>
 
 </body>
+
 </html>

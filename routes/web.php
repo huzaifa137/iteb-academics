@@ -10,7 +10,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\ItebController;
 use App\Http\Controllers\SchoolsController;
 use App\Http\Controllers\GradingController;
-use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\PasslipAndCertificatesController;
 use Illuminate\Support\Facades\Route;
 
 use App\Models\House;
@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Hash;
 
 //     return redirect('/');
 // });
+
 
 Route::get('/generate-school-passwords', function () {
 
@@ -428,6 +429,23 @@ Route::group(['middleware' => ['StudentAuth']], function () {
 });
 
 
+Route::get('/template', function () {
+
+    return view('template');
+});
+
+Route::group(['middleware' => ['StudentAuth']], function () {
+
+    Route::prefix('passlip')
+        ->controller(PasslipAndCertificatesController::class)
+        ->group(function () {
+
+            Route::get('/generate-passlips', 'generatePasslip')->name('passlip.generate');
+            Route::post('/fetch-school-records', 'fetchSchoolRecords')->name('fetch.school.records');
+
+            Route::get('/generate-certifications', 'generateCertifications')->name('generate.certifications');
+        });
+});
 
 Route::controller(SchoolsController::class)->group(function () {
     Route::group(['middleware' => ['SchoolAuth']], function () {
@@ -442,5 +460,4 @@ Route::controller(SchoolsController::class)->group(function () {
     });
 
     Route::post('/school-passwords/export-all-pdf', 'exportAllPasswordsPDF')->name('school.passwords.export-all-pdf');
-
 });
