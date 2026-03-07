@@ -72,4 +72,13 @@ class PasslipAndCertificatesController extends Controller
             // Save to file
             ->save(storage_path('app/reports/example.pdf'));
     }
+
+
+    public function downloadIndividualPasslip(Request $request)
+    {
+
+        $studentId = $request->student_id;
+
+        return view('template', compact('studentId'));
+    }
 }

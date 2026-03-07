@@ -24,11 +24,11 @@ use Illuminate\Support\Facades\Hash;
 //     dd($allSessions);
 // })->name('show.sessions');
 
-// Route::get('/set-admin-session', function () {
-//     session(['LoggedAdmin' => 1]);
+Route::get('/set-admin-session', function () {
+    session(['LoggedAdmin' => 1]);
 
-//     return redirect('/'); // or where
-// });
+    return redirect('/'); // or where
+});
 
 // Route::get('/set-student-session', function () {
 //     session(['LoggedStudent' => 1]);
@@ -444,6 +444,10 @@ Route::group(['middleware' => ['StudentAuth']], function () {
             Route::post('/fetch-school-records', 'fetchSchoolRecords')->name('fetch.school.records');
 
             Route::get('/generate-certifications', 'generateCertifications')->name('generate.certifications');
+
+
+            Route::post('/download-individual-passlip', 'downloadIndividualPasslip')->name('download.individual.passlip');
+
         });
 });
 
@@ -460,4 +464,5 @@ Route::controller(SchoolsController::class)->group(function () {
     });
 
     Route::post('/school-passwords/export-all-pdf', 'exportAllPasswordsPDF')->name('school.passwords.export-all-pdf');
+
 });

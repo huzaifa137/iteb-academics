@@ -63,9 +63,15 @@
                                         <td>{{ $studentId }} - {{ Helper::getStudentName($studentId) }}</td>
 
                                         <td>
-                                            <button class="btn btn-sm btn-primary">
-                                                <i class="fas fa-file-pdf"></i> Download Passlip
-                                            </button>
+                                            <form action="{{ route('download.individual.passlip') }}" method="POST"
+                                                style="display:inline;">
+                                                @csrf
+                                                <input type="hidden" name="student_id" value="{{ $studentId }}">
+
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-file-pdf"></i> Download Passlip
+                                                </button>
+                                            </form>
 
                                             <button class="btn btn-sm btn-success">
                                                 <i class="fas fa-file-pdf"></i> Download Certificate

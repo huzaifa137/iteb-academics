@@ -168,9 +168,6 @@
 <body>
 
 <div class="document-container">
-    @php
-        use App\Http\Controllers\Helper;
-    @endphp
     <div class="watermark">
         IDAAD AND THANAWI<br>EXAMINATIONS BOARD
     </div>
@@ -192,10 +189,10 @@
 
     <div class="student-info">
         <div class="info-col">
-            <div class="info-row"><span class="label">NAME:</span> {{Helper::getStudentName($studentId)}}</div>
-            <div class="info-row"><span class="label">INDEX NO:</span> {{$studentId}}</div>
-            <div class="info-row"><span class="label">GENDER:</span> {{Helper::getStudentSex($studentId)}}</div>
-            <div class="info-row"><span class="label">SCH NAME:</span> {{Helper::getStudentSchool($studentId)}}</div>
+            <div class="info-row"><span class="label">NAME:</span> SENYONJO ISMAEL ABDUL-SSWAMM</div>
+            <div class="info-row"><span class="label">INDEX NO:</span> IT-046-TH-039-2024</div>
+            <div class="info-row"><span class="label">GENDER:</span> Male</div>
+            <div class="info-row"><span class="label">SCH NAME:</span> MADRASAT DIINIYYAH BUGEMBE ISLAMIC INSTITUTE</div>
         </div>
         <div class="info-col" style="text-align: right;">
             <div class="photo-box" style="float: right; margin-left: 10px;">PHOTO</div>

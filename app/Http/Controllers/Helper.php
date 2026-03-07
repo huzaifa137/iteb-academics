@@ -377,6 +377,25 @@ class Helper extends Controller
         return $Student_Name;
     }
 
+    public static function getStudentSex($studentId)
+    {
+
+        $StudentSex = DB::table('students_basic')
+            ->where('Student_ID', $studentId)
+            ->value('StudentSex');
+
+        return $StudentSex;
+    }
+
+    public static function getStudentSchool($studentId)
+    {
+
+        $StudentSchool = DB::table('students_basic')
+            ->where('Student_ID', $studentId)
+            ->value('House');
+
+        return $StudentSchool;
+    }
 
     public static function parseStudentId($studentId, $type = null)
     {
