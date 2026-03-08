@@ -5,270 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Idaad and Thanawi Pass Slip</title>
-    {{-- <style>
-        @page {
-            size: A4 landscape;
-            margin: 0;
-        }
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        .document-container {
-            width: 100%;
-            max-width: 297mm;
-            /* A4 landscape width */
-            padding: 10mm;
-            box-sizing: border-box;
-            background-color: #fff;
-            border: 15px solid #2e5a31;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Ensure tables do not break awkwardly */
-        table,
-        tr,
-        td,
-        th {
-            page-break-inside: auto !important;
-        }
-
-        /* Shrink fonts slightly to help fit */
-        table {
-            font-size: 11px;
-        }
-
-        td,
-        th {
-            padding: 3px;
-        }
-
-        /* Watermark sizing */
-        .watermark img {
-            width: 50%;
-            opacity: 0.08;
-        }
-
-        /* Logo sizing */
-        .logo-placeholder img {
-            max-width: 80px;
-            max-height: 80px;
-        }
-
-        :root {
-            --border-green: #2e5a31;
-            --light-green: #e9f5ea;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            background: white;
-            padding: 20px;
-            margin: 0;
-        }
-
-        .document-container {
-            width: 297mm;
-            min-height: 210mm;
-            background-color: #fff;
-            border: 15px solid var(--border-green);
-            padding: 20px;
-            position: relative;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Watermark */
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
-            font-size: 60px;
-            color: rgba(46, 90, 49, 0.05);
-            pointer-events: none;
-            z-index: 0;
-            text-align: center;
-            width: 100%;
-        }
-
-        .watermark img {
-            width: 60%;
-            /* optional: scale watermark */
-            opacity: 0.09;
-            /* makes it very faint */
-            pointer-events: none;
-            /* ensures it doesn’t interfere with clicks */
-            display: block;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            border-bottom: 3px solid var(--border-green);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-
-        .header-arabic {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-
-        .header-english {
-            font-size: 20px;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-
-        .logo-section {
-            display: flex;
-            justify-content: center;
-            margin: 10px 0;
-        }
-
-        .logo-placeholder {
-            width: 100px;
-            height: 100px;
-            /* border: 2px solid gold; */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-        }
-
-        .pass-slip-banner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            padding: 5px 0;
-        }
-
-        .pass-slip-banner h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .student-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            line-height: 1.6;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .info-col {
-            width: 48%;
-        }
-
-        .info-row {
-            display: flex;
-            margin-bottom: 2px;
-        }
-
-        .label {
-            font-weight: bold;
-            min-width: 80px;
-        }
-
-        .arabic-label {
-            text-align: right;
-            flex-grow: 1;
-            direction: rtl;
-        }
-
-        .photo-box {
-            width: 100px;
-            height: 120px;
-            border: 1px solid #000;
-            background-color: #ddd;
-            text-align: center;
-            line-height: 120px;
-            font-size: 12px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            position: relative;
-            z-index: 1;
-        }
-
-        th {
-            background-color: white;
-            border: 1px solid #000;
-            padding: 5px;
-            text-align: center;
-        }
-
-        td {
-            border: 1px solid #000;
-            padding: 4px;
-        }
-
-        .category-row {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-
-        .score-col {
-            text-align: center;
-            width: 60px;
-            font-weight: bold;
-        }
-
-        .code-col {
-            text-align: center;
-            width: 60px;
-        }
-
-        .footer-stats {
-            margin-top: 10px;
-            border-top: 2px solid #000;
-            padding-top: 5px;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            font-weight: bold;
-        }
-
-        .signatures {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            text-align: center;
-        }
-
-        .sig-box {
-            width: 200px;
-            border-top: 1px solid #000;
-            padding-top: 5px;
-        }
-
-        .grading-scale {
-            margin-top: 20px;
-            font-size: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
-        }
-    </style> --}}
     <style>
         @page {
             size: A4 portrait;
@@ -290,16 +27,17 @@
 
         .document-container {
             width: 210mm;
-            /* A4 portrait width */
-            min-height: 297mm;
-            /* A4 portrait height */
+            height: 297mm;
+            /* fixed height */
             padding: 10mm;
-            border: 15px solid var(--border-green);
+            /* inner spacing */
+            border: 10px solid var(--border-green);
+            /* smaller border to fit */
             box-sizing: border-box;
+            /* includes padding + border in height */
             background-color: #fff;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         /* Watermark */
@@ -477,9 +215,7 @@
             use App\Http\Controllers\Helper;
         @endphp
         <div class="watermark">
-            {{-- <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"> --}}
-            <img src="{{ public_path('assets/images/brand/uplogolight.png') }}" alt="Covido logo">
-
+            <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo">
         </div>
 
         <header>
@@ -489,10 +225,7 @@
 
             <div class="logo-section">
                 <div class="logo-placeholder">
-                    {{-- <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
-                        style="max-width: 120%; max-height: 120%; object-fit: contain;"> --}}
-
-                    <img src="{{ public_path('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
+                    <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
                         style="max-width: 120%; max-height: 120%; object-fit: contain;">
                 </div>
             </div>

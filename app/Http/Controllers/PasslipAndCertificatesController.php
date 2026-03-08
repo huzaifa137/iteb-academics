@@ -207,19 +207,15 @@ class PasslipAndCertificatesController extends Controller
             'subjects'
         ))->render();
 
-        // Generate PDF with Browsershot
-        $pdf = Browsershot::html($html)
-            ->format('A4')
-            ->landscape()
-            ->margins(0, 0, 0, 0)
-            ->showBackground()
-            ->useLocalFileAccess()  // important on Windows
-            ->timeout(120000)
-            ->pdf(); // returns the PDF content
-
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', "attachment; filename=passlip_{$studentId}.pdf");
+        // Generate PDF with html2pdf
+        return view('template', compact(
+            'studentId',
+            'schoolId',
+            'studentCategory',
+            'year',
+            'categories',
+            'subjects'
+        ));
     }
 
     public function viewPasslip($studentId)
