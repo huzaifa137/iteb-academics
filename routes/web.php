@@ -457,6 +457,9 @@ Route::group(['middleware' => ['StudentAuth']], function () {
 
             Route::get('/passlip/{student_id}', 'viewPasslip')
                 ->name('passlip.view');
+
+            Route::get('passlip/download/{student_id}',  'downloadPasslip')
+                ->name('passlip.download');
         });
 });
 

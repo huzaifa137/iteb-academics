@@ -74,7 +74,14 @@
                                                 </button>
                                             </form> --}}
 
-                                            <a href="{{ route('passlip.view', ['student_id' => $studentId]) }}"
+                                            {{-- <a href="{{ route('passlip.view', ['student_id' => $studentId]) }}"
+                                                class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="fas fa-file-pdf"></i> Download Passlip
+                                            </a> --}}
+
+                                            {{-- BrowserShot 2 --}}
+
+                                            <a href="{{ route('passlip.download', ['student_id' => $studentId]) }}"
                                                 class="btn btn-sm btn-primary" target="_blank">
                                                 <i class="fas fa-file-pdf"></i> Download Passlip
                                             </a>
@@ -103,7 +110,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
+    {{-- <script>
         // Use class selector instead of ID selector
         document.querySelectorAll('.downloadPasslipForm').forEach(form => {
             form.addEventListener('submit', function(e) {
@@ -166,7 +173,7 @@
                     });
             });
         });
-    </script>
+    </script> --}}
 
     <script>
         // Use class selector instead of ID selector

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Idaad and Thanawi Pass Slip</title>
-    <style>
+    {{-- <style>
         @page {
             size: A4 landscape;
             margin: 0;
@@ -268,6 +268,206 @@
             border-top: 1px solid #ccc;
             padding-top: 10px;
         }
+    </style> --}}
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        :root {
+            --border-green: #2e5a31;
+            --light-green: #e9f5ea;
+        }
+
+        .document-container {
+            width: 210mm;
+            /* A4 portrait width */
+            min-height: 297mm;
+            /* A4 portrait height */
+            padding: 10mm;
+            border: 15px solid var(--border-green);
+            box-sizing: border-box;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            pointer-events: none;
+            z-index: 0;
+            text-align: center;
+            width: 100%;
+            opacity: 0.08;
+        }
+
+        .watermark img {
+            width: 40%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--border-green);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .header-arabic {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .header-english {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .logo-section {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pass-slip-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .pass-slip-banner h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-col {
+            width: 48%;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 2px;
+        }
+
+        .label {
+            font-weight: bold;
+            min-width: 70px;
+        }
+
+        .photo-box {
+            width: 80px;
+            height: 100px;
+            border: 1px solid #000;
+            background-color: #ddd;
+            text-align: center;
+            line-height: 100px;
+            font-size: 10px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            page-break-inside: avoid;
+            position: relative;
+            z-index: 1;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 2px 3px;
+            text-align: center;
+        }
+
+        .category-row {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .score-col,
+        .code-col {
+            font-weight: bold;
+            width: 50px;
+        }
+
+        /* Footer & Signatures */
+        .footer-stats {
+            margin-top: 5px;
+            border-top: 2px solid #000;
+            padding-top: 3px;
+            font-size: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            font-weight: bold;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .sig-box {
+            width: 150px;
+            border-top: 1px solid #000;
+            padding-top: 3px;
+            font-size: 10px;
+        }
+
+        /* Grading Scale */
+        .grading-scale {
+            margin-top: 10px;
+            font-size: 9px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            border-top: 1px solid #ccc;
+            padding-top: 5px;
+        }
     </style>
 </head>
 
@@ -277,7 +477,9 @@
             use App\Http\Controllers\Helper;
         @endphp
         <div class="watermark">
-            <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo">
+            {{-- <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"> --}}
+            <img src="{{ public_path('assets/images/brand/uplogolight.png') }}" alt="Covido logo">
+
         </div>
 
         <header>
@@ -287,7 +489,10 @@
 
             <div class="logo-section">
                 <div class="logo-placeholder">
-                    <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
+                    {{-- <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
+                        style="max-width: 120%; max-height: 120%; object-fit: contain;"> --}}
+
+                    <img src="{{ public_path('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
                         style="max-width: 120%; max-height: 120%; object-fit: contain;">
                 </div>
             </div>
@@ -418,7 +623,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-
             const element = document.querySelector('.document-container');
 
             const opt = {
@@ -429,13 +633,16 @@
                     quality: 1
                 },
                 html2canvas: {
-                    scale: 4,
+                    scale: 3, // higher scale for sharper PDF
                     useCORS: true
                 },
                 jsPDF: {
                     unit: 'mm',
                     format: 'a4',
-                    orientation: 'landscape'
+                    orientation: 'portrait'
+                },
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy']
                 }
             };
 
