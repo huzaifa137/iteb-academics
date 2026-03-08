@@ -12,14 +12,6 @@
         <div class="stats-container">
 
             @if (isset($groupedByStudent))
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <a href="{{ route('generate.certifications') }}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-file-pdf"></i> Generate Certificate
-                        </a>
-                    </div>
-                </div>
-
                 <div class="card mt-4">
                     <div class="card-header text-white d-flex align-items-center" style="background-color: #263f2e;">
                         <div class="w-33 text-start">
@@ -63,19 +55,34 @@
                                         <td>{{ $studentId }} - {{ Helper::getStudentName($studentId) }}</td>
 
                                         <td>
-                                            <form action="{{ route('download.individual.passlip') }}" method="POST"
-                                                style="display:inline;">
+                                            <!-- Update the form in the loop -->
+                                            {{-- <form action="{{ route('download.individual.passlip') }}" method="POST"
+                                                class="downloadPasslipForm" style="display:inline;">
                                                 @csrf
                                                 <input type="hidden" name="student_id" value="{{ $studentId }}">
-
                                                 <button type="submit" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-file-pdf"></i> Download Passlip
                                                 </button>
-                                            </form>
+                                            </form> --}}
 
-                                            <button class="btn btn-sm btn-success">
+                                            {{-- <form action="{{ route('download.individual.certificate') }}" method="POST"
+                                                class="downloadCertificateForm" style="display:inline;">
+                                                @csrf
+                                                <input type="hidden" name="student_id" value="{{ $studentId }}">
+                                                <button class="btn btn-sm btn-success">
+                                                    <i class="fas fa-file-pdf"></i> Download Certificate
+                                                </button>
+                                            </form> --}}
+
+                                            <a href="{{ route('passlip.view', ['student_id' => $studentId]) }}"
+                                                class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="fas fa-file-pdf"></i> Download Passlip
+                                            </a>
+
+                                            <a href="{{ route('certificate.view', ['student_id' => $studentId]) }}"
+                                                class="btn btn-sm btn-success " target="_blank">
                                                 <i class="fas fa-file-pdf"></i> Download Certificate
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -97,202 +104,141 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.getElementById('examStatisticsForm').addEventListener('submit', function() {
+        // Use class selector instead of ID selector
+        document.querySelectorAll('.downloadPasslipForm').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
 
-            const button = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
+                Swal.fire({
+                    title: 'Downloading...',
+                    text: 'Please wait while your passlip is being prepared.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
 
-            // Disable button
-            button.disabled = true;
-            button.style.opacity = "0.7";
-            button.style.cursor = "not-allowed";
+                let formData = new FormData(this);
+                let studentId = this.querySelector('input[name="student_id"]').value;
 
-            // Swap text with loader
-            btnText.style.display = "none";
-            btnLoader.style.display = "inline-block";
+                fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create temporary download link
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = "passlip_" + studentId + ".pdf";
+                        document.body.appendChild(a);
+                        a.click();
+
+                        // Clean up
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Downloaded!',
+                                text: 'Passlip has been downloaded successfully.',
+                                confirmButtonText: 'OK'
+                            });
+                        }, 100);
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to download passlip. Please try again.'
+                        });
+                        console.error('Download error:', err);
+                    });
+            });
         });
     </script>
 
     <script>
-        // Your existing JavaScript functions here
-        function showMissingResourcesAlert() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Missing Required Resources',
-                text: 'Some required resources are missing. Please update Server',
-                confirmButtonColor: '#287c44',
-                confirmButtonText: 'OK'
+        // Use class selector instead of ID selector
+        document.querySelectorAll('.downloadCertificateForm').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Downloading...',
+                    text: 'Please wait while your certificate is being prepared.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+
+                let formData = new FormData(this);
+                let studentId = this.querySelector('input[name="student_id"]').value;
+
+                fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(async response => {
+                        if (!response.ok) {
+                            // Try to get the error response as text
+                            const errorText = await response.text();
+                            throw new Error(errorText || `HTTP error! status: ${response.status}`);
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create temporary download link
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = "certificate_" + studentId + ".pdf";
+                        document.body.appendChild(a);
+                        a.click();
+
+                        // Clean up
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Downloaded!',
+                                text: 'Certificate has been downloaded successfully.',
+                                confirmButtonText: 'OK'
+                            });
+                        }, 100);
+                    })
+                    .catch(err => {
+                        // Close the loading Swal first
+                        Swal.close();
+
+                        // Display the error response in the body
+                        error({
+                            responseText: err.message
+                        });
+
+                        console.error('Download error:', err);
+                    });
             });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const category = document.getElementById('categorySelect');
-            const level = document.getElementById('levelSelect');
-
-            function setLevelBasedOnCategory() {
-                if (category.value === 'ID') {
-                    level.value = 'O';
-                } else if (category.value === 'TH') {
-                    level.value = 'A';
-                }
-                level.disabled = true;
-            }
-
-            category.addEventListener('change', setLevelBasedOnCategory);
-            setLevelBasedOnCategory();
         });
 
-        function downloadPdf() {
-            downloadFile('pdf');
-        }
-
-        function downloadFile(type) {
-            const year = $('select[name="year"]').val();
-            const category = $('select[name="category"]').val();
-            const level = $('select[name="level"]').val();
-
-            if (!year || !category) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Missing Information',
-                    text: 'Please select Year and Category before downloading.',
-                    confirmButtonColor: '#287c44'
-                });
-                return;
-            }
-
-            const route = type === 'excel' ?
-                '{{ route('iteb.exam.statistics.download.excel') }}' :
-                '{{ route('iteb.exam.statistics.download.pdf') }}';
-
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = route;
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_token';
-            csrfInput.value = '{{ csrf_token() }}';
-            form.appendChild(csrfInput);
-
-            const yearInput = document.createElement('input');
-            yearInput.type = 'hidden';
-            yearInput.name = 'year';
-            yearInput.value = year;
-            form.appendChild(yearInput);
-
-            const categoryInput = document.createElement('input');
-            categoryInput.type = 'hidden';
-            categoryInput.name = 'category';
-            categoryInput.value = category;
-            form.appendChild(categoryInput);
-
-            const levelInput = document.createElement('input');
-            levelInput.type = 'hidden';
-            levelInput.name = 'level';
-            levelInput.value = level;
-            form.appendChild(levelInput);
-
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-
-            Swal.fire({
-                title: `Generating ${type.toUpperCase()}...`,
-                text: 'Your file will be downloaded shortly.',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            setTimeout(() => {
-                Swal.close();
-            }, 3000);
-        }
-    </script>
-
-    <script>
-        function downloadStudentsFullReport() {
-            downloadReport('students', 'full');
-        }
-
-        function downloadSchoolsFullReport() {
-            downloadReport('schools', 'full');
-        }
-
-        function downloadReport(reportType, reportScope) {
-            const year = $('select[name="year"]').val();
-            const category = $('select[name="category"]').val();
-            const level = $('select[name="level"]').val();
-
-            if (!year || !category) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Missing Information',
-                    text: 'Please select Year and Category before downloading.',
-                    confirmButtonColor: '#287c44'
-                });
-                return;
-            }
-
-            Swal.fire({
-                title: `Generating ${reportType} report...`,
-                text: 'This may take a moment for large datasets.',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            const route = reportType === 'students' ?
-                '{{ route('iteb.exam.statistics.download.students') }}' :
-                '{{ route('iteb.exam.statistics.download.schools') }}';
-
-            // Create a hidden form and submit
-            const form = $('<form>', {
-                'method': 'POST',
-                'action': route,
-                'target': '_blank'
-            });
-
-            form.append($('<input>', {
-                'name': '_token',
-                'value': '{{ csrf_token() }}',
-                'type': 'hidden'
-            }));
-
-            form.append($('<input>', {
-                'name': 'year',
-                'value': year,
-                'type': 'hidden'
-            }));
-
-            form.append($('<input>', {
-                'name': 'category',
-                'value': category,
-                'type': 'hidden'
-            }));
-
-            form.append($('<input>', {
-                'name': 'level',
-                'value': level,
-                'type': 'hidden'
-            }));
-
-            $('body').append(form);
-            form.submit();
-            form.remove();
-
-            // Close the loading message after a delay
-            setTimeout(() => {
-                Swal.close();
-            }, 4000);
+        function error(data) {
+            $('body').html(data.responseText);
         }
     </script>
 @endsection

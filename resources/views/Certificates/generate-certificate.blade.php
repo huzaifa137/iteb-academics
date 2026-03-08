@@ -45,7 +45,7 @@
                                     <select name="category" class="form-control select2" required>
                                         <option value="">-- Select Category --</option>
                                         <option value="TH">Thanawi</option>
-                                        <option value="ID">Idaad</option>
+                                        {{-- <option value="ID">Idaad</option> --}}
                                     </select>
                                 </div>
 

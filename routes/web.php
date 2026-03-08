@@ -434,6 +434,11 @@ Route::get('/template', function () {
     return view('template');
 });
 
+Route::get('/certificate', function () {
+
+    return view('Certificates.certificate');
+});
+
 Route::group(['middleware' => ['StudentAuth']], function () {
 
     Route::prefix('passlip')
@@ -444,10 +449,14 @@ Route::group(['middleware' => ['StudentAuth']], function () {
             Route::post('/fetch-school-records', 'fetchSchoolRecords')->name('fetch.school.records');
 
             Route::get('/generate-certifications', 'generateCertifications')->name('generate.certifications');
-
-
             Route::post('/download-individual-passlip', 'downloadIndividualPasslip')->name('download.individual.passlip');
+            Route::post('/download-individual-certificate', 'downloadIndividualCertificate')->name('download.individual.certificate');
 
+            Route::get('/certificate/{student_id}', 'viewCertificate')
+                ->name('certificate.view');
+
+            Route::get('/passlip/{student_id}', 'viewPasslip')
+                ->name('passlip.view');
         });
 });
 
