@@ -208,18 +208,18 @@ class PasslipAndCertificatesController extends Controller
         ))->render();
 
         // Generate PDF with Browsershot
-        $pdfPath = storage_path("app/public/passlip_{$studentId}.pdf");
-
-        Browsershot::html($html)
+        $pdf = Browsershot::html($html)
             ->format('A4')
             ->landscape()
             ->margins(0, 0, 0, 0)
             ->showBackground()
-            ->useLocalFileAccess()  // <--- important on Windows!
-            ->timeout(120000)        // optional, increase timeout to 60s
-            ->save($pdfPath);
+            ->useLocalFileAccess()  // important on Windows
+            ->timeout(120000)
+            ->pdf(); // returns the PDF content
 
-        return response()->download($pdfPath, "passlip_{$studentId}.pdf");
+        return response($pdf)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', "attachment; filename=passlip_{$studentId}.pdf");
     }
 
     public function viewPasslip($studentId)
