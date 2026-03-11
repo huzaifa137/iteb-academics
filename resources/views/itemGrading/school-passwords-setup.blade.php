@@ -33,7 +33,8 @@
                                         <select id="schoolSelect" class="form-control select2" required>
                                             <option value="">-- Select School --</option>
                                             @foreach ($houses as $house)
-                                                <option value="{{ $house->ID }}">{{ $house->House }} - {{ $house->Number }}
+                                                <option value="{{ $house->ID }}">{{ $house->House }} -
+                                                    {{ $house->Number }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -43,10 +44,15 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 text-end mt-3">
-                                    <button type="button" id="exportAllPasswordsBtn" class="btn mt-4" style="background-color: #287c44;color:#FFF">
+                                    <button type="button" id="exportAllPasswordsBtn" class="btn mt-4"
+                                        style="background-color: #287c44;color:#FFF">
                                         <i class="fa fa-download me-2"></i> Export All Passwords
                                     </button>
                                 </div>
+                                
+                                <script>
+                                    document.getElementById("exportAllPasswordsBtn").disabled = true;
+                                </script>
                             </div>
 
                             <!-- Password Display Section (Initially Hidden) -->
@@ -74,7 +80,8 @@
                                                 </style>
 
                                                 <div class="input-group">
-                                                    <input type="text" id="passwordDisplay" class="form-control" readonly>
+                                                    <input type="text" id="passwordDisplay" class="form-control"
+                                                        readonly>
 
                                                     <button type="button" class="btn btn-outline-secondary copy-btn"
                                                         onclick="copyPassword()">
@@ -98,7 +105,8 @@
                                                         New
                                                         Password</span>
                                                 </button>
-                                                <button type="button" id="savePasswordBtn" class="btn btn-success" disabled>
+                                                <button type="button" id="savePasswordBtn" class="btn btn-success"
+                                                    disabled>
                                                     <i class="fa fa-save me-2"></i> Save Password
                                                 </button>
                                             </div>
@@ -132,14 +140,13 @@
     </div>
     </div>
     </div>
-
 @endsection
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         let currentSchoolId = null;
         let generatedPassword = null;
         let hasExistingPassword = false;
@@ -150,7 +157,7 @@
         });
 
         // Fetch Password Button Click
-        $('#fetchPasswordBtn').click(function () {
+        $('#fetchPasswordBtn').click(function() {
             const schoolId = $('#schoolSelect').val();
 
             if (!schoolId) {
@@ -169,13 +176,13 @@
             });
 
             $.ajax({
-                url: '{{ route("school.passwords.fetch") }}',
+                url: '{{ route('school.passwords.fetch') }}',
                 type: 'POST',
                 data: {
                     school_id: schoolId,
                     _token: '{{ csrf_token() }}'
                 },
-                success: function (response) {
+                success: function(response) {
                     Swal.close();
 
                     currentSchoolId = response.school_id;
@@ -199,14 +206,14 @@
 
                     $('#passwordSection').show();
                 },
-                error: function (data) {
+                error: function(data) {
                     $('body').html(data.responseText);
                 }
             });
         });
 
         // Regenerate/Create Password Button Click
-        $('#regenerateBtn').click(function () {
+        $('#regenerateBtn').click(function() {
             if (!currentSchoolId) {
                 Swal.fire('Error', 'Please select a school first', 'error');
                 return;
@@ -223,13 +230,13 @@
             });
 
             $.ajax({
-                url: '{{ route("school.passwords.generate") }}',
+                url: '{{ route('school.passwords.generate') }}',
                 type: 'POST',
                 data: {
                     school_id: currentSchoolId,
                     _token: '{{ csrf_token() }}'
                 },
-                success: function (response) {
+                success: function(response) {
                     Swal.close();
 
                     generatedPassword = response.generated_password;
@@ -237,14 +244,14 @@
                     $('#generatedPasswordPreview').show();
                     $('#savePasswordBtn').prop('disabled', false);
                 },
-                error: function (xhr) {
+                error: function(xhr) {
                     Swal.fire('Error', 'Failed to generate password', 'error');
                 }
             });
         });
 
         // Save Password Button Click
-        $('#savePasswordBtn').click(function () {
+        $('#savePasswordBtn').click(function() {
             if (!currentSchoolId || !generatedPassword) {
                 Swal.fire('Error', 'No password generated to save', 'error');
                 return;
@@ -273,14 +280,14 @@
                     });
 
                     $.ajax({
-                        url: '{{ route("school.passwords.save") }}',
+                        url: '{{ route('school.passwords.save') }}',
                         type: 'POST',
                         data: {
                             school_id: currentSchoolId,
                             password: generatedPassword,
                             _token: '{{ csrf_token() }}'
                         },
-                        success: function (response) {
+                        success: function(response) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Success!',
@@ -296,7 +303,7 @@
                             $('#savePasswordBtn').prop('disabled', true);
                             hasExistingPassword = true;
                         },
-                        error: function (data) {
+                        error: function(data) {
                             $('body').html(data.responseText);
                         }
                     });
@@ -305,7 +312,7 @@
         });
 
         // Export All Passwords Button Click - MOVED INSIDE document.ready
-        $('#exportAllPasswordsBtn').click(function () {
+        $('#exportAllPasswordsBtn').click(function() {
             Swal.fire({
                 title: 'Generating PDF...',
                 text: 'Please wait while we prepare your PDF document.',
@@ -317,7 +324,7 @@
             });
 
             $.ajax({
-                url: '{{ route("school.passwords.export-all-pdf") }}',
+                url: '{{ route('school.passwords.export-all-pdf') }}',
                 type: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}'
@@ -325,7 +332,7 @@
                 xhrFields: {
                     responseType: 'blob'
                 },
-                success: function (response, status, xhr) {
+                success: function(response, status, xhr) {
                     Swal.close();
 
                     // Check if response is actually a PDF
@@ -333,9 +340,10 @@
                     if (contentType && contentType.includes('application/json')) {
                         // This is an error response
                         const reader = new FileReader();
-                        reader.onload = function () {
+                        reader.onload = function() {
                             const errorResponse = JSON.parse(reader.result);
-                            Swal.fire('Error', errorResponse.message || 'Failed to generate PDF', 'error');
+                            Swal.fire('Error', errorResponse.message ||
+                                'Failed to generate PDF', 'error');
                         };
                         reader.readAsText(response);
                         return;
@@ -353,7 +361,9 @@
                     }
 
                     // Create download link
-                    const blob = new Blob([response], { type: 'application/pdf' });
+                    const blob = new Blob([response], {
+                        type: 'application/pdf'
+                    });
                     const link = document.createElement('a');
                     link.href = window.URL.createObjectURL(blob);
                     link.download = filename;
@@ -371,14 +381,14 @@
                         showConfirmButton: false
                     });
                 },
-                error: function (data) {
+                error: function(data) {
                     $('body').html(data.responseText);
                 }
             });
         });
 
         // School selection change
-        $('#schoolSelect').change(function () {
+        $('#schoolSelect').change(function() {
             // Hide password section when school changes
             $('#passwordSection').hide();
             currentSchoolId = null;

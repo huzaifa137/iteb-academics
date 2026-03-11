@@ -718,7 +718,7 @@ class SchoolsController extends Controller
                 'export_date' => now()->format('Y-m-d H:i:s'),
                 'exported_by' => auth()->user()->name ?? 'System',
                 'title' => 'School Passwords Export',
-                'company_name' => config('app.name', 'School Management System')
+                'company_name' => 'ITEB ACADEMICS'
             ];
 
             // Clean any output buffers

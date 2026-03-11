@@ -17,4 +17,10 @@
             <i class="fa-solid fa-key me-2"></i> Schools & Passwords
         </a>
     </div>
+
+    <div class="col-12 col-sm-4 mb-2">
+        <a href="{{ route('passlip.generate') }}" class="btn btn-white text-dark w-100">
+            <i class="fas fa-scroll me-2"></i> Passlips & Certificates
+        </a>
+    </div>
 </div>
