@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>A LEVEL Certificate</title>
+    <title>O LEVEL Certificate</title>
     <style>
         html,
         body {
@@ -21,36 +21,71 @@
             width: 297mm;
             height: 210mm;
             margin: 0 auto;
+            background: #fff;
+            padding: 25mm;
+            box-sizing: border-box;
             position: relative;
         }
 
-        /* BORDER IMAGE */
-        .certificate-bg {
+        /* OUTER ORNAMENT FRAME */
+        .certificate::before {
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 8mm;
+            left: 8mm;
+            right: 8mm;
+            bottom: 8mm;
+            border: 4px double #2f7a59;
         }
 
-        .certificate-bg img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        /* INNER GOLD FRAME */
+        .certificate::after {
+            content: "";
+            position: absolute;
+            top: 14mm;
+            left: 14mm;
+            right: 14mm;
+            bottom: 14mm;
+            border: 2px solid #c9a646;
         }
 
-        /* CONTENT INSIDE BORDER */
-        .certificate-content {
+        /* CORNER ORNAMENTS */
+        .corner {
             position: absolute;
-            left: 20mm;
-            right: 20mm;
-            top: 23mm;
-            /* start below top border */
-            /* remove bottom: 5mm; */
+            width: 60px;
+            height: 60px;
+            border: 4px solid #c9a646;
+        }
+
+        .corner.tl {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner.tr {
+            top: 10px;
+            right: 10px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner.bl {
+            bottom: 10px;
+            left: 10px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner.br {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
         }
 
         /* BISMILLAH */
-
         .bismillah {
             text-align: center;
             color: #1e5cc4;
@@ -66,7 +101,6 @@
         }
 
         /* HEADER */
-
         .header {
             display: flex;
             justify-content: space-between;
@@ -98,9 +132,12 @@
         .center-logo {
             width: 110px;
             height: 110px;
+            /* border: 2px solid #777; */
+            /* transform: rotate(45deg); */
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 12px;
             text-align: center;
         }
 
@@ -114,8 +151,14 @@
             margin: 5px 0;
         }
 
-        /* ARABIC PARAGRAPH */
+        /* TITLE (optional, not present in HTML) but keep style */
+        .title-ar {
+            text-align: center;
+            font-size: 22px;
+            margin-top: 10px;
+        }
 
+        /* ARABIC PARAGRAPH */
         .arabic {
             direction: rtl;
             text-align: right;
@@ -124,19 +167,47 @@
             margin-top: 20px;
         }
 
+        /* ENGLISH PARAGRAPH */
         .english {
             margin-top: 20px;
             font-size: 18px;
             line-height: 1.7;
         }
 
-        /* ENGLISH PARAGRAPH */
+        /* FOOTER AREA */
+        .footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+        }
 
+        .qr {
+            width: 90px;
+            height: 90px;
+            background: repeating-linear-gradient(45deg,
+                    black,
+                    black 5px,
+                    white 5px,
+                    white 10px);
+        }
 
-        /* FOOTER */
+        /* SIGNATURES */
+        .signatures {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sign {
+            text-align: center;
+        }
+
+        .date-ar {
+            direction: rtl;
+        }
 
         .footer {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -165,65 +236,28 @@
                     white 10px);
         }
 
-        .date-ar {
-            direction: rtl;
-        }
-
         * {
             box-sizing: border-box;
-        }
-
-        .nowrap {
-            white-space: nowrap;
-        }
-
-        .signature-space {
-            height: 80px;
-        }
-
-        .watermark {
-            position: absolute;
-            top: 65%;
-            left: 43%;
-            transform: translate(-50%, -50%);
-            z-index: 0;
-            opacity: 0.3;
-            width: 200px;
-            height: auto;
-            pointer-events: none;
-        }
-
-        .certificate-content>* {
-            position: relative;
-            z-index: 1;
         }
     </style>
 </head>
 
 <body>
 
-    @php
-        use App\Http\Controllers\Helper;
-        $currentDate = date('d/m/Y');
-    @endphp
-
     <div class="certificate">
 
-        <div class="certificate-bg">
-            <img src="{{ asset('/assets/certificates/border.jpg') }}">
-        </div>
+        @php
+            use App\Http\Controllers\Helper;
 
-        <div class="watermark">
-            <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Watermark">
-        </div>
-
+            $currentDate = date('d/m/Y');
+        @endphp
+        <!-- top-ornament DIV removed (the ball border) -->
         <div class="certificate-content">
-
             <div class="bismillah">
                 بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْم
             </div>
 
-            <div class="bismillah-translation" style="color: #1e5cc4;">
+            <div class="bismillah-translation">
                 In the name of Allah the most Gracious the most Merciful
             </div>
 
@@ -231,9 +265,9 @@
             <div class="header">
 
                 <div class="left">
-                    <h2 style="color: #0d4b1e;">Uganda Muslim Supreme Council</h2>
+                    <h2>Uganda Muslim Supreme Council</h2>
                     <h3 class="red">Idaad and Thanawi Examinations Board (U)</h3>
-                    <h4 style="text-align: center;">{{ $level }} Certificate</h4>
+                    <h4>{{ $level }} Certificate</h4>
                 </div>
 
 
@@ -244,9 +278,9 @@
 
 
                 <div class="right">
-                    <h2 style="color: #0d4b1e;">المجلس الأعلى الإسلامي الأوغندي</h2>
+                    <h2>المجلس الأعلى الإسلامي الأوغندي</h2>
                     <h3 class="red">هيئة الامتحانات الإعدادية والثانوية (أوغندا)</h3>
-                    <h4 style="text-align: center;">الشهادة {{ $ArLevel }}</h4>
+                    <h4>الشهادة {{ $ArLevel }}</h4>
                 </div>
             </div>
 
@@ -263,20 +297,19 @@
                 );
             @endphp
 
-
             <div class="arabic">
                 الحمد لله رب العالمين والصلاة والسلام على خاتم الأنبياء والمرسلين نبينا محمد وعلى آله وصحبه ومن تبعهم
                 بإحسان
                 إلى يوم الدين أما بعد:
 
-                تشهد الهيئة بأن الطالب <b>{{ Helper::getStudentARName($studentId) }}</b> المولود سنة
-                <b>{{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }}</b> وجنسيته
+                تشهد الهيئة بأن الطالب <b>{{ Helper::getStudentName($studentId) }}</b> المولود سنة
+                <b>{{ Helper::getStudentYearofBirth($studentId) }}</b> وجنسيته
                 <b>{{ Helper::getStudentARNationality($studentId) }}</b>
                 قد جلس في الامتحان النهائي للشهادة الإعدادية سنة
-                <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}</b>
-                بمدرسة <b>{{ Helper::getStudentARSchool($studentId) }}</b>
-                برقم تسجيل <b>{{ Helper::getStudentID_AR($studentId) }}</b>
-                ونجح بنسبة <b>{{ Helper::toArabicNumberDate($stats['average']) }}%</b> بتقدير
+                <b>{{ Helper::getStudentAdmissionYear($studentId) }}</b>
+                بمدرسة <b>{{ Helper::getStudentSchool($studentId) }}</b>
+                برقم تسجيل <b>{{ $studentId }}</b>
+                ونجح بنسبة <b>{{ $stats['average'] }}%</b> بتقدير
                 <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>.
             </div>
 
@@ -284,12 +317,11 @@
             <div class="english">
                 The Board hereby certifies that <b>{{ Helper::getStudentName($studentId) }}</b> Born in
                 <b>{{ Helper::getStudentYearofBirth($studentId) }}</b> of
-                <b>{{ Helper::getStudentNationality($studentId) }}</b> Nationality, sat for the
-                <span class="nowrap">final examinations</span> in
+                <b>{{ Helper::getStudentNationality($studentId) }}</b> Nationality, sat for the final examinations in
                 <b>{{ Helper::getStudentAdmissionYear($studentId) }}</b>,
                 at <b>{{ Helper::getStudentSchool($studentId) }}</b> under registration Number
                 <b>{{ $studentId }}</b>, after successful completion of
-                <b>{{ $level == "O'LEVEL" ? 'Idaad' : 'Thanawi' }} ({{ $level }})</b> and passed with
+                <b>{{ $level == "O'LEVEL" ? 'Idaad' : 'Thanawi' }} {{ $level }}</b> and passed with
                 <b>{{ $stats['average'] }}%</b>.
                 Grade: <b>{{ $stats['grade'] }}</b>.
             </div>
@@ -300,16 +332,15 @@
                     <div>Date of Issue {{ $currentDate }}</div>
 
                     <div class="sign">
-                        <b>سكرتير التعليم بالمجلس</b>
-                        <div class="signature-space"></div>
-                        <strong>Secretary for Education (UMSC)</strong>
+                        <b> سكرتير التعليم بالمجلس<br><br></b>
+                        Secretary for Education (UMSC)
                     </div>
                 </div>
 
 
                 <div class="sno-section">
-                    <div style="padding-bottom: 5px;"><strong>SNO: {{ random_int(1000000, 9999999) }}</strong></div>
-                    <div id="qr"></div>
+                    <div>SNO: {{ random_int(1000000, 9999999) }}</div>
+                    <div class="qr"></div>
                 </div>
 
 
@@ -317,9 +348,8 @@
                     <div>التاريخ {{ Helper::toArabicNumberDate($currentDate) }}</div>
 
                     <div class="sign">
-                        <b>السكرتير التنفيذي للهيئة</b>
-                        <div class="signature-space"></div>
-                        <strong>Executive Secretary (ITEBU)</strong>
+                        <b> السكرتير التنفيذي للهيئة<br><br></b>
+                        Executive Secretary (ITEBU)
                     </div>
                 </div>
 
@@ -328,25 +358,12 @@
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        window.onload = function () {
+        window.onload = function() {
 
             const element = document.querySelector('.certificate');
 
-            // Generate QR code
-            const qrData = "https://iteb-ug.org/";
-            new QRCode(document.getElementById("qr"), {
-                text: qrData,
-                width: 90,
-                height: 90,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            // PDF options
             const opt = {
                 margin: 0,
                 filename: 'certificate_{{ $studentId }}.pdf',

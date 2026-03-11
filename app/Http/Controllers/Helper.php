@@ -495,6 +495,34 @@ class Helper extends Controller
         return $StudentSchool;
     }
 
+    public static function getStudentARSchool($studentId)
+    {
+
+        $StudentSchoolEN = DB::table('students_basic')
+            ->where('Student_ID', $studentId)
+            ->value('House');
+
+        $StudentSchoolAR = DB::table('houses')
+            ->where('House', $StudentSchoolEN)
+            ->value('House_AR');
+
+        return $StudentSchoolAR;
+    }
+
+    public static function getStudentID_AR($studentId)
+    {
+
+        $StudentID_AR = DB::table('students_basic')
+            ->where('Student_ID', $studentId)
+            ->value('ID_AR');
+
+        if ($StudentID_AR == null) {
+            $StudentID_AR = $studentId;
+        }
+        
+        return $StudentID_AR;
+    }
+
     public static function getStudentMarksBySubject($studentId, $subjectCode, $category, $year, $schoolNumber)
     {
 
