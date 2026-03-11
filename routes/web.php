@@ -448,18 +448,10 @@ Route::group(['middleware' => ['StudentAuth']], function () {
             Route::get('/generate-passlips', 'generatePasslip')->name('passlip.generate');
             Route::post('/fetch-school-records', 'fetchSchoolRecords')->name('fetch.school.records');
 
-            Route::get('/generate-certifications', 'generateCertifications')->name('generate.certifications');
-            Route::post('/download-individual-passlip', 'downloadIndividualPasslip')->name('download.individual.passlip');
-            Route::post('/download-individual-certificate', 'downloadIndividualCertificate')->name('download.individual.certificate');
-
-            Route::get('/certificate/{student_id}', 'viewCertificate')
-                ->name('certificate.view');
-
-            Route::get('/passlip/{student_id}', 'viewPasslip')
-                ->name('passlip.view');
-
-            Route::get('passlip/download/{student_id}',  'downloadPasslip')
-                ->name('passlip.download');
+            Route::get('/certificate/{student_id}', 'downloadertificate')->name('certificate.view');
+                
+            Route::get('passlip/download/{student_id}', 'downloadPasslip')->name('passlip.download');
+                
         });
 });
 

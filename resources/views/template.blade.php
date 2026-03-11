@@ -26,18 +26,16 @@
         }
 
         .document-container {
-            width: 210mm;
-            height: 297mm;
-            /* fixed height */
-            padding: 10mm;
-            /* inner spacing */
-            border: 10px solid var(--border-green);
-            /* smaller border to fit */
+            width: 204mm;
+            height: 277mm;
+            padding: 5mm;
+            border: 5mm solid var(--border-green);
             box-sizing: border-box;
-            /* includes padding + border in height */
             background-color: #fff;
             position: relative;
             overflow: hidden;
+
+            margin: 0 auto;
         }
 
         /* Watermark */
@@ -45,12 +43,12 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
+            transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 0;
             text-align: center;
             width: 100%;
-            opacity: 0.08;
+            opacity: 0.4;
         }
 
         .watermark img {
@@ -189,11 +187,34 @@
             text-align: center;
         }
 
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            text-align: center;
+        }
+
         .sig-box {
-            width: 150px;
-            border-top: 1px solid #000;
-            padding-top: 3px;
+            width: 160px;
+            text-align: center;
             font-size: 10px;
+        }
+
+        .sig-img {
+            height: 60px;
+            margin-bottom: 5px;
+        }
+
+        .sig-img img {
+            max-height: 60px;
+            max-width: 140px;
+            object-fit: contain;
+        }
+
+        .sig-line {
+            border-top: 1px solid #000;
+            margin-top: 5px;
+            padding-top: 3px;
         }
 
         /* Grading Scale */
@@ -219,7 +240,7 @@
         </div>
 
         <header>
-            <div class="header-arabic">بسم الله الرحمن الرحيم</div>
+            <div class="header-arabic" style="color: #1e5cc4;">بسم الله الرحمن الرحيم</div>
             <div class="header-arabic">هيئة الامتحانات الإعدادية والثانوية (أوغندا)</div>
             <div class="header-english">IDAAD AND THANAWI EXAMINATIONS BOARD (U)</div>
 
@@ -355,7 +376,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        window.onload = function() {
+        window.onload = function () {
             const element = document.querySelector('.document-container');
 
             const opt = {

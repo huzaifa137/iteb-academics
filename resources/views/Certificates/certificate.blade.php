@@ -119,15 +119,16 @@
         .arabic {
             direction: rtl;
             text-align: right;
-            font-size: 18px;
+            font-size: 20px;
             line-height: 2;
             margin-top: 20px;
         }
 
         .english {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 16px;
             line-height: 1.7;
+                font-family: Tahoma, Arial, sans-serif;
         }
 
         /* ENGLISH PARAGRAPH */
@@ -136,7 +137,7 @@
         /* FOOTER */
 
         .footer {
-            margin-top: 20px;
+            margin-top: 30px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -184,7 +185,7 @@
         .watermark {
             position: absolute;
             top: 65%;
-            left: 43%;
+            left: 42%;
             transform: translate(-50%, -50%);
             z-index: 0;
             opacity: 0.3;
@@ -233,7 +234,7 @@
                 <div class="left">
                     <h2 style="color: #0d4b1e;">Uganda Muslim Supreme Council</h2>
                     <h3 class="red">Idaad and Thanawi Examinations Board (U)</h3>
-                    <h4 style="text-align: center;">{{ $level }} Certificate</h4>
+                    <h4 style="text-align: center;">'{{ $level }} Certificate</h4>
                 </div>
 
 
@@ -263,21 +264,24 @@
                 );
             @endphp
 
-
             <div class="arabic">
                 الحمد لله رب العالمين والصلاة والسلام على خاتم الأنبياء والمرسلين نبينا محمد وعلى آله وصحبه ومن تبعهم
                 بإحسان
-                إلى يوم الدين أما بعد:
+                إلى يوم الدين أما بعد : 
 
                 تشهد الهيئة بأن الطالب <b>{{ Helper::getStudentARName($studentId) }}</b> المولود سنة
-                <b>{{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }}</b> وجنسيته
+                <b>{{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }} </b> وجنسيته
                 <b>{{ Helper::getStudentARNationality($studentId) }}</b>
                 قد جلس في الامتحان النهائي للشهادة الإعدادية سنة
                 <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}</b>
-                بمدرسة <b>{{ Helper::getStudentARSchool($studentId) }}</b>
-                برقم تسجيل <b>{{ Helper::getStudentID_AR($studentId) }}</b>
-                ونجح بنسبة <b>{{ Helper::toArabicNumberDate($stats['average']) }}%</b> بتقدير
-                <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>.
+                <b>ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم <b>{{ Helper::getStudentID_AR($studentId) ?? Helper::toArabicLettersPackage($studentId) }}</b>
+                ونجح  بتقدير
+                <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>
+                @if(Helper::getStudentSex($studentId) == 'Female')
+                    . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله لها السداد والتوفيق
+                @else
+                   . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله له السداد والتوفيق
+                @endif
             </div>
 
 
@@ -300,7 +304,7 @@
                     <div>Date of Issue {{ $currentDate }}</div>
 
                     <div class="sign">
-                        <b>سكرتير التعليم بالمجلس</b>
+                        <b>سكرتير التعليم بالمجل  س</b>
                         <div class="signature-space"></div>
                         <strong>Secretary for Education (UMSC)</strong>
                     </div>
@@ -317,7 +321,7 @@
                     <div>التاريخ {{ Helper::toArabicNumberDate($currentDate) }}</div>
 
                     <div class="sign">
-                        <b>السكرتير التنفيذي للهيئة</b>
+                        <b>السكرتير   التنفيذي  للهيئة</b>
                         <div class="signature-space"></div>
                         <strong>Executive Secretary (ITEBU)</strong>
                     </div>

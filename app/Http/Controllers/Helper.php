@@ -516,10 +516,10 @@ class Helper extends Controller
             ->where('Student_ID', $studentId)
             ->value('ID_AR');
 
-        if ($StudentID_AR == null) {
-            $StudentID_AR = $studentId;
-        }
-        
+        // if ($StudentID_AR == null) {
+        //     $StudentID_AR = $studentId;
+        // }
+        // dd($StudentID_AR);
         return $StudentID_AR;
     }
 
@@ -546,7 +546,7 @@ class Helper extends Controller
         $arNumber = DB::table('translation')
             ->where('NUMBERS', $enNumber)
             ->value('TRANSLATION');
-        // dd($arNumber);
+
         return $arNumber;
     }
 
@@ -624,4 +624,59 @@ class Helper extends Controller
 
         return str_replace($western, $arabic, $value);
     }
+
+    public static function toArabicLettersPackage($text)
+{
+    // Handle special letter combinations first
+    $special = [
+        'TH' => 'ث'
+    ];
+
+    // Replace combinations first
+    $text = str_ireplace(array_keys($special), array_values($special), strtoupper($text));
+
+    // Single letter + number mapping
+    $map = [
+        'A' => 'ا',
+        'B' => 'ب',
+        'C' => 'ك',
+        'D' => 'د',
+        'E' => 'ي',
+        'F' => 'ف',
+        'G' => 'ج',
+        'H' => 'ه',
+        'I' => 'ا',
+        'J' => 'ج',
+        'K' => 'ك',
+        'L' => 'ل',
+        'M' => 'م',
+        'N' => 'ن',
+        'O' => 'و',
+        'P' => 'ب',
+        'Q' => 'ق',
+        'R' => 'ر',
+        'S' => 'س',
+        'T' => 'ت',
+        'U' => 'و',
+        'V' => 'ف',
+        'W' => 'و',
+        'X' => 'كس',
+        'Y' => 'ي',
+        'Z' => 'ز',
+
+        // Numbers
+        '0' => '٠',
+        '1' => '١',
+        '2' => '٢',
+        '3' => '٣',
+        '4' => '٤',
+        '5' => '٥',
+        '6' => '٦',
+        '7' => '٧',
+        '8' => '٨',
+        '9' => '٩'
+    ];
+
+    return strtr($text, $map + ['-' => '-']);
+}
 }
