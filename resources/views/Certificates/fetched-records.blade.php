@@ -209,6 +209,422 @@
         }
     </style>
 
+    <style>
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #263f2e 0%, #1a2f20 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 25px;
+            border: none;
+        }
+
+        .modal-header .modal-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-header .close {
+            color: white;
+            opacity: 0.8;
+            text-shadow: none;
+            font-size: 28px;
+            transition: all 0.3s;
+        }
+
+        .modal-header .close:hover {
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px 25px;
+        }
+
+        .modal-footer {
+            border: none;
+            padding: 20px 25px;
+            background: #f8f9fa;
+            border-radius: 0 0 20px 20px;
+        }
+
+        /* Student Info Card */
+        .student-info-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #263f2e;
+        }
+
+        .student-info-card p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .student-info-card strong {
+            color: #263f2e;
+            font-size: 1.2rem;
+            word-break: break-word;
+        }
+
+        /* Image Preview Container */
+        .image-preview-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .preview-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        #previewImage {
+            width: 160px;
+            height: 180px;
+            border-radius: 15px;
+            border: 4px solid #e9ecef;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        #previewImage:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .preview-badge {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            background: #263f2e;
+            color: white;
+            border-radius: 30px;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(38, 63, 46, 0.3);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #263f2e;
+            background: #e9ecef;
+        }
+
+        .upload-area i {
+            font-size: 40px;
+            color: #263f2e;
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+
+        .upload-area .file-name {
+            font-size: 0.9rem;
+            color: #263f2e;
+            font-weight: 500;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        #photoInput {
+            display: none;
+        }
+
+        /* Submit Button */
+        .btn-upload {
+            background: linear-gradient(135deg, #263f2e 0%, #1a2f20 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(38, 63, 46, 0.4);
+            color: white;
+        }
+
+        .btn-upload:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Table Styles - Responsive */
+        .w-33 {
+            width: 33.33%;
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .table thead th {
+            background: #263f2e;
+            color: white;
+            font-weight: 600;
+            border: none;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin: 0 3px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+
+        /* Mobile Responsive Styles */
+        @media screen and (max-width: 768px) {
+
+            /* Header adjustments */
+            .card-header {
+                flex-direction: column;
+                text-align: center !important;
+                gap: 10px;
+            }
+
+            .card-header .w-33 {
+                width: 100% !important;
+                text-align: center !important;
+            }
+
+            .card-header h5 {
+                font-size: 1rem;
+            }
+
+            /* Table responsive */
+            .table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .table td {
+                min-width: 120px;
+            }
+
+            .table td:first-child {
+                min-width: 50px;
+            }
+
+            .table td:nth-child(2) {
+                min-width: 140px;
+            }
+
+            .table td:last-child {
+                min-width: 280px;
+            }
+
+            /* Action buttons in table */
+            .btn-action {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+                margin: 2px;
+            }
+
+            /* Modal responsive */
+            .modal-dialog {
+                margin: 10px;
+            }
+
+            .modal-body {
+                padding: 20px 15px;
+            }
+
+            .modal-header {
+                padding: 15px;
+            }
+
+            .modal-header .modal-title {
+                font-size: 1.1rem;
+            }
+
+            .modal-footer {
+                padding: 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-footer button {
+                width: 100%;
+                margin: 0 !important;
+            }
+
+            /* Student info card */
+            .student-info-card {
+                padding: 15px;
+            }
+
+            .student-info-card strong {
+                font-size: 1rem;
+            }
+
+            /* Preview image */
+            #previewImage {
+                width: 140px;
+                height: 160px;
+            }
+
+            .preview-badge {
+                padding: 3px 10px;
+                font-size: 0.7rem;
+            }
+
+            /* Upload area */
+            .upload-area {
+                padding: 20px 15px;
+            }
+
+            .upload-area i {
+                font-size: 30px;
+            }
+
+            .upload-area p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Small mobile devices */
+        @media screen and (max-width: 480px) {
+            .modal-body {
+                padding: 15px 10px;
+            }
+
+            .student-info-card {
+                padding: 12px;
+            }
+
+            .student-info-card p {
+                font-size: 0.9rem;
+            }
+
+            .student-info-card strong {
+                font-size: 0.95rem;
+            }
+
+            #previewImage {
+                width: 120px;
+                height: 140px;
+            }
+
+            .upload-area {
+                padding: 15px 10px;
+            }
+
+            .upload-area i {
+                font-size: 25px;
+            }
+
+            .upload-area p {
+                font-size: 0.8rem;
+            }
+
+            .upload-area .file-name {
+                font-size: 0.8rem;
+            }
+
+            .btn-upload {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            /* Table text size */
+            .table td {
+                font-size: 0.9rem;
+            }
+
+            .table td strong {
+                font-size: 0.9rem;
+            }
+
+            .btn-action {
+                padding: 3px 6px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Tablet devices */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .card-header .w-33 {
+                font-size: 0.9rem;
+            }
+
+            .btn-action {
+                padding: 5px 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* For better table scrolling on mobile */
+        .table-responsive-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -15px;
+            padding: 0 15px;
+        }
+
+        /* Ensure images don't overflow */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Better touch targets for mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .btn-action {
+                padding: 8px 12px;
+            }
+
+            .upload-area {
+                min-height: 150px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+    </style>
+
     <div class="side-app">
         <div class="stats-container">
             @if (isset($groupedByStudent))
@@ -233,61 +649,63 @@
                     </div>
 
                     <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th style="width:1px;">No.</th>
-                                    <th style="width:70px; text-align:center;">Photo</th>
-                                    <th style="text-align: center">Student Information</th>
-                                    <th style="text-align: center;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($groupedByStudent as $studentId => $allocations)
-                                    @php
-                                        $photoPath = public_path('assets/student_photos/' . $studentId . '.jpg');
-                                        $photoExists = file_exists($photoPath);
-                                    @endphp
-
+                        <div class="table-responsive-wrapper">
+                            <table class="table table-bordered">
+                                <thead>
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td style="text-align:center; width:140px;">
-                                            @if($photoExists)
-                                                <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') }}"
-                                                    style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
-                                            @else
-                                                <img src="{{ asset('assets/images/default-user.jpg') }}"
-                                                    style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <strong>{{ $studentId }}</strong> - {{ Helper::getStudentName($studentId) }}
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('passlip.download', ['student_id' => $studentId]) }}"
-                                                class="btn btn-sm btn-primary btn-action" target="_blank">
-                                                <i class="fas fa-file-pdf"></i> Passlip
-                                            </a>
-
-                                            <a href="{{ route('certificate.view', ['student_id' => $studentId]) }}"
-                                                class="btn btn-sm btn-success btn-action" target="_blank">
-                                                <i class="fas fa-file-pdf"></i> Certificate
-                                            </a>
-
-                                            <button class="btn btn-sm btn-warning btn-action uploadBtn"
-                                                data-student="{{ $studentId }}"
-                                                data-name="{{ Helper::getStudentName($studentId) }}">
-                                                @if($photoExists)
-                                                    <i class="fas fa-edit"></i> Update
-                                                @else
-                                                    <i class="fas fa-upload"></i> Upload
-                                                @endif
-                                            </button>
-                                        </td>
+                                        <th style="width:1px;">No.</th>
+                                        <th style="width:70px; text-align:center;">Photo</th>
+                                        <th style="text-align: center">Student Information</th>
+                                        <th style="text-align: center;">Actions</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($groupedByStudent as $studentId => $allocations)
+                                        @php
+                                            $photoPath = public_path('assets/student_photos/' . $studentId . '.jpg');
+                                            $photoExists = file_exists($photoPath);
+                                        @endphp
+
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td style="text-align:center; width:140px;">
+                                                @if($photoExists)
+                                                    <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') }}"
+                                                        style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
+                                                @else
+                                                    <img src="{{ asset('assets/images/default-user.jpg') }}"
+                                                        style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <strong>{{ $studentId }}</strong> - {{ Helper::getStudentName($studentId) }}
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('passlip.download', ['student_id' => $studentId]) }}"
+                                                    class="btn btn-sm btn-primary btn-action" target="_blank">
+                                                    <i class="fas fa-file-pdf"></i> Passlip
+                                                </a>
+
+                                                <a href="{{ route('certificate.view', ['student_id' => $studentId]) }}"
+                                                    class="btn btn-sm btn-success btn-action" target="_blank">
+                                                    <i class="fas fa-file-pdf"></i> Certificate
+                                                </a>
+
+                                                <button class="btn btn-sm btn-warning btn-action uploadBtn"
+                                                    data-student="{{ $studentId }}"
+                                                    data-name="{{ Helper::getStudentName($studentId) }}">
+                                                    @if($photoExists)
+                                                        <i class="fas fa-edit"></i> Update
+                                                    @else
+                                                        <i class="fas fa-upload"></i> Upload
+                                                    @endif
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- Beautified Upload Modal -->
@@ -352,7 +770,7 @@
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
