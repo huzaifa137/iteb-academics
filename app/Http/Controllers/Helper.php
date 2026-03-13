@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use DB;
 use Session;
+use App\Models\MasterData;
+use App\Models\Mark;
 use Carbon\Carbon;
 use NumberFormatter;
 use App\Models\User;
 use App\Models\StudentBasic;
 use App\Models\Student;
+use App\Models\ClassAllocation;
 use App\Models\AcademicYear;
 
 class Helper extends Controller
@@ -626,57 +629,124 @@ class Helper extends Controller
     }
 
     public static function toArabicLettersPackage($text)
-{
-    // Handle special letter combinations first
-    $special = [
-        'TH' => 'ث'
-    ];
+    {
+        // Handle special letter combinations first
+        $special = [
+            'TH' => 'ث'
+        ];
 
-    // Replace combinations first
-    $text = str_ireplace(array_keys($special), array_values($special), strtoupper($text));
+        // Replace combinations first
+        $text = str_ireplace(array_keys($special), array_values($special), strtoupper($text));
 
-    // Single letter + number mapping
-    $map = [
-        'A' => 'ا',
-        'B' => 'ب',
-        'C' => 'ك',
-        'D' => 'د',
-        'E' => 'ي',
-        'F' => 'ف',
-        'G' => 'ج',
-        'H' => 'ه',
-        'I' => 'ا',
-        'J' => 'ج',
-        'K' => 'ك',
-        'L' => 'ل',
-        'M' => 'م',
-        'N' => 'ن',
-        'O' => 'و',
-        'P' => 'ب',
-        'Q' => 'ق',
-        'R' => 'ر',
-        'S' => 'س',
-        'T' => 'ت',
-        'U' => 'و',
-        'V' => 'ف',
-        'W' => 'و',
-        'X' => 'كس',
-        'Y' => 'ي',
-        'Z' => 'ز',
+        // Single letter + number mapping
+        $map = [
+            'A' => 'ا',
+            'B' => 'ب',
+            'C' => 'ك',
+            'D' => 'د',
+            'E' => 'ي',
+            'F' => 'ف',
+            'G' => 'ج',
+            'H' => 'ه',
+            'I' => 'ا',
+            'J' => 'ج',
+            'K' => 'ك',
+            'L' => 'ل',
+            'M' => 'م',
+            'N' => 'ن',
+            'O' => 'و',
+            'P' => 'ب',
+            'Q' => 'ق',
+            'R' => 'ر',
+            'S' => 'س',
+            'T' => 'ت',
+            'U' => 'و',
+            'V' => 'ف',
+            'W' => 'و',
+            'X' => 'كس',
+            'Y' => 'ي',
+            'Z' => 'ز',
 
-        // Numbers
-        '0' => '٠',
-        '1' => '١',
-        '2' => '٢',
-        '3' => '٣',
-        '4' => '٤',
-        '5' => '٥',
-        '6' => '٦',
-        '7' => '٧',
-        '8' => '٨',
-        '9' => '٩'
-    ];
+            // Numbers
+            '0' => '٠',
+            '1' => '١',
+            '2' => '٢',
+            '3' => '٣',
+            '4' => '٤',
+            '5' => '٥',
+            '6' => '٦',
+            '7' => '٧',
+            '8' => '٨',
+            '9' => '٩'
+        ];
 
-    return strtr($text, $map + ['-' => '-']);
-}
+        return strtr($text, $map + ['-' => '-']);
+    }
+
+    public static function getSubjectIdsForCategory($category)
+    {
+        $masterCodeId = ($category == 'TH')
+            ? config('constants.options.ThanawiPapers')
+            : config('constants.options.IdaadPapers');
+
+        return MasterData::where('md_master_code_id', $masterCodeId)
+            ->pluck('md_id')
+            ->toArray();
+    }
+
+    public static function getStudentNationalRank($studentId)
+    {
+        $parts = explode('-', $studentId);
+        $year = $parts[4];
+        $category = $parts[2];
+
+        // Get all students in the same category and year
+        $allStudentIds = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->pluck('Student_ID')
+            ->toArray();
+
+        // Get subjects for this category
+        $subjectIds = self::getSubjectIdsForCategory($category);
+        $totalPossibleMarks = count($subjectIds) * 100;
+
+        // Array to store each student's total marks and percentage
+        $studentsWithPercentage = [];
+
+        foreach ($allStudentIds as $sid) {
+            // Sum marks for this student only for the relevant subjects and year
+            $totalMarks = Mark::where('student_id', $sid)
+                ->whereIn('subject_id', $subjectIds)
+                ->where('year', $year)
+                ->sum('mark');
+
+            if ($totalMarks === 0) {
+                continue; // Skip students with no marks
+            }
+
+            $percentage = $totalPossibleMarks > 0
+                ? ($totalMarks / $totalPossibleMarks) * 100
+                : 0;
+
+            $studentsWithPercentage[] = [
+                'id' => $sid,
+                'percentage' => $percentage
+            ];
+        }
+
+        // Sort students by percentage descending
+        usort($studentsWithPercentage, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        // Find and return the student's national rank
+        foreach ($studentsWithPercentage as $index => $student) {
+            if ($student['id'] === $studentId) {
+                return $index + 1; // Rank is index + 1
+            }
+        }
+
+        return null; // Student not found
+    }
 }

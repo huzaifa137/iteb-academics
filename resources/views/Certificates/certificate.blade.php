@@ -17,12 +17,12 @@
         }
 
         /* CERTIFICATE CONTAINER */
-        .certificate {
-            width: 297mm;
-            height: 210mm;
-            margin: 0 auto;
-            position: relative;
-        }
+.certificate {
+    width: 287mm;
+    height: 198mm;
+    margin: 5mm auto 0 auto; /* add top spacing */
+    position: relative;
+}
 
         /* BORDER IMAGE */
         .certificate-bg {
@@ -36,17 +36,17 @@
         .certificate-bg img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: fill;
+            display: block;
         }
 
         /* CONTENT INSIDE BORDER */
         .certificate-content {
             position: absolute;
-            left: 20mm;
-            right: 20mm;
-            top: 23mm;
-            /* start below top border */
-            /* remove bottom: 5mm; */
+            left: 22mm;
+            right: 22mm;
+            top: 16mm;
+            bottom: 22mm;
         }
 
         /* BISMILLAH */
@@ -128,7 +128,7 @@
             margin-top: 20px;
             font-size: 16px;
             line-height: 1.7;
-                font-family: Tahoma, Arial, sans-serif;
+            font-family: Tahoma, Arial, sans-serif;
         }
 
         /* ENGLISH PARAGRAPH */
@@ -137,10 +137,11 @@
         /* FOOTER */
 
         .footer {
-            margin-top: 30px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 20px;
         }
 
         .footer-col {
@@ -179,7 +180,7 @@
         }
 
         .signature-space {
-            height: 80px;
+            height: 60px;
         }
 
         .watermark {
@@ -228,7 +229,6 @@
                 In the name of Allah the most Gracious the most Merciful
             </div>
 
-
             <div class="header">
 
                 <div class="left">
@@ -267,20 +267,21 @@
             <div class="arabic">
                 الحمد لله رب العالمين والصلاة والسلام على خاتم الأنبياء والمرسلين نبينا محمد وعلى آله وصحبه ومن تبعهم
                 بإحسان
-                إلى يوم الدين أما بعد : 
+                إلى يوم الدين أما بعد :
 
                 تشهد الهيئة بأن الطالب <b>{{ Helper::getStudentARName($studentId) }}</b> المولود سنة
                 <b>{{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }} </b> وجنسيته
                 <b>{{ Helper::getStudentARNationality($studentId) }}</b>
                 قد جلس في الامتحان النهائي للشهادة الإعدادية سنة
                 <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}</b>
-                <b>ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم <b>{{ Helper::getStudentID_AR($studentId) ?? Helper::toArabicLettersPackage($studentId) }}</b>
-                ونجح  بتقدير
+                <b>ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم
+                <b>{{ Helper::getStudentID_AR($studentId) ?? Helper::toArabicLettersPackage($studentId) }}</b>
+                ونجح بتقدير
                 <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>
                 @if(Helper::getStudentSex($studentId) == 'Female')
                     . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله لها السداد والتوفيق
                 @else
-                   . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله له السداد والتوفيق
+                    . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله له السداد والتوفيق
                 @endif
             </div>
 
@@ -289,7 +290,7 @@
                 The Board hereby certifies that <b>{{ Helper::getStudentName($studentId) }}</b> Born in
                 <b>{{ Helper::getStudentYearofBirth($studentId) }}</b> of
                 <b>{{ Helper::getStudentNationality($studentId) }}</b> Nationality, sat for the
-                <span class="nowrap">final examinations</span> in
+                final examinations in
                 <b>{{ Helper::getStudentAdmissionYear($studentId) }}</b>,
                 at <b>{{ Helper::getStudentSchool($studentId) }}</b> under registration Number
                 <b>{{ $studentId }}</b>, after successful completion of
@@ -304,7 +305,7 @@
                     <div>Date of Issue {{ $currentDate }}</div>
 
                     <div class="sign">
-                        <b>سكرتير التعليم بالمجل  س</b>
+                        <b>سكرتير التعليم بالمجل س</b>
                         <div class="signature-space"></div>
                         <strong>Secretary for Education (UMSC)</strong>
                     </div>
@@ -312,7 +313,7 @@
 
 
                 <div class="sno-section">
-                    <div style="padding-bottom: 5px;"><strong>SNO: {{ random_int(1000000, 9999999) }}</strong></div>
+                    <div style="padding-bottom: 5px;"><strong>SNO: {{ $snoRank }}</strong></div>
                     <div id="qr"></div>
                 </div>
 
@@ -321,7 +322,7 @@
                     <div>التاريخ {{ Helper::toArabicNumberDate($currentDate) }}</div>
 
                     <div class="sign">
-                        <b>السكرتير   التنفيذي  للهيئة</b>
+                        <b>السكرتير التنفيذي للهيئة</b>
                         <div class="signature-space"></div>
                         <strong>Executive Secretary (ITEBU)</strong>
                     </div>
@@ -359,8 +360,9 @@
                     quality: 1
                 },
                 html2canvas: {
-                    scale: 4,
-                    useCORS: true
+                    scale: 3,
+                    useCORS: true,
+                    scrollY: 0
                 },
                 jsPDF: {
                     unit: 'mm',

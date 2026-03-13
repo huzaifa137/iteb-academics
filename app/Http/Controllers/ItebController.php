@@ -2446,10 +2446,6 @@ class ItebController extends Controller
         return $pdf->download($filename);
     }
 
-    // Helper method to reuse existing logic
-    /**
-     * Get all exam statistics data for PDF generation
-     */
     private function getExamStatisticsData($request)
     {
         $year = $request->year;
@@ -2716,9 +2712,6 @@ class ItebController extends Controller
         ];
     }
 
-    /**
-     * Calculate ALL schools performance (not just top 10)
-     */
     private function calculateAllSchoolsPerformance($allStudents, $marks, $subjectIds, $totalPossibleMarks, $level, $category, $year)
     {
         $studentsBySchool = [];
@@ -2891,32 +2884,6 @@ class ItebController extends Controller
             ]
         ]);
     }
-
-    // private function generateSecurePassword($length = 12)
-    // {
-    //     $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    //     $lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    //     $numbers = '0123456789';
-    //     $symbols = '!@#$%^&*()_-+=';
-
-    //     $all = $uppercase . $lowercase . $numbers . $symbols;
-
-    //     // Ensure at least one character from each set
-    //     $password = '';
-    //     $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
-    //     $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
-    //     $password .= $numbers[random_int(0, strlen($numbers) - 1)];
-    //     $password .= $symbols[random_int(0, strlen($symbols) - 1)];
-
-    //     // Fill the rest with random characters
-    //     for ($i = strlen($password); $i < $length; $i++) {
-    //         $password .= $all[random_int(0, strlen($all) - 1)];
-    //     }
-
-    //     // Shuffle the password to avoid predictable pattern
-    //     return str_shuffle($password);
-    // }
-
     private function generateSecurePassword($length = 5)
     {
         $numbers = '0123456789';

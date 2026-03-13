@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Mark;
 use App\Models\House;
 use App\Models\MasterData;
 use Illuminate\Http\Request;
@@ -99,6 +100,13 @@ class PasslipAndCertificatesController extends Controller
         $categoryParts = explode('-', $studentCategory);
         $firstLetters = $categoryParts[0];
 
+        $rank = Helper::getStudentNationalRank($studentId);
+
+        if ($firstLetters === 'TH') {
+            $subYear = substr($parts[4], -2);
+            $snoRank = '2' . $subYear . $rank;
+        }
+
         if ($firstLetters == 'ID') {
             $level = "O'LEVEL";
             $ArLevel = 'الإعدادية';
@@ -113,7 +121,8 @@ class PasslipAndCertificatesController extends Controller
             'studentCategory',
             'year',
             'level',
-            'ArLevel'
+            'ArLevel',
+            'snoRank',
         ));
     }
 }
