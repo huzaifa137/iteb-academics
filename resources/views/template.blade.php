@@ -20,21 +20,14 @@
             font-family: Arial, sans-serif;
         }
 
-        :root {
-            --border-green: #2e5a31;
-            --light-green: #e9f5ea;
-        }
-
         .document-container {
             width: 204mm;
             height: 277mm;
             padding: 5mm;
-            border: 5mm solid var(--border-green);
             box-sizing: border-box;
             background-color: #fff;
             position: relative;
             overflow: hidden;
-
             margin: 0 auto;
         }
 
@@ -59,7 +52,7 @@
 
         header {
             text-align: center;
-            border-bottom: 3px solid var(--border-green);
+            border-bottom: 3px solid #000;
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
@@ -266,7 +259,19 @@
                 </div>
             </div>
             <div class="info-col" style="text-align: right;">
-                <div class="photo-box" style="float: right; margin-left: 10px;">PHOTO</div>
+                <div class="photo-box" style="float: right; margin-left: 10px;">
+                    @php
+                        $photo = public_path('assets/student_photos/' . $studentId . '.jpg');
+                    @endphp
+
+                    @if(file_exists($photo))
+                        <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') }}"
+                            style="width:100%; height:100%; object-fit:cover;">
+                    @else
+                        <img src="{{ asset('assets/images/default-user.png') }}"
+                            style="width:100%; height:100%; object-fit:cover;">
+                    @endif
+                </div>
                 <div>اسم الطالب : {{ Helper::getStudentARName($studentId) }}</div>
                 <div>المرحلة: {{ Helper::getStudentARLevel($studentId) }}</div>
                 <div>العام: {{ Helper::toArabicNumberPackge($year) }}</div>
@@ -347,12 +352,35 @@
         </div>
 
         <div class="signatures">
+
             <div class="sig-box">
-                CHAIRMAN<br><strong>مدير هيئة الامتحانات</strong>
+
+                <strong>مدير هيئة الامتحانات</strong>
+
+                <div class="sig-img">
+                    <img src="{{ asset('assets/signatures/chairman.png') }}" alt="Chairman Signature">
+                </div>
+
+                <div class="sig-line">
+                    CHAIRMAN
+                </div>
+
             </div>
+
             <div class="sig-box">
-                EXECUTIVE SECRETARY<br><strong>السكرتير التنفيذي</strong>
+
+                <strong>السكرتير التنفيذي</strong>
+
+                <div class="sig-img">
+                    <img src="{{ asset('assets/signatures/Executive.png') }}" alt="Executive Secretary Signature">
+                </div>
+
+                <div class="sig-line">
+                    EXECUTIVE SECRETARY
+                </div>
+
             </div>
+
         </div>
 
         <div class="grading-scale">

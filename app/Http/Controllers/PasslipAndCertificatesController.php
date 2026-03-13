@@ -125,4 +125,28 @@ class PasslipAndCertificatesController extends Controller
             'snoRank',
         ));
     }
+
+    public function uploadStudentPhoto(Request $request)
+    {
+
+        $request->validate([
+            'photo' => 'required|image|mimes:jpg,jpeg,png',
+            'studentId' => 'required'
+        ]);
+
+        $studentId = $request->studentId;
+
+        $file = $request->file('photo');
+
+        $path = public_path('assets/student_photos');
+
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+
+        $file->move($path, $studentId . '.jpg');
+
+        return response()->json(['success' => true]);
+
+    }
 }
