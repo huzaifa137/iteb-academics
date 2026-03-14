@@ -351,60 +351,7 @@
 
         <div class="container mt-4">
 
-            <div class="row g-4">
-                <!-- Total Students Card -->
-                <div class="col-md-4">
-                    <div class="card stats-card bg-gradient-primary border-0 shadow-lg">
-                        <div class="card-body position-relative">
-                            <div class="stats-icon-wrapper">
-                                <i class="fas fa-users fa-2x"></i>
-                            </div>
-                            <div class="stats-content">
-                                <span class="stats-label text-white text-uppercase small fw-bold">Overall Student
-                                    Population</span>
-                                <h3 class="stats-number text-white mb-0">{{ $totalStudents }}</h3>
-                                <small class="text-white"><i class="fas fa-arrow-up me-1"></i> Total enrolled</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Graded Records Card -->
-                <div class="col-md-4">
-                    <div class="card stats-card bg-gradient-success border-0 shadow-lg">
-                        <div class="card-body position-relative">
-                            <div class="stats-icon-wrapper">
-                                <i class="fas fa-check-circle fa-2x"></i>
-                            </div>
-                            <div class="stats-content">
-                                <span class="stats-label text-white text-uppercase small fw-bold">Overall Total Graded
-                                    Records</span>
-                                <h3 class="stats-number text-white mb-0">{{ $gradedSoFar }}</h3>
-                                <small class="text-white"><i class="fas fa-file-alt me-1"></i> Completed
-                                    assessments</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Average Performance Card -->
-                <div class="col-md-4">
-                    <div class="card stats-card bg-gradient-info border-0 shadow-lg">
-                        <div class="card-body position-relative">
-                            <div class="stats-icon-wrapper">
-                                <i class="fas fa-chart-line fa-2x"></i>
-                            </div>
-                            <div class="stats-content">
-                                <span class="stats-label text-white text-uppercase small fw-bold">Average
-                                    Performance</span>
-                                <h3 class="stats-number text-white mb-0">{{ number_format($avgPerformance, 1) }}%</h3>
-                                <i class="fas fa-trophy text-white me-1"></i> <span class="text-white">Overall
-                                    Achievement</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
 
             <div class="card shadow-lg border-0">
                 <div class="card-header text-white d-flex justify-content-between align-items-center"
