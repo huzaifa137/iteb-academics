@@ -13,30 +13,16 @@
         }
 
         body {
-            width: 297mm;
-            height: 210mm;
-            margin: auto;
             background: #e9ecef;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         /* CERTIFICATE CONTAINER */
-        /* CERTIFICATE CONTAINER */
-        .certificate {
-            width: 287mm;
-            height: 198mm;
-
-            position: relative;
-
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 6mm;
-            margin-bottom: 6mm;
-
-            display: block;
-        }
+.certificate {
+    width: 287mm;
+    height: 198mm;
+    margin: 5mm auto 0 auto; /* add top spacing */
+    position: relative;
+}
 
         /* BORDER IMAGE */
         .certificate-bg {
@@ -151,17 +137,18 @@
         /* FOOTER */
 
         .footer {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             gap: 20px;
         }
 
-        .footer-col,
-        .sno-section,
-        .footer-empty {
-            flex: 1;
+        .footer-col {
+            text-align: center;
+        }
+
+        .sno-section {
             text-align: center;
         }
 
@@ -331,12 +318,6 @@
                 </div>
 
 
-                <!-- NEW EMPTY SECTION -->
-                <div class="footer-empty">
-                    &nbsp;
-                </div>
-
-
                 <div class="footer-col date-ar">
                     <div>التاريخ {{ Helper::toArabicNumberDate($currentDate) }}</div>
 
@@ -379,7 +360,7 @@
                     quality: 1
                 },
                 html2canvas: {
-                    scale: 4,
+                    scale: 3,
                     useCORS: true,
                     scrollY: 0
                 },

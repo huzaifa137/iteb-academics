@@ -5,38 +5,38 @@
     <meta charset="UTF-8">
     <title>A LEVEL Certificate</title>
     <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: white;
-        }
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: white;
+}
 
-        body {
-            width: 297mm;
-            height: 210mm;
-            margin: auto;
-            background: #e9ecef;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+body {
+    width: 297mm;
+    height: 210mm;
+    margin: auto;
+    background: #e9ecef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
         /* CERTIFICATE CONTAINER */
-        /* CERTIFICATE CONTAINER */
-        .certificate {
-            width: 287mm;
-            height: 198mm;
+/* CERTIFICATE CONTAINER */
+.certificate {
+    width: 287mm;
+    height: 198mm;
 
-            position: relative;
+    position: relative;
 
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 6mm;
-            margin-bottom: 6mm;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 6mm;
+    margin-bottom: 6mm;
 
-            display: block;
-        }
+    display: block;
+}
 
         /* BORDER IMAGE */
         .certificate-bg {
@@ -151,17 +151,18 @@
         /* FOOTER */
 
         .footer {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             gap: 20px;
         }
 
-        .footer-col,
-        .sno-section,
-        .footer-empty {
-            flex: 1;
+        .footer-col {
+            text-align: center;
+        }
+
+        .sno-section {
             text-align: center;
         }
 
@@ -328,12 +329,6 @@
                 <div class="sno-section">
                     <div style="padding-bottom: 5px;"><strong>SNO: {{ $snoRank }}</strong></div>
                     <div id="qr"></div>
-                </div>
-
-
-                <!-- NEW EMPTY SECTION -->
-                <div class="footer-empty">
-                    &nbsp;
                 </div>
 
 
