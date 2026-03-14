@@ -16,7 +16,8 @@
            AJAX, CSRF, error handling, dynamic labels)
         ------------------------------------------------------------ */
         :root {
-            --orange: #16a34a; /* repurposed variable name kept for minimal changes */
+            --orange: #16a34a;
+            /* repurposed variable name kept for minimal changes */
             --orange-dark: #15803d;
             --orange-light: #4ade80;
             --orange-subtle: #ecfdf5;
@@ -353,12 +354,15 @@
             .login-card {
                 padding: 2rem 1.5rem;
             }
+
             .brand {
                 font-size: 2rem;
             }
+
             .user-role-selector {
                 flex-wrap: wrap;
             }
+
             .role-btn {
                 min-width: 100px;
             }
@@ -373,9 +377,9 @@
             I<span>T</span>EB
         </div>
         <div class="welcome-text">
-           <i class="fas fa-hand-sparkles" style="color: var(--orange);"></i> Welcome to
- I<span>T</span>EB! <br>
-            Please sign-in to your account 
+            <i class="fas fa-hand-sparkles" style="color: var(--orange);"></i> Welcome to
+            I<span>T</span>EB! <br>
+            Please sign-in to your account
         </div>
 
         <!-- === ORIGINAL ROLE SELECTOR – fully functional, now in orange === -->
@@ -384,9 +388,9 @@
                 <i class="fas fa-user-graduate"></i>
                 <span>Student</span>
             </button>
-            <button class="role-btn" data-role="teacher">
+            <button class="role-btn" data-role="school">
                 <i class="fas fa-chalkboard-teacher"></i>
-                <span>Teacher</span>
+                <span>School</span>
             </button>
             <button class="role-btn" data-role="admin">
                 <i class="fas fa-user-cog"></i>
@@ -405,7 +409,7 @@
                 <div class="input-group">
                     <i class="fas fa-id-card input-icon"></i>
                     <input type="text" id="username" name="username" class="form-input"
-                           placeholder="Enter your student registration number">
+                        placeholder="Enter your student registration number">
                 </div>
                 <small class="error-text" id="username-error"></small>
             </div>
@@ -416,7 +420,7 @@
                 <div class="input-group">
                     <i class="fas fa-lock input-icon"></i>
                     <input type="password" id="password" name="password" class="form-input"
-                           placeholder="Enter your secure password">
+                        placeholder="Enter your secure password">
                     <button type="button" class="password-toggle" id="togglePassword">
                         <i class="fas fa-eye"></i>
                     </button>
@@ -430,7 +434,8 @@
                     <input type="checkbox" name="remember" id="remember" value="1">
                     <span>Remember me</span>
                 </label>
-                <a href="{{ url('/users/forgot-password') }}" class="forgot-password">Forgot password?</a>
+                <a href="javascript:void();" class="forgot-password" style="text-decoration: none;">Forgot password ?</a>
+                {{-- <a href="{{ url('/users/forgot-password') }}" class="forgot-password">Forgot password?</a> --}}
             </div>
 
             <!-- SIGN IN BUTTON (orange) -->
@@ -469,10 +474,10 @@
                         usernameInput.placeholder = 'Enter your student registration number';
                         passwordLabel.textContent = 'STUDENT PASSWORD';
                         break;
-                    case 'teacher':
-                        usernameLabel.textContent = 'TEACHER ID / EMAIL';
-                        usernameInput.placeholder = 'Enter your teacher identification number';
-                        passwordLabel.textContent = 'TEACHER PASSWORD';
+                    case 'school':
+                        usernameLabel.textContent = 'SCHOOL CENTER NUMBER';
+                        usernameInput.placeholder = 'Enter your school center number';
+                        passwordLabel.textContent = 'SCHOOL PASSWORD';
                         break;
                     case 'admin':
                         usernameLabel.textContent = 'ADMINISTRATOR ID / EMAIL';
@@ -544,37 +549,37 @@
                     },
                     body: formData
                 })
-                .then(async response => {
-                    const data = await response.json();
-                    if (!response.ok) throw data;
-                    return data;
-                })
-                .then(data => {
-                    if (data.status && data.redirect) {
-                        window.location.href = data.redirect;
-                    } else {
-                        throw { message: 'Redirect missing' };
-                    }
-                })
-                .catch(data => {
-                    // Re-enable button on error
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = originalBtnHtml;
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) throw data;
+                        return data;
+                    })
+                    .then(data => {
+                        if (data.status && data.redirect) {
+                            window.location.href = data.redirect;
+                        } else {
+                            throw { message: 'Redirect missing' };
+                        }
+                    })
+                    .catch(data => {
+                        // Re-enable button on error
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = originalBtnHtml;
 
-                    // Validation errors
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(key => {
-                            const errorEl = document.getElementById(`${key}-error`);
-                            if (errorEl) {
-                                errorEl.textContent = data.errors[key][0];
-                            }
-                        });
-                    }
-                    // General error
-                    if (data.message && !data.errors) {
-                        alert(data.message);
-                    }
-                });
+                        // Validation errors
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(key => {
+                                const errorEl = document.getElementById(`${key}-error`);
+                                if (errorEl) {
+                                    errorEl.textContent = data.errors[key][0];
+                                }
+                            });
+                        }
+                        // General error
+                        if (data.message && !data.errors) {
+                            alert(data.message);
+                        }
+                    });
             });
         });
     </script>
@@ -582,4 +587,5 @@
     <!-- Optional: dynamic year (if you need it, uncomment) 
     <script>document.getElementById("year").textContent = new Date().getFullYear();</script> -->
 </body>
+
 </html>

@@ -54,6 +54,18 @@ class AdminAuth
             return redirect('/');
         }
 
+        if (
+            session()->has('LoggedSchool') &&
+            (
+                $request->path() == 'users/login' ||
+                $request->path() == 'users/register' ||
+                $request->path() == 'users/home-page' ||
+                $request->routeIs('auth-user-check')
+            )
+        ) {
+            return redirect('/school/dashboard');
+        }
+
         $response = $next($request);
 
         $response->headers->set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');

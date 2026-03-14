@@ -1,1563 +1,848 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="no-js" lang="zxx">
 
 <head>
+    <!-- Meta Tags -->
     <meta charset="utf-8">
-    <title>Item Academics</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="keywords" content="Site keywords here">
+    <meta name="description" content="">
+    <meta name='copyright' content=''>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Title -->
+    <title>ITEB &minus; Idaad & Thanawi Examination Board</title>
 
     <!-- Favicon -->
-    <link href="{{ asset('asset/img/favicon.ico') }}" rel="icon">
+    <link rel="icon" type="image/png" href="{{ asset('asset/images/logo.png') }}">
 
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap"
-        rel="stylesheet">
+    <!-- Web Font -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
 
-    <!-- Icon Font Stylesheet -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ asset('asset/css/bootstrap.min.css') }}">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="{{ asset('asset/css/font-awesome.min.css') }}">
+    <!-- Nice Select CSS -->
+    <link rel="stylesheet" href="{{ asset('asset/css/niceselect.css') }}">
+    <!-- Fancy Box CSS -->
+    <link rel="stylesheet" href=" {{ asset('asset/css/jquery.fancybox.min.css') }}">
+    <!-- Fancy Box CSS -->
+    <link rel="stylesheet" href="{{asset('asset/css/cube-portfolio.min.css')}}">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="{{asset('asset/css/owl.carousel.min.css')}}">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="{{asset('asset/css/animate.min.css')}}">
+    <!-- Slick Nav CSS -->
+    <link rel="stylesheet" href="{{asset('asset/css/slicknav.min.css')}}">
+    <!-- Magnific Popup -->
+    <link rel="stylesheet" href="{{asset('asset/css/magnific-popup.css')}}">
 
-    <!-- Libraries Stylesheet -->
-    <link href="{{ asset('asset/lib/animate/animate.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('asset/lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <!-- Eduland Stylesheet -->
+    <link rel="stylesheet" href="{{asset('asset/css/normalize.css')}}">
+    <link rel="stylesheet" href="{{asset('asset/style.css')}}">
+    <link rel="stylesheet" href="{{asset('asset/css/responsive.css')}}">
 
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="{{ asset('asset/css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Eduland Colors -->
+    <link rel="stylesheet" href="{{asset('asset/css/colors/color1.css')}}">
 
-    <!-- Template Stylesheet -->
-    <link href="{{ asset('asset/css/style.css') }}" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container-xxl bg-white p-0">
-        <!-- Spinner Start -->
-        <div id="spinner"
-            class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-        </div>
-        <!-- Spinner End -->
 
 
-        <!-- Navbar Start -->
-        <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-4 px-lg-5 py-lg-0">
-            <a href="{{ route('home.page') }}" class="navbar-brand d-flex align-items-center">
-                <img src="{{ asset('assets/images/brand/logo.png') }}" alt="ITEB Logo" class="navbar-logo me-3">
-                <h1 class="m-0 text-primary">ITEB</h1>
-            </a>
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <div class="navbar-nav mx-auto">
-                    <a href="{{ route('home.page') }}" class="nav-item nav-link active">Home</a>
-                    <a href="{{ route('about.us') }}" class="nav-item nav-link">About Us</a>
-                    <a href="{{ route('contact.us') }}" class="nav-item nav-link">Contact Us</a>
-                    <a href="{{ route('users.login') }}" class="nav-item nav-link">Login</a>
-                </div>
-                <a href="{{ route('public.portal') }}"
-                    class="btn btn-primary rounded-pill px-3 d-none d-lg-block">Portal<i
-                        class="fa fa-arrow-right ms-3"></i></a>
-            </div>
-        </nav>
-        <!-- Navbar End -->
-
-
-        <!-- Carousel Start -->
-        <div class="container-fluid p-0 mb-5">
-            <div class="owl-carousel header-carousel position-relative">
-                <div class="owl-carousel-item position-relative">
-                    <img class="img-fluid" src="{{ asset('asset/img/carousel-1.jpg') }}" alt="">
-                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center"
-                        style="background: rgba(0, 0, 0, .2);">
-                        <div class="container">
-                            <div class="row justify-content-start">
-                                <div class="col-10 col-lg-8">
-                                    <h1 class="display-2 text-white animated slideInDown mb-4">Idaad & Thanawi
-                                        Examination Board</h1>
-                                    <p class="fs-5 fw-medium text-white mb-4 pb-2">A modern, transparent, and efficient
-                                        system for grading Idaad and Thanawi examination results across Uganda.</p>
-                                    <a href=""
-                                        class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn
-                                        More</a>
-                                    <a href=""
-                                        class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our
-                                        Classes</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="owl-carousel-item position-relative">
-                    <img class="img-fluid" src="{{ asset('asset/img/carousel-2.jpg') }}" alt="">
-                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center"
-                        style="background: rgba(0, 0, 0, .2);">
-                        <div class="container">
-                            <div class="row justify-content-start">
-                                <div class="col-10 col-lg-8">
-                                    <h1 class="display-2 text-white animated slideInDown mb-4">Make A Brighter Future
-                                        For Your Child</h1>
-                                    <p class="fs-5 fw-medium text-white mb-4 pb-2">Ensuring accuracy and fairness for
-                                        every student.</p>
-                                    <a href=""
-                                        class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn
-                                        More</a>
-                                    <a href=""
-                                        class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our
-                                        Classes</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Carousel End -->
-
-
-        <!-- Facilities Start -->
-        <div class="container-xxl py-5">
+    <!-- Header -->
+    <header class="header">
+        <!-- Header Inner -->
+        <div class="header-inner overlay">
             <div class="container">
-                <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
-                    <h1 class="mb-3">Examination Structures</h1>
-                    <p>Idaad (O-Level): The Ordinary Level secondary education stage specializing in Islamic Theology.
-                        Generally a 4-year program.</p>
-                    <p>Thanawi (A-Level): The Advanced Level secondary education stage. Generally a 2-year program.</p>
+                <div class="row">
+                    <div class="col-lg-3 col-md-3 col-12">
+                        <!-- Logo -->
+                        <div class="logo">
+                            <a href="{{ route('home.page') }}">
+                                <img src="{{asset('asset/images/logo.png')}}" alt="#"
+                                    style="width: 180px; height: 100px; object-fit: contain; max-width: 100%;"
+                                    class="logo-img">
+                            </a>
+                        </div>
+                        <!--/ End Logo -->
+
+                        <!-- Add this style tag right after your logo or in the head section -->
+                        <style>
+                            @media (max-width: 768px) {
+                                .logo-img {
+                                    width: 120px !important;
+                                    height: 60px !important;
+                                }
+                            }
+
+                            @media (max-width: 480px) {
+                                .logo-img {
+                                    width: 100px !important;
+                                    height: 50px !important;
+                                }
+                            }
+                        </style>
+                        <div class="mobile-menu"></div>
+                    </div>
+                    <div class="col-lg-9 col-md-9 col-12">
+                        <div class="menu-bar">
+                            <nav class="navbar navbar-default">
+                                <div class="navbar-collapse">
+                                    <!-- Main Menu -->
+                                    <ul id="nav" class="nav menu navbar-nav">
+                                        <li class="active"><a href="{{ route('home.page') }}"><i
+                                                    class="fa fa-home"></i>Home</a></li>
+                                        <li><a href="{{ route('users.login') }}"><i
+                                                    class="fa fa-address-book"></i>Login</a></li>
+                                    </ul>
+                                    <!-- End Main Menu -->
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
-                <div class="row g-4">
-                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="facility-item">
-                            <div class="facility-icon bg-primary">
-                                <span class="bg-primary"></span>
-                                <i class="fa fa-bus-alt fa-3x text-primary"></i>
-                                <span class="bg-primary"></span>
+            </div>
+        </div>
+        <!--/ End Header Inner -->
+    </header>
+    <!--/ End Header -->
+
+    <!-- Slider Area -->
+    <section class="home-slider">
+        <div class="slider-active">
+            <!-- Single Slider -->
+            <div class="single-slider overlay">
+                <div class="slider-image"
+                    style="background-image:url({{ asset('asset/images/slider/slider-bg1.jpg') }})"></div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-7 col-md-10 col-12">
+                            <!-- Slider Content -->
+                            <div class="slider-content">
+                                <h1 class="slider-title"><span>ITEB</span>Idaad & Thanawi <b>Examination Board</b></h1>
+                                <p class="slider-text">At the Uganda Muslim Supreme Council (UMSC) Examination Board, we
+                                    are committed to upholding the highest standards in Islamic secondary education.</p>
+                                <!-- Button -->
+                                <div class="button">
+                                    <a href="#about-iteb" class="btn white">About ITEB</a>
+                                    <a href="#subjects" class="btn white primary">Our Subjects</a>
+                                </div>
+                                <!--/ End Button -->
                             </div>
-                            <div class="facility-text bg-primary">
-                                <h3 class="text-primary mb-3">Data Collection</h3>
-                                <p class="mb-0">Secure digital submission of examination papers with automated
+                            <!--/ End Slider Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--/ End Single Slider -->
+        </div>
+    </section>
+    <!--/ End Slider Area -->
+
+    <!-- Courses -->
+    <section id="subjects" class="courses section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 col-12">
+                    <div class="section-title bg">
+                        <h2>Our <span>Subjects</span></h2>
+                        <p>many schools are adopting a "duo curriculum" (Combining standard secondary
+                            subjects with advanced Islamic Theology) to help students compete on the international
+                            market</p>
+                        <div class="icon"><i class="fa fa-clone"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-12">
+                    <!-- Single Course -->
+                    <div class="single-course">
+                        <!-- Course Head -->
+                        <div class="course-head overlay">
+                            <img src="{{asset('asset/images/courses/course1.jpg')}}" alt="#">
+                            <a href="{{ route('users.login') }}" class="btn white primary">Register Now</a>
+                        </div>
+                        <!-- Course Body -->
+                        <div class="course-body">
+                            <div class="name-price">
+                                <div class="teacher-info">
+                                    <img src="{{asset('asset/images/author1.jpg')}}" alt="#">
+                                    <h4 class="title"></h4>
+                                </div>
+                                <span class="price">ID & TH</span>
+                            </div>
+                            <h4 class="c-title"><a href="#">Islamic History</a></h4>
+                            <p>Islamic History studies the Muslim world's past, from the Prophet's life to its
+                                spread in Africa. It helps students understand their faith's origins and development.
+                            </p>
+                        </div>
+                        <!-- Course Meta -->
+                        <div class="course-meta">
+                            <!-- Rattings -->
+                            <ul class="rattings">
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li class="point"><span>5.0</span></li>
+                            </ul>
+                            <!-- Course Info -->
+
+                        </div>
+                        <!--/ End Course Meta -->
+                    </div>
+                    <!--/ End Single Course -->
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <!-- Single Course -->
+                    <div class="single-course">
+                        <!-- Course Head -->
+                        <div class="course-head overlay">
+                            <img src="{{asset('asset/images/courses/course3.jpg')}}" alt="#">
+                            <a href="{{ route('users.login') }}" class="btn white primary">Register Now</a>
+                        </div>
+                        <!-- Course Body -->
+                        <div class="course-body">
+                            <div class="name-price">
+                                <div class="teacher-info">
+                                    <img src="{{asset('asset/images/author3.jpg')}}" alt="#">
+                                    <h4 class="title"></h4>
+                                </div>
+                                <span class="price">IT & TH</span>
+                            </div>
+                            <h4 class="c-title"><a href="#">Sources of exegesis</a></h4>
+                            <p>examines the tools used to interpret the Qur'an. Studied at Uganda's O-Level, it
+                                identifies the primary sources: the Qur'an itself, the Hadith, scholarly consensus, and
+                                Arabic linguistics.</p>
+                        </div>
+                        <!-- Course Meta -->
+                        <div class="course-meta">
+                            <!-- Rattings -->
+                            <ul class="rattings">
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li class="point"><span>5.0</span></li>
+                            </ul>
+                            <!-- Course Info -->
+
+                        </div>
+                        <!--/ End Course Meta -->
+                    </div>
+                    <!--/ End Single Course -->
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <!-- Single Course -->
+                    <div class="single-course">
+                        <!-- Course Head -->
+                        <div class="course-head overlay">
+                            <img src="{{asset('asset/images/courses/course2.jpg')}}" alt="#">
+                            <a href="{{ route('users.login') }}" class="btn white primary">Register Now</a>
+                        </div>
+                        <!-- Course Body -->
+                        <div class="course-body">
+                            <div class="name-price">
+                                <div class="teacher-info">
+                                    <img src="{{asset('asset/images/author2.jpg')}}" alt="#">
+                                    <h4 class="title"></h4>
+                                </div>
+                                <span class="price">ID & TH</span>
+                            </div>
+                            <h4 class="c-title"><a href="#">Islamic Monotheism</a></h4>
+                            <p>is the foundational belief in the absolute oneness of God (Tawhid). Studied at Uganda's
+                                O-Level, it teaches that Allah is unique, without partners or equals.</p>
+                        </div>
+                        <!-- Course Meta -->
+                        <div class="course-meta">
+                            <!-- Rattings -->
+                            <ul class="rattings">
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li class="point"><span>5.0</span></li>
+                            </ul>
+                            <!-- Course Info -->
+
+                        </div>
+                        <!--/ End Course Meta -->
+                    </div>
+                    <!--/ End Single Course -->
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <!-- Single Course -->
+                    <div class="single-course">
+                        <!-- Course Head -->
+                        <div class="course-head overlay">
+                            <img src="{{asset('asset/images/courses/course4.jpg')}}" alt="#">
+                            <a href="{{ route('users.login') }}" class="btn white primary">Register Now</a>
+                        </div>
+                        <!-- Course Body -->
+                        <div class="course-body">
+                            <div class="name-price">
+                                <div class="teacher-info">
+                                    <img src="{{asset('asset/images/author1.jpg')}}" alt="#">
+                                    <h4 class="title"></h4>
+                                </div>
+                                <span class="price">ID & TH</span>
+                            </div>
+                            <h4 class="c-title"><a href="#">Quran Recitation and its Rules</a></h4>
+                            <p>(Tajweed) teaches the correct pronunciation and melodious recitation of the Holy Quran.
+                                Studied at Uganda's primary level, it covers articulation points, nasal sounds, and
+                                stopping rules.</p>
+                        </div>
+                        <!-- Course Meta -->
+                        <div class="course-meta">
+                            <!-- Rattings -->
+                            <ul class="rattings">
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li class="point"><span>5.0</span></li>
+                            </ul>
+                            <!-- Course Info -->
+
+                        </div>
+                        <!--/ End Course Meta -->
+                    </div>
+                    <!--/ End Single Course -->
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <!-- Single Course -->
+                    <div class="single-course">
+                        <!-- Course Head -->
+                        <div class="course-head overlay">
+                            <img src="{{asset('asset/images/courses/course5.jpg')}}" alt="#">
+                            <a href="{{ route('users.login') }}" class="btn white primary">Register Now</a>
+                        </div>
+                        <!-- Course Body -->
+                        <div class="course-body">
+                            <div class="name-price">
+                                <div class="teacher-info">
+                                    <img src="{{asset('asset/images/author3.jpg')}}" alt="#">
+                                    <h4 class="title">ID & TH</h4>
+                                </div>
+                                <span class="price">ID & TH</span>
+                            </div>
+                            <h4 class="c-title"><a href="#">Composition and Comprehension</a></h4>
+                            <p>develops Arabic writing and reading skills. Studied at Uganda's O-Level and A-Level, it
+                                enables students to construct texts and understand classical literature</p>
+                        </div>
+                        <!-- Course Meta -->
+                        <div class="course-meta">
+                            <!-- Rattings -->
+                            <ul class="rattings">
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li class="point"><span>5.0</span></li>
+                            </ul>
+                            <!-- Course Info -->
+
+                        </div>
+                        <!--/ End Course Meta -->
+                    </div>
+                    <!--/ End Single Course -->
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <!-- Single Course -->
+                    <div class="single-course">
+                        <!-- Course Head -->
+                        <div class="course-head overlay">
+                            <img src="{{asset('asset/images/courses/course3.jpg')}}" alt="#">
+                            <a href="{{ route('users.login') }}" class="btn white primary">Register Now</a>
+                        </div>
+                        <!-- Course Body -->
+                        <div class="course-body">
+                            <div class="name-price">
+                                <div class="teacher-info">
+                                    <img src="{{asset('asset/images/author2.jpg')}}" alt="#">
+                                    <h4 class="title"></h4>
+                                </div>
+                                <span class="price">ID & TH</span>
+                            </div>
+                            <h4 class="c-title"><a href="#">Rhetoric</a></h4>
+                            <p>is the study of eloquent and effective communication in Arabic. Studied at Uganda's
+                                A-Level, it examines figurative language, stylistic devices, and composition techniques.
+                            </p>
+                        </div>
+                        <!-- Course Meta -->
+                        <div class="course-meta">
+                            <!-- Rattings -->
+                            <ul class="rattings">
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li><i class="fa fa-star"></i></li>
+                                <li class="point"><span>5.0</span></li>
+                            </ul>
+                            <!-- Course Info -->
+
+                        </div>
+                        <!--/ End Course Meta -->
+                    </div>
+                    <!--/ End Single Course -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--/ End Courses -->
+
+    <!-- Features -->
+    <div class="features overlay section" data-stellar-background-ratio="0.5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Single Feature -->
+                    <div class="single-feature">
+                        <div class="icon-img">
+                            <img src="{{asset('asset/images/feature1.jpg')}}" alt="#">
+                            <i class="fa fa-clone"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="f-title">Religions and Sects</h4>
+                            <p>is an A-Level subject examining different Islamic sects and other faith traditions . It
+                                enables students to understand doctrinal differences and religious diversity, fostering
+                                interfaith awareness and comparative theological analysis at university level </p>
+                        </div>
+                    </div>
+                    <!--/ End Single Feature -->
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Single Feature -->
+                    <div class="single-feature">
+                        <div class="icon-img">
+                            <img src="{{asset('asset/images/feature2.jpg')}}" alt="#">
+                            <i class="fa fa-book"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="f-title">sources of jurisprudence</h4>
+                            <p>studies the primary evidence for Islamic law. At Uganda's O-Level, it examines the
+                                Qur'an, Sunnah, scholarly consensus, and analogy. The subject teaches students how legal
+                                rulings are derived from these foundations, ensuring daily practices are authentically
+                                grounded.</p>
+                        </div>
+                    </div>
+                    <!--/ End Single Feature -->
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Single Feature -->
+                    <div class="single-feature">
+                        <div class="icon-img">
+                            <img src="{{asset('asset/images/feature1.jpg')}}" alt="#">
+                            <i class="fa fa-institution"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="f-title">grammar and morphology</h4>
+                            <p>are the foundational sciences of Arabic linguistics. Studied at Uganda's A-Level, grammar
+                                governs sentence structure while morphology examines word patterns. Together, they
+                                enable students to accurately understand classical texts, including the Qur'an and
+                                Hadith, in their original form.</p>
+                        </div>
+                    </div>
+                    <!--/ End Single Feature -->
+                </div>
+                <div class="col-lg-3 col-md-6 col-12">
+                    <!-- Single Feature -->
+                    <div class="single-feature">
+                        <div class="icon-img">
+                            <img src="{{asset('asset/images/feature3.jpg')}}" alt="#">
+                            <i class="fa fa-users"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="f-title">Sources of Prophetic Traditions</h4>
+                            <p>examines the methodology for verifying Hadith. Studied at Uganda's O-Level, it covers
+                                chains of narration, narrator reliability, and text analysis. The subject distinguishes
+                                authentic from weak traditions, ensuring only verified teachings guide Islamic practice.
+                            </p>
+                        </div>
+                    </div>
+                    <!--/ End Single Feature -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ End Features -->
+
+    <!-- Events -->
+    <section id="about-iteb" class="events section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 col-12">
+                    <div class="section-title bg">
+                        <h2>Examination <span>Structures</span></h2>
+                        <p>Idaad (O-Level): The Ordinary Level secondary education stage specializing in Islamic
+                            Theology.
+                            Generally a 4-year program.</p>
+                        <p>Thanawi (A-Level): The Advanced Level secondary education stage. Generally a 2-year program.
+                        </p>
+                        <div class="icon"><i class="fa fa-paper-plane"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-5 col-12">
+                    <div class="event-img">
+                        <img src="{{asset('asset/images/event-left.png')}}" alt="#">
+                    </div>
+                </div>
+                <div class="col-lg-7 col-12">
+                    <div class="coming-event">
+                        <!-- Single Event -->
+                        <div class="single-event">
+                            <div class="event-date">
+                                <p>01<span></span></p>
+                            </div>
+                            <div class="event-content">
+                                <h3 class="event-title"><a href="#">Data Collection</a></h3>
+                                <p>Secure digital submission of examination papers with automated
                                     validation and error detection.</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
-                        <div class="facility-item">
-                            <div class="facility-icon bg-success">
-                                <span class="bg-success"></span>
-                                <i class="fa fa-futbol fa-3x text-success"></i>
-                                <span class="bg-success"></span>
+                        <!-- End Single Event -->
+                        <!-- Single Event -->
+                        <div class="single-event">
+                            <div class="event-date">
+                                <p>02<span></span></p>
                             </div>
-                            <div class="facility-text bg-success">
-                                <h3 class="text-success mb-3">Automated Grading</h3>
-                                <p class="mb-0">System processes results using AI-powered algorithms aligned with
+                            <div class="event-content">
+                                <h3 class="event-title"><a href="#">Automated Grading</a></h3>
+                                <p>System processes results using AI-powered algorithms aligned with
                                     national grading standards.</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
-                        <div class="facility-item">
-                            <div class="facility-icon bg-warning">
-                                <span class="bg-warning"></span>
-                                <i class="fa fa-home fa-3x text-warning"></i>
-                                <span class="bg-warning"></span>
+                        <!-- End Single Event -->
+                        <!-- Single Event -->
+                        <div class="single-event">
+                            <div class="event-date">
+                                <p>03<span></span></p>
                             </div>
-                            <div class="facility-text bg-warning">
-                                <h3 class="text-warning mb-3">Quality Control</h3>
-                                <p class="mb-0">Multi-level verification by qualified examiners ensures accuracy
+                            <div class="event-content">
+                                <h3 class="event-title"><a href="#">Quality Control</a></h3>
+                                <p>Multi-level verification by qualified examiners ensures accuracy
                                     before final approval.</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
-                        <div class="facility-item">
-                            <div class="facility-icon bg-info">
-                                <span class="bg-info"></span>
-                                <i class="fa fa-chalkboard-teacher fa-3x text-info"></i>
-                                <span class="bg-info"></span>
-                            </div>
-                            <div class="facility-text bg-info">
-                                <h3 class="text-info mb-3">Result Distribution</h3>
-                                <p class="mb-0">Secure access to results via web portal, mobile app, SMS, and
-                                    official school notifications.</p>
-                            </div>
-                        </div>
+                        <!-- End Single Event -->
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Facilities End -->
+    </section>
+    <!--/ End Events -->
 
-
-        <!-- About Start -->
-        <div class="container-xxl py-5">
+    <!-- Call To Action -->
+    <section class="cta">
+        <div class="cta-inner overlay section" style="background-image:url({{asset('asset/images/cta-bg.jpg')}})"
+            data-stellar-background-ratio="0.5">
             <div class="container">
-                <div class="row g-5 align-items-center">
-                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <h1 class="mb-4">About ITEB</h1>
-                        <p>UMSC Examination Board: Based in Kawempe. Conducts examinations under the Uganda Muslim
-                            Supreme Council. Dr. Sheikh Ziyad Swaleh Lubanga is the Executive Secretary</p>
-                        <p class="mb-4">IMPORTANT: many schools are adopting a "duo curriculum" (Combining standard
-                            secondary subjects with advanced Islamic Theology) to help students compete on the
-                            international market</p>
-                        <div class="row g-4 align-items-center">
-                            <div class="col-sm-6">
-                                <a class="btn btn-primary rounded-pill py-3 px-5" href="">Read More</a>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Prof. Dr Ziyad Swalleh Lubanga</h6>
-                                        <small>Executive Secretary</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 about-img wow fadeInUp" data-wow-delay="0.5s">
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <img class="img-fluid w-75 rounded-circle bg-light p-3"
-                                    src="{{ asset('asset/img/about-1.jpg') }}" alt="">
-                            </div>
-                            <div class="col-6 text-start" style="margin-top: -150px;">
-                                <img class="img-fluid w-100 rounded-circle bg-light p-3"
-                                    src="{{ asset('asset/img/about-2.jpg') }}" alt="">
-                            </div>
-                            <div class="col-6 text-end" style="margin-top: -150px;">
-                                <img class="img-fluid w-100 rounded-circle bg-light p-3"
-                                    src="{{ asset('asset/img/about-3.jpg') }}" alt="">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- About End -->
-
-
-        <!-- Call To Action Start -->
-        <div class="container-xxl py-5">
-            <div class="container">
-                <div class="bg-light rounded">
-                    <div class="row g-0">
-                        <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s" style="min-height: 400px;">
-                            <div class="position-relative h-100">
-                                <img class="position-absolute w-100 h-100 rounded"
-                                    src="{{ asset('asset/img/call-to-action.jpg') }}" style="object-fit: cover;">
-                            </div>
-                        </div>
-                        <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
-                            <div class="h-100 d-flex flex-column justify-content-center p-5">
-                                <h1 class="mb-4">Register Your School now</h1>
-                                <p class="mb-4">Join the ITEB family and ensure your students receive accurate,
-                                    timely, and secure examination results. Our platform offers a seamless experience
-                                    for schools to submit results, track progress, and access comprehensive reports.
-                                    Register now to empower your students with the recognition they deserve and
-                                    contribute to a brighter future for education in Uganda.
-                                </p>
-                                <a class="btn btn-primary py-3 px-5" href="">Get Started Now<i
-                                        class="fa fa-arrow-right ms-2"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Call To Action End -->
-
-
-        <!-- Classes Start-Idaad -->
-        <div class="container-xxl py-5">
-            <div class="container">
-                <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
-                    <h1 class="mb-3">Idaad Examinations set</h1>
-                    <p>Register your school for the coming Idaad Examinations on Our Portal now to avoid late
-                        registration costs</p>
-                </div>
-                <div class="row g-4">
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="classes-item">
-                            <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                                <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-1.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="bg-light rounded p-4 pt-5 mt-n5">
-                                <a class="d-block text-center h3 mt-3 mb-4" href="">Dictation and
-                                    Calligraphy</a>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0"
-                                            src="{{ asset('asset/img/user.jpg') }}" alt=""
-                                            style="width: 45px; height: 45px;">
-                                        <div class="ms-3">
-                                            <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                            <small>H.O.D</small>
-                                        </div>
-                                    </div>
-                                    <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-primary pt-2">
-                                            <h6 class="text-primary mb-1">papers:</h6>
-                                            <small>10 papers</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-success pt-2">
-                                            <h6 class="text-success mb-1">Duration:</h6>
-                                            <small>6 days</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-warning pt-2">
-                                            <h6 class="text-warning mb-1">Capacity:</h6>
-                                            <small>S4 Equivalent</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                        <div class="classes-item">
-                            <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                                <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-2.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="bg-light rounded p-4 pt-5 mt-n5">
-                                <a class="d-block text-center h3 mt-3 mb-4" href="">Sources of Exegesis</a>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0"
-                                            src="{{ asset('asset/img/user.jpg') }}" alt=""
-                                            style="width: 45px; height: 45px;">
-                                        <div class="ms-3">
-                                            <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                            <small>H.O.D</small>
-                                        </div>
-                                    </div>
-                                    <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-primary pt-2">
-                                            <h6 class="text-primary mb-1">papers:</h6>
-                                            <small>10 papers</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-success pt-2">
-                                            <h6 class="text-success mb-1">Duration:</h6>
-                                            <small>6 days</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-warning pt-2">
-                                            <h6 class="text-warning mb-1">Capacity:</h6>
-                                            <small>S4 Equivalent</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                        <div class="classes-item">
-                            <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                                <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-3.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="bg-light rounded p-4 pt-5 mt-n5">
-                                <a class="d-block text-center h3 mt-3 mb-4" href="">Islamic Monotheism
-                                    (Tawheed)</a>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0"
-                                            src="{{ asset('asset/img/user.jpg') }}" alt=""
-                                            style="width: 45px; height: 45px;">
-                                        <div class="ms-3">
-                                            <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                            <small>H.O.D</small>
-                                        </div>
-                                    </div>
-                                    <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-primary pt-2">
-                                            <h6 class="text-primary mb-1">papers:</h6>
-                                            <small>10 papers</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-success pt-2">
-                                            <h6 class="text-success mb-1">Duration:</h6>
-                                            <small>6 days</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-warning pt-2">
-                                            <h6 class="text-warning mb-1">Capacity:</h6>
-                                            <small>S4 Equivalent</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="classes-item">
-                            <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                                <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-4.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="bg-light rounded p-4 pt-5 mt-n5">
-                                <a class="d-block text-center h3 mt-3 mb-4" href="">Holy Qur’an Recitation and
-                                    Its Rules (Tilawah/Tajweed)</a>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0"
-                                            src="{{ asset('asset/img/user.jpg') }}" alt=""
-                                            style="width: 45px; height: 45px;">
-                                        <div class="ms-3">
-                                            <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                            <small>H.O.D</small>
-                                        </div>
-                                    </div>
-                                    <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-primary pt-2">
-                                            <h6 class="text-primary mb-1">papers:</h6>
-                                            <small>10 papers</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-success pt-2">
-                                            <h6 class="text-success mb-1">Duration:</h6>
-                                            <small>6 days</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-warning pt-2">
-                                            <h6 class="text-warning mb-1">Capacity:</h6>
-                                            <small>S4 Equivalent</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                        <div class="classes-item">
-                            <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                                <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-5.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="bg-light rounded p-4 pt-5 mt-n5">
-                                <a class="d-block text-center h3 mt-3 mb-4" href="">Arabic Literature and
-                                    Texts</a>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0"
-                                            src="{{ asset('asset/img/user.jpg') }}" alt=""
-                                            style="width: 45px; height: 45px;">
-                                        <div class="ms-3">
-                                            <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                            <small>H.O.D</small>
-                                        </div>
-                                    </div>
-                                    <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-primary pt-2">
-                                            <h6 class="text-primary mb-1">papers:</h6>
-                                            <small>10 papers</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-success pt-2">
-                                            <h6 class="text-success mb-1">Duration:</h6>
-                                            <small>6 days</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-warning pt-2">
-                                            <h6 class="text-warning mb-1">Capacity:</h6>
-                                            <small>S4 Equivalent</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                        <div class="classes-item">
-                            <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                                <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-6.jpg') }}"
-                                    alt="">
-                            </div>
-                            <div class="bg-light rounded p-4 pt-5 mt-n5">
-                                <a class="d-block text-center h3 mt-3 mb-4" href="">Composition and
-                                    Comprehension (Insha’)</a>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0"
-                                            src="{{ asset('asset/img/user.jpg') }}" alt=""
-                                            style="width: 45px; height: 45px;">
-                                        <div class="ms-3">
-                                            <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                            <small>H.O.D</small>
-                                        </div>
-                                    </div>
-                                    <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                                </div>
-                                <div class="row g-1">
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-primary pt-2">
-                                            <h6 class="text-primary mb-1">papers:</h6>
-                                            <small>10 papers</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-success pt-2">
-                                            <h6 class="text-success mb-1">Duration:</h6>
-                                            <small>6 days</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="border-top border-3 border-warning pt-2">
-                                            <h6 class="text-warning mb-1">Capacity:</h6>
-                                            <small>S4 Equivalent</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Classes End -->
-
-
-
-
-        <!-- Classes Start -->
-
-        <div class="row g-4">
-            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                <div class="classes-item">
-                    <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                        <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-7.jpg') }}"
-                            alt="">
-                    </div>
-                    <div class="bg-light rounded p-4 pt-5 mt-n5">
-                        <a class="d-block text-center h3 mt-3 mb-4" href="">Sources of Islamic Law (Usool
-                            al-Fiqh)</a>
-                        <div class="d-flex align-items-center justify-content-between mb-4">
-                            <div class="d-flex align-items-center">
-                                <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                    alt="" style="width: 45px; height: 45px;">
-                                <div class="ms-3">
-                                    <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                    <small>H.O.D</small>
-                                </div>
-                            </div>
-                            <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                        </div>
-                        <div class="row g-1">
-                            <div class="col-4">
-                                <div class="border-top border-3 border-primary pt-2">
-                                    <h6 class="text-primary mb-1">papers:</h6>
-                                    <small>10 papers</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-success pt-2">
-                                    <h6 class="text-success mb-1">Duration:</h6>
-                                    <small>6 days</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-warning pt-2">
-                                    <h6 class="text-warning mb-1">Capacity:</h6>
-                                    <small>S4 Equivalent</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                <div class="classes-item">
-                    <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                        <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-8.jpg') }}"
-                            alt="">
-                    </div>
-                    <div class="bg-light rounded p-4 pt-5 mt-n5">
-                        <a class="d-block text-center h3 mt-3 mb-4" href="">Sources of Prophetic Traditions
-                            (Usool al-Hadith)</a>
-                        <div class="d-flex align-items-center justify-content-between mb-4">
-                            <div class="d-flex align-items-center">
-                                <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                    alt="" style="width: 45px; height: 45px;">
-                                <div class="ms-3">
-                                    <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                    <small>H.O.D</small>
-                                </div>
-                            </div>
-                            <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                        </div>
-                        <div class="row g-1">
-                            <div class="col-4">
-                                <div class="border-top border-3 border-primary pt-2">
-                                    <h6 class="text-primary mb-1">papers:</h6>
-                                    <small>10 papers</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-success pt-2">
-                                    <h6 class="text-success mb-1">Duration:</h6>
-                                    <small>6 days</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-warning pt-2">
-                                    <h6 class="text-warning mb-1">Capacity:</h6>
-                                    <small>S4 Equivalent</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                <div class="classes-item">
-                    <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                        <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-9.jpg') }}"
-                            alt="">
-                    </div>
-                    <div class="bg-light rounded p-4 pt-5 mt-n5">
-                        <a class="d-block text-center h3 mt-3 mb-4" href="">Qur’anic Orals and Rhetoric</a>
-                        <div class="d-flex align-items-center justify-content-between mb-4">
-                            <div class="d-flex align-items-center">
-                                <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                    alt="" style="width: 45px; height: 45px;">
-                                <div class="ms-3">
-                                    <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                    <small>H.O.D</small>
-                                </div>
-                            </div>
-                            <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                        </div>
-                        <div class="row g-1">
-                            <div class="col-4">
-                                <div class="border-top border-3 border-primary pt-2">
-                                    <h6 class="text-primary mb-1">papers:</h6>
-                                    <small>10 papers</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-success pt-2">
-                                    <h6 class="text-success mb-1">Duration:</h6>
-                                    <small>6 days</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-warning pt-2">
-                                    <h6 class="text-warning mb-1">Capacity:</h6>
-                                    <small>S4 Equivalent</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                <div class="classes-item">
-                    <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                        <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-10.jpg') }}"
-                            alt="">
-                    </div>
-                    <div class="bg-light rounded p-4 pt-5 mt-n5">
-                        <a class="d-block text-center h3 mt-3 mb-4" href="">(Implied general papers) </a>
-                        <div class="d-flex align-items-center justify-content-between mb-4">
-                            <div class="d-flex align-items-center">
-                                <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                    alt="" style="width: 45px; height: 45px;">
-                                <div class="ms-3">
-                                    <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                    <small>H.O.D</small>
-                                </div>
-                            </div>
-                            <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                        </div>
-                        <div class="row g-1">
-                            <div class="col-4">
-                                <div class="border-top border-3 border-primary pt-2">
-                                    <h6 class="text-primary mb-1">papers:</h6>
-                                    <small>10 papers</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-success pt-2">
-                                    <h6 class="text-success mb-1">Duration:</h6>
-                                    <small>6 days</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border-top border-3 border-warning pt-2">
-                                    <h6 class="text-warning mb-1">Capacity:</h6>
-                                    <small>S4 Equivalent</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    <!-- Classes End -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- Classes Start-Thanawi -->
-    <div class="container-xxl py-5">
-        <div class="container">
-            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
-                <h1 class="mb-3">Thanawi Examinations set</h1>
-                <p>Performance Insight: Hadith and Arabic Grammar are historically cited as the "worst done" subjects,
-                    presenting a major area for academic focus</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="classes-item">
-                        <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-8.jpg') }}"
-                                alt="">
-                        </div>
-                        <div class="bg-light rounded p-4 pt-5 mt-n5">
-                            <a class="d-block text-center h3 mt-3 mb-4" href="">Holy Qur’an Exegesis
-                                (Tafsir)</a>
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                        <small>H.O.D</small>
-                                    </div>
-                                </div>
-                                <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                            </div>
-                            <div class="row g-1">
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-primary pt-2">
-                                        <h6 class="text-primary mb-1">papers:</h6>
-                                        <small>15 papers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-success pt-2">
-                                        <h6 class="text-success mb-1">Duration:</h6>
-                                        <small>8 days</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-warning pt-2">
-                                        <h6 class="text-warning mb-1">Capacity:</h6>
-                                        <small>S6 Equivalent</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="classes-item">
-                        <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-16.jpg') }}"
-                                alt="">
-                        </div>
-                        <div class="bg-light rounded p-4 pt-5 mt-n5">
-                            <a class="d-block text-center h3 mt-3 mb-4" href="">Grammar and Morphology
-                                (Sarf/Nahv)</a>
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                        <small>H.O.D</small>
-                                    </div>
-                                </div>
-                                <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                            </div>
-                            <div class="row g-1">
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-primary pt-2">
-                                        <h6 class="text-primary mb-1">papers:</h6>
-                                        <small>15 papers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-success pt-2">
-                                        <h6 class="text-success mb-1">Duration:</h6>
-                                        <small>8 days</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-warning pt-2">
-                                        <h6 class="text-warning mb-1">Capacity:</h6>
-                                        <small>S6 Equivalent</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="classes-item">
-                        <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-14.jpg') }}"
-                                alt="">
-                        </div>
-                        <div class="bg-light rounded p-4 pt-5 mt-n5">
-                            <a class="d-block text-center h3 mt-3 mb-4" href="">Islamic Family Law</a>
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                        <small>H.O.D</small>
-                                    </div>
-                                </div>
-                                <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                            </div>
-                            <div class="row g-1">
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-primary pt-2">
-                                        <h6 class="text-primary mb-1">papers:</h6>
-                                        <small>15 papers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-success pt-2">
-                                        <h6 class="text-success mb-1">Duration:</h6>
-                                        <small>8 days</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-warning pt-2">
-                                        <h6 class="text-warning mb-1">Capacity:</h6>
-                                        <small>S6 Equivalent</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="classes-item">
-                        <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-11.jpg') }}"
-                                alt="">
-                        </div>
-                        <div class="bg-light rounded p-4 pt-5 mt-n5">
-                            <a class="d-block text-center h3 mt-3 mb-4" href="">Arabic Literature</a>
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                        <small>H.O.D</small>
-                                    </div>
-                                </div>
-                                <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                            </div>
-                            <div class="row g-1">
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-primary pt-2">
-                                        <h6 class="text-primary mb-1">papers:</h6>
-                                        <small>15 papers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-success pt-2">
-                                        <h6 class="text-success mb-1">Duration:</h6>
-                                        <small>8 days</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-warning pt-2">
-                                        <h6 class="text-warning mb-1">Capacity:</h6>
-                                        <small>S6 Equivalent</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="classes-item">
-                        <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-5.jpg') }}"
-                                alt="">
-                        </div>
-                        <div class="bg-light rounded p-4 pt-5 mt-n5">
-                            <a class="d-block text-center h3 mt-3 mb-4" href="">Jurisprudence of Rituals (Fiqh
-                                al-Ibadat)</a>
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                        <small>H.O.D</small>
-                                    </div>
-                                </div>
-                                <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                            </div>
-                            <div class="row g-1">
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-primary pt-2">
-                                        <h6 class="text-primary mb-1">papers:</h6>
-                                        <small>15 papers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-success pt-2">
-                                        <h6 class="text-success mb-1">Duration:</h6>
-                                        <small>8 days</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-warning pt-2">
-                                        <h6 class="text-warning mb-1">Capacity:</h6>
-                                        <small>S6 Equivalent</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="classes-item">
-                        <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-18.jpg') }}"
-                                alt="">
-                        </div>
-                        <div class="bg-light rounded p-4 pt-5 mt-n5">
-                            <a class="d-block text-center h3 mt-3 mb-4" href="">Islamic History</a>
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                        alt="" style="width: 45px; height: 45px;">
-                                    <div class="ms-3">
-                                        <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                        <small>H.O.D</small>
-                                    </div>
-                                </div>
-                                <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                            </div>
-                            <div class="row g-1">
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-primary pt-2">
-                                        <h6 class="text-primary mb-1">papers:</h6>
-                                        <small>15 papers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-success pt-2">
-                                        <h6 class="text-success mb-1">Duration:</h6>
-                                        <small>8 days</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-top border-3 border-warning pt-2">
-                                        <h6 class="text-warning mb-1">Capacity:</h6>
-                                        <small>S6 Equivalent</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Classes End -->
-
-
-
-
-    <!-- Classes Start -->
-
-    <div class="row g-4">
-        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-            <div class="classes-item">
-                <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                    <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-15.jpg') }}"
-                        alt="">
-                </div>
-                <div class="bg-light rounded p-4 pt-5 mt-n5">
-                    <a class="d-block text-center h3 mt-3 mb-4" href="">Religion and Sects</a>
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="d-flex align-items-center">
-                            <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                alt="" style="width: 45px; height: 45px;">
-                            <div class="ms-3">
-                                <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                <small>H.O.D</small>
-                            </div>
-                        </div>
-                        <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                    </div>
-                    <div class="row g-1">
-                        <div class="col-4">
-                            <div class="border-top border-3 border-primary pt-2">
-                                <h6 class="text-primary mb-1">papers:</h6>
-                                <small>15 papers</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-success pt-2">
-                                <h6 class="text-success mb-1">Duration:</h6>
-                                <small>8 days</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-warning pt-2">
-                                <h6 class="text-warning mb-1">Capacity:</h6>
-                                <small>S6 Equivalent</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-            <div class="classes-item">
-                <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                    <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-9.jpg') }}"
-                        alt="">
-                </div>
-                <div class="bg-light rounded p-4 pt-5 mt-n5">
-                    <a class="d-block text-center h3 mt-3 mb-4" href="">Sources of Islamic Law (Usool
-                        al-Fiqh)</a>
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="d-flex align-items-center">
-                            <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                alt="" style="width: 45px; height: 45px;">
-                            <div class="ms-3">
-                                <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                <small>H.O.D</small>
-                            </div>
-                        </div>
-                        <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                    </div>
-                    <div class="row g-1">
-                        <div class="col-4">
-                            <div class="border-top border-3 border-primary pt-2">
-                                <h6 class="text-primary mb-1">papers:</h6>
-                                <small>15 papers</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-success pt-2">
-                                <h6 class="text-success mb-1">Duration:</h6>
-                                <small>8 days</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-warning pt-2">
-                                <h6 class="text-warning mb-1">Capacity:</h6>
-                                <small>S6 Equivalent</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-            <div class="classes-item">
-                <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                    <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-4.jpg') }}"
-                        alt="">
-                </div>
-                <div class="bg-light rounded p-4 pt-5 mt-n5">
-                    <a class="d-block text-center h3 mt-3 mb-4" href="">Prophetic Traditions (Hadith)</a>
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="d-flex align-items-center">
-                            <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                alt="" style="width: 45px; height: 45px;">
-                            <div class="ms-3">
-                                <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                <small>H.O.D</small>
-                            </div>
-                        </div>
-                        <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                    </div>
-                    <div class="row g-1">
-                        <div class="col-4">
-                            <div class="border-top border-3 border-primary pt-2">
-                                <h6 class="text-primary mb-1">papers:</h6>
-                                <small>15 papers</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-success pt-2">
-                                <h6 class="text-success mb-1">Duration:</h6>
-                                <small>8 days</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-warning pt-2">
-                                <h6 class="text-warning mb-1">Capacity:</h6>
-                                <small>S6 Equivalent</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-            <div class="classes-item">
-                <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                    <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-17.jpg') }}"
-                        alt="">
-                </div>
-                <div class="bg-light rounded p-4 pt-5 mt-n5">
-                    <a class="d-block text-center h3 mt-3 mb-4" href="">Composition and Comprehension </a>
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="d-flex align-items-center">
-                            <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                alt="" style="width: 45px; height: 45px;">
-                            <div class="ms-3">
-                                <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                <small>H.O.D</small>
-                            </div>
-                        </div>
-                        <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                    </div>
-                    <div class="row g-1">
-                        <div class="col-4">
-                            <div class="border-top border-3 border-primary pt-2">
-                                <h6 class="text-primary mb-1">papers:</h6>
-                                <small>15 papers</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-success pt-2">
-                                <h6 class="text-success mb-1">Duration:</h6>
-                                <small>8 days</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-warning pt-2">
-                                <h6 class="text-warning mb-1">Capacity:</h6>
-                                <small>S6 Equivalent</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-            <div class="classes-item">
-                <div class="bg-light rounded-circle w-75 mx-auto p-3">
-                    <img class="img-fluid rounded-circle" src="{{ asset('asset/img/classes-14.jpg') }}"
-                        alt="">
-                </div>
-                <div class="bg-light rounded p-4 pt-5 mt-n5">
-                    <a class="d-block text-center h3 mt-3 mb-4" href="">Orals</a>
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="d-flex align-items-center">
-                            <img class="rounded-circle flex-shrink-0" src="{{ asset('asset/img/user.jpg') }}"
-                                alt="" style="width: 45px; height: 45px;">
-                            <div class="ms-3">
-                                <h6 class="text-primary mb-1">Jhon Doe</h6>
-                                <small>H.O.D</small>
-                            </div>
-                        </div>
-                        <span class="bg-primary text-white rounded-pill py-2 px-3" href=""></span>
-                    </div>
-                    <div class="row g-1">
-                        <div class="col-4">
-                            <div class="border-top border-3 border-primary pt-2">
-                                <h6 class="text-primary mb-1">papers:</h6>
-                                <small>15 papers</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-success pt-2">
-                                <h6 class="text-success mb-1">Duration:</h6>
-                                <small>8 days</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-top border-3 border-warning pt-2">
-                                <h6 class="text-warning mb-1">Capacity:</h6>
-                                <small>S6 Equivalent</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    <!-- Classes End -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- Appointment Start -->
-    <div class="container-xxl py-5">
-        <div class="container">
-            <div class="bg-light rounded">
-                <div class="row g-0">
-                    <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
-                        <div class="h-100 d-flex flex-column justify-content-center p-5">
-                            <h1 class="mb-4">Make Appointment</h1>
-                            <form>
-                                <div class="row g-3">
-                                    <div class="col-sm-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control border-0" id="gname"
-                                                placeholder="Gurdian Name">
-                                            <label for="gname">School Name</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-floating">
-                                            <input type="email" class="form-control border-0" id="gmail"
-                                                placeholder="Gurdian Email">
-                                            <label for="gmail">School Email</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control border-0" id="cname"
-                                                placeholder="Child Name">
-                                            <label for="cname">Head Teacher's Name</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control border-0" id="cage"
-                                                placeholder="Child Age">
-                                            <label for="cage">Location</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <textarea class="form-control border-0" placeholder="Leave a message here" id="message" style="height: 100px"></textarea>
-                                            <label for="message">Message</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <button class="btn btn-primary w-100 py-3" type="submit">Submit</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s" style="min-height: 400px;">
-                        <div class="position-relative h-100">
-                            <img class="position-absolute w-100 h-100 rounded"
-                                src="{{ asset('asset/img/appointment.jpg') }}" style="object-fit: cover;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Appointment End -->
-
-
-    <!-- Team Start -->
-    <div class="container-xxl py-5">
-        <div class="container">
-            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
-                <h1 class="mb-3">Board of Directors</h1>
-                <p>Meet our dedicated board members. </p>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="team-item position-relative">
-                        <img class="img-fluid rounded-circle w-75" src="{{ asset('asset/img/team-1.jpg') }}"
-                            alt="">
-                        <div class="team-text">
-                            <h3>Prof Dr Ziyad Swaleh Lubanga</h3>
-                            <p>Executive Secretary</p>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-square btn-primary mx-1" href=""><i
-                                        class="fab fa-facebook-f"></i></a>
-                                <a class="btn btn-square btn-primary  mx-1" href=""><i
-                                        class="fab fa-twitter"></i></a>
-                                <a class="btn btn-square btn-primary  mx-1" href=""><i
-                                        class="fab fa-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="team-item position-relative">
-                        <img class="img-fluid rounded-circle w-75" src="{{ asset('asset/img/team-2.jpg') }}"
-                            alt="">
-                        <div class="team-text">
-                            <h3>Sheikh Hatimu Wamala</h3>
-                            <p>Board Chairperson</p>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-square btn-primary mx-1" href=""><i
-                                        class="fab fa-facebook-f"></i></a>
-                                <a class="btn btn-square btn-primary  mx-1" href=""><i
-                                        class="fab fa-twitter"></i></a>
-                                <a class="btn btn-square btn-primary  mx-1" href=""><i
-                                        class="fab fa-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="team-item position-relative">
-                        <img class="img-fluid rounded-circle w-75" src="{{ asset('asset/img/team-3.jpg') }}"
-                            alt="">
-                        <div class="team-text">
-                            <h3>Dr Shaban Mubaje</h3>
-                            <p>Mufti</p>
-                            <div class="d-flex align-items-center">
-                                <a class="btn btn-square btn-primary mx-1" href=""><i
-                                        class="fab fa-facebook-f"></i></a>
-                                <a class="btn btn-square btn-primary  mx-1" href=""><i
-                                        class="fab fa-twitter"></i></a>
-                                <a class="btn btn-square btn-primary  mx-1" href=""><i
-                                        class="fab fa-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Team End -->
-
-
-    <!-- Testimonial Start -->
-    <div class="container-xxl py-5">
-        <div class="container">
-            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
-                <h1 class="mb-3">Our Clients Say!</h1>
-                <p>At the Uganda Muslim Supreme Council (UMSC) Examination Board, we are committed to upholding the
-                    highest standards in Islamic secondary education. Here’s what some of the leading Idaad and Thanawi
-                    institutions have to say about our examination processes, curriculum support, and professional
-                    conduct.</p>
-            </div>
-            <div class="owl-carousel testimonial-carousel wow fadeInUp" data-wow-delay="0.1s">
-                <div class="testimonial-item bg-light rounded p-5">
-                    <p class="fs-5">“For years, we have trusted the UMSC Examination Board to assess our Thanawi
-                        candidates. Their structured timetable, clear subject guidelines, and timely release of results
-                        give our students a competitive edge. ”</p>
-                    <div class="d-flex align-items-center bg-white me-n5" style="border-radius: 50px 0 0 50px;">
-                        <img class="img-fluid flex-shrink-0 rounded-circle"
-                            src="{{ asset('asset/img/testimonial-1.jpg') }}" style="width: 90px; height: 90px;">
-                        <div class="ps-3">
-                            <h3 class="mb-1">Sheikh Abdulrahman Kiggundu</h3>
-                            <span>Head of Academics</span>
-                        </div>
-                        <i class="fa fa-quote-right fa-3x text-primary ms-auto d-none d-sm-flex"></i>
-                    </div>
-                </div>
-                <div class="testimonial-item bg-light rounded p-5">
-                    <p class="fs-5">“The UMSC Examination Board has consistently demonstrated excellence in managing
-                        our examinations. Their attention to detail and commitment to fairness ensures that our students
-                        are assessed accurately and professionally.”</p>
-                    <div class="d-flex align-items-center bg-white me-n5" style="border-radius: 50px 0 0 50px;">
-                        <img class="img-fluid flex-shrink-0 rounded-circle"
-                            src="{{ asset('asset/img/testimonial-2.jpg') }}" style="width: 90px; height: 90px;">
-                        <div class="ps-3">
-                            <h3 class="mb-1">Sheikh Mustafa Kigunda</h3>
-                            <span>Head of Studies</span>
-                        </div>
-                        <i class="fa fa-quote-right fa-3x text-primary ms-auto d-none d-sm-flex"></i>
-                    </div>
-                </div>
-                <div class="testimonial-item bg-light rounded p-5">
-                    <p class="fs-5">“The UMSC team is always accessible. From the dispatch of examination packages to
-                        the eight gazetted centres, everything runs smoothly. Their anti‑malpractice measures are strict
-                        yet fair – this preserves the integrity of our Idaad graduates.</p>
-                    <div class="d-flex align-items-center bg-white me-n5" style="border-radius: 50px 0 0 50px;">
-                        <img class="img-fluid flex-shrink-0 rounded-circle"
-                            src="{{ asset('asset/img/testimonial-3.jpg') }}" style="width: 90px; height: 90px;">
-                        <div class="ps-3">
-                            <h3 class="mb-1">Sheikh Yusuf Kiganda</h3>
-                            <span>Head of Idaad Studies</span>
-                        </div>
-                        <i class="fa fa-quote-right fa-3x text-primary ms-auto d-none d-sm-flex"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Testimonial End -->
-
-
-    <!-- Footer Start -->
-    <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
-        <div class="container py-5">
-            <div class="row g-5">
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="text-white mb-4">Get In Touch</h3>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>kampala-kawempe division</p>
-                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+256 700 123456</p>
-                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@iteb.org.ug</p>
-                    <div class="d-flex pt-2">
-                        <a class="btn btn-outline-light btn-social" href=""><i
-                                class="fab fa-twitter"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i
-                                class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i
-                                class="fab fa-youtube"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i
-                                class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="text-white mb-4">Quick Links</h3>
-                    <a class="btn btn-link text-white-50" href="">About Us</a>
-                    <a class="btn btn-link text-white-50" href="">Contact Us</a>
-                    <a class="btn btn-link text-white-50" href="">Our Services</a>
-                    <a class="btn btn-link text-white-50" href="">Privacy Policy</a>
-                    <a class="btn btn-link text-white-50" href="">Terms & Condition</a>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="text-white mb-4">Photo Gallery</h3>
-                    <div class="row g-2 pt-2">
-                        <div class="col-4">
-                            <img class="img-fluid rounded bg-light p-1"
-                                src="{{ asset('asset/img/classes-1.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded bg-light p-1"
-                                src="{{ asset('asset/img/classes-2.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded bg-light p-1"
-                                src="{{ asset('asset/img/classes-3.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded bg-light p-1"
-                                src="{{ asset('asset/img/classes-4.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded bg-light p-1"
-                                src="{{ asset('asset/img/classes-5.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid rounded bg-light p-1"
-                                src="{{ asset('asset/img/classes-6.jpg') }}" alt="">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 class="text-white mb-4">Newsletter</h3>
-                    <p>subscribe to our newsletter for updates</p>
-                    <div class="position-relative mx-auto" style="max-width: 400px;">
-                        <input class="form-control bg-transparent w-100 py-3 ps-4 pe-5" type="text"
-                            placeholder="Your email">
-                        <button type="button"
-                            class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="container">
-            <div class="copyright">
                 <div class="row">
-                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a class="border-bottom" href="#">iteb</a>, All Right Reserved.
-
-                        <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-
+                    <div class="col-lg-8 col-md-8 col-12">
+                        <div class="text-content">
+                            <h2>We <span>Focus on</span> Transparency, Quality & Religious Teachings</h2>
+                            <p>Our institution upholds the highest standards in Islamic education by prioritizing
+                                transparency in all our operations, ensuring clarity between educators and students. We
+                                maintain uncompromising quality through structured curricula covering Quranic
+                                recitation, Hadith verification, and jurisprudence. Most importantly, our religious
+                                teachings remain rooted in authentic sources, nurturing students who practice their
+                                faith with understanding and integrity.</p>
+                            <!-- CTA Button -->
+                            <div class="button">
+                                <a class="btn white" href="{{ route('users.login') }}">Join With Now</a>
+                                <a class="btn white primary" href="{{ route('users.login') }}">Check your results</a>
+                            </div>
+                            <!--/ End CTA Button -->
+                        </div>
                     </div>
-                    <div class="col-md-6 text-center text-md-end">
-                        <div class="footer-menu">
-                            <a href="">Home</a>
-                            <a href="">Cookies</a>
-                            <a href="">Help</a>
-                            <a href="">FQAs</a>
+                    <div class="col-lg-4 col-md-4 col-12">
+                        <!-- Cta Image -->
+                        <div class="cta-image">
+                            <img src="{{asset('asset/images/girl-1.png')}}" alt="#">
+                        </div>
+                        <!--/ End Cta Image -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--/ End Call To Action -->
+    <!-- Faqs -->
+    <section class="faqs section" id="FAQS">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 col-12">
+                    <div class="section-title bg">
+                        <h2>Frequently Asked <span>Questions</span></h2>
+                        <p>Find answers to common questions about our Idaad and Thanawi system of Islamic education.</p>
+                        <div class="icon"><i class="fa fa-question"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-5 col-12">
+                    <div class="faq-image"> <img src="{{asset('asset/images/faq.png')}}" alt="#">
+                    </div>
+                </div>
+                <div class="col-lg-7 col-12">
+                    <div class="faq-main">
+                        <div class="faq-content">
+                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                                <!-- Single Faq -->
+                                <div class="panel panel-default">
+                                    <div class="faq-heading" id="FaqTitle1">
+                                        <h4 class="faq-title"> <a class="collapsed" data-toggle="collapse"
+                                                data-parent="#accordion" href="#faq1"><i class="fa fa-question">
+
+                                                </i>What is the Idaad and Thanawi system?</a> </h4>
+                                    </div>
+                                    <div id="faq1" class="panel-collapse collapse" role="tabpanel"
+                                        aria-labelledby="FaqTitle1">
+                                        <div class="faq-body">The Idaad and Thanawi system is Uganda's structured
+                                            Islamic secondary education framework.
+                                            Idaad (O-Level) covers the first four years, building foundational
+                                            knowledge.
+                                            Thanawi (A-Level) is a two-year advanced program for deeper specialization
+                                            in Islamic sciences.</div>
+                                    </div>
+                                </div> <!--/ End Single Faq --> <!-- Single Faq -->
+                                <div class="panel panel-default active">
+                                    <div class="faq-heading" id="FaqTitle2">
+                                        <h4 class="faq-title"> <a class="collapsed" data-toggle="collapse"
+                                                data-parent="#accordion" href="#faq2">
+                                                <i class="fa fa-question"></i>How long does each level take to
+                                                complete?</a> </h4>
+                                    </div>
+                                    <div id="faq2" class="panel-collapse collapse show" role="tabpanel"
+                                        aria-labelledby="FaqTitle2">
+                                        <div class="faq-body">Idaad (O-Level) spans four years, while Thanawi (A-Level)
+                                            requires two years of study. Students typically begin after completing
+                                            primary Islamic education,
+                                            progressing systematically through the curriculum.</div>
+                                    </div>
+                                </div> <!--/ End Single Faq --> <!-- Single Faq -->
+                                <div class="panel panel-default">
+                                    <div class="faq-heading" id="FaqTitle3">
+                                        <h4 class="faq-title"> <a class="collapsed" data-toggle="collapse"
+                                                data-parent="#accordion" href="#faq3">
+                                                <i class="fa fa-question"></i>What subjects are taught at Idaad
+                                                level?</a> </h4>
+                                    </div>
+                                    <div id="faq3" class="panel-collapse collapse" role="tabpanel"
+                                        aria-labelledby="FaqTitle3">
+                                        <div class="faq-body">Idaad students study Islamic Monotheism, Sources of
+                                            Exegesis, Sources of Jurisprudence, Sources of Prophetic Traditions,
+                                            Qur'anic Orals, Arabic Composition
+                                            and Comprehension, and Islamic History, among others.</div>
+                                    </div>
+                                </div> <!--/ End Single Faq --> <!-- Single Faq -->
+                                <div class="panel panel-default">
+                                    <div class="faq-heading" id="FaqTitle4">
+                                        <h4 class="faq-title"> <a class="collapsed" data-toggle="collapse"
+                                                data-parent="#accordion" href="#faq4">
+                                                <i class="fa fa-question"></i>What makes Thanawi level different?</a>
+                                        </h4>
+                                    </div>
+                                    <div id="faq4" class="panel-collapse collapse" role="tabpanel"
+                                        aria-labelledby="FaqTitle4">
+                                        <div class="faq-body">Thanawi offers advanced specialization with subjects like
+                                            Qur'an Exegesis,
+                                            Jurisprudence of Rituals, Religion and Sects, Rhetoric, and advanced Grammar
+                                            and Morphology,
+                                            preparing students for university-level Islamic scholarship.</div>
+                                    </div>
+                                </div> <!--/ End Single Faq --> <!-- Single Faq -->
+                                <div class="panel panel-default">
+                                    <div class="faq-heading" id="FaqTitle5">
+                                        <h4 class="faq-title"> <a class="collapsed" data-toggle="collapse"
+                                                data-parent="#accordion" href="#faq5">
+                                                <i class="fa fa-question"></i>Are graduates qualified for university
+                                                admission?</a>
+                                        </h4>
+                                    </div>
+                                    <div id="faq5" class="panel-collapse collapse" role="tabpanel"
+                                        aria-labelledby="FaqTitle5">
+                                        <div class="faq-body">
+                                            Yes, successful Thanawi graduates meet admission requirements for Islamic
+                                            universities, including the Islamic University in Uganda (IUIU), where they
+                                            can pursue bachelor's and postgraduate degrees in specialized Islamic
+                                            disciplines.</div>
+                                    </div>
+                                </div> <!--/ End Single Faq -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
+
+    <!--/ End Blogs -->
+
+    <div class="clients">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-12">
+                    <div class="text-content text-center">
+                        <h4>Idaad and Thanawi Examination Board</h4>
+                        <p>The official examination board responsible for standardizing, administering,
+                            and certifying Islamic secondary education across Uganda. We ensure quality
+                            assessment at both Idaad (O-Level) and Thanawi (A-Level) stages,
+                            maintaining academic excellence and authentic Islamic values
+                            throughout the national curriculum.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- Footer End -->
 
+    <!--/ End Clients CSS -->
 
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    </div>
+    <!-- Footer -->
+    <footer class="footer section">
+        <!-- Footer Top -->
+        <div class="footer-top overlay">
+            <div class="container">
+                <div class="row">
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('asset/lib/wow/wow.min.js') }}"></script>
-    <script src="{{ asset('asset/lib/easing/easing.min.js') }}"></script>
-    <script src="{{ asset('asset/lib/waypoints/waypoints.min.js') }}"></script>
-    <script src="{{ asset('asset/lib/owlcarousel/owl.carousel.min.js') }}"></script>
+                    <!-- About -->
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="single-widget about">
+                            <h2>About ITEB</h2>
+                            <ul class="list">
+                                <li><i class="fa fa-phone"></i>Phone: +256 702 595 554</li>
+                                <li><i class="fa fa-envelope"></i>Email:
+                                    <a href="mailto:info@iteb-ug.org">Info@iteb-ug.org</a>
+                                </li>
+                                <li>
+                                    <i class="fa fa-map-marker"></i>
+                                    <span>Address: Kampala - Kawempe. Uganda</span>
+                                </li>
+                            </ul>
 
-    <!-- Template Javascript -->
-    <script src="{{ asset('asset/js/main.js') }}"></script>
+                            <!-- Social -->
+                            <ul class="social">
+                                <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                                <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                            </ul>
+                            <!-- End Social -->
+                        </div>
+                    </div>
+
+                    <!-- Useful Links -->
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="single-widget list">
+                            <h2>Useful Links</h2>
+                            <ul>
+                                <li><i class="fa fa-angle-right"></i><a href="#">Home</a></li>
+                                <li><i class="fa fa-angle-right"></i><a href="#about-iteb">Our Subjects</a></li>
+                                <li><i class="fa fa-angle-right"></i><a href="#FAQS">FAQ's</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Extra Section (You can customize this) -->
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="single-widget">
+                            <h2>Quick Contact</h2>
+                            <p>
+                                Have questions or need more information? Reach out to us and
+                                our team will be happy to assist you.
+                            </p>
+                            <a href="mailto:info@iteb-ug.org" class="btn mt-3">
+                                Contact Us
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--/ End Footer Top -->
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+
+                        <div class="copyright"
+                            style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+
+                            <p style="margin:0;">
+                                Designed and developed by
+                                <a href="{{ route('coming.soon') }}">www.Techsate.com</a>.
+                            </p>
+
+                            <p style="margin:0;">
+                                © <span id="year"></span> Iteb. All rights reserved.
+                            </p>
+
+                        </div>
+
+                        <script>
+                            document.getElementById("year").textContent = new Date().getFullYear();
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/ End Footer Bottom -->
+    </footer>
+    <!--/ End Footer -->
+
+    <!-- Jquery JS-->
+    <script src="{{asset('asset/js/jquery.min.js')}}"></script>
+    <script src="{{asset('asset/js/jquery-migrate.min.js')}}"></script>
+    <!-- Colors JS-->
+    <script src="{{asset('asset/js/colors.js')}}"></script>
+    <!-- Popper JS-->
+    <script src="{{asset('asset/js/popper.min.js')}}"></script>
+    <!-- Bootstrap JS-->
+    <script src="{{asset('asset/js/bootstrap.min.js')}}"></script>
+    <!-- Owl Carousel JS-->
+    <script src="{{asset('asset/js/owl.carousel.min.js')}}"></script>
+    <!-- Jquery Steller JS -->
+    <script src="{{asset('asset/js/jquery.stellar.min.js')}}"></script>
+    <!-- Final Countdown JS -->
+    <script src="{{asset('asset/js/finalcountdown.min.js')}}"></script>
+    <!-- Fancy Box JS-->
+    <script src="{{asset('asset/js/facnybox.min.js')}}"></script>
+    <!-- Magnific Popup JS-->
+    <script src="{{asset('asset/js/jquery.magnific-popup.min.js')}}"></script>
+    <!-- Circle Progress JS -->
+    <script src="{{asset('asset/js/circle-progress.min.js')}}"></script>
+    <!-- Nice Select JS -->
+    <script src="{{asset('asset/js/niceselect.js')}}"></script>
+    <!-- Jquery Steller JS-->
+    <script src="{{asset('asset/js/jquery.stellar.min.js')}}"></script>
+    <!-- Jquery Steller JS-->
+    <script src="{{asset('asset/js/cube-portfolio.min.js')}}"></script>
+    <!-- Slick Nav JS-->
+    <script src="{{asset('asset/js/slicknav.min.js')}}"></script>
+    <!-- Easing JS-->
+    <script src="{{asset('asset/js/easing.min.js')}}"></script>
+    <!-- Waypoints JS-->
+    <script src="{{asset('asset/js/waypoints.min.js')}}"></script>
+    <!-- Counter Up JS -->
+    <script src="{{asset('asset/js/jquery.counterup.min.js')}}"></script>
+    <!-- Scroll Up JS-->
+    <script src="{{asset('asset/js/jquery.scrollUp.min.js')}}"></script>
+    <!-- Gmaps JS-->
+    <script src="{{asset('asset/js/gmaps.min.js')}}"></script>
+    <!-- Main JS-->
+    <script src="{{asset('asset/js/main.js')}}"></script>
 </body>
 
 </html>

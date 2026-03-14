@@ -8,17 +8,21 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UserRightsAndPreviledges;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\ItebController;
-use App\Http\Controllers\ReportGradingController;
+use App\Http\Controllers\SchoolsController;
 use App\Http\Controllers\GradingController;
-use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\PasslipAndCertificatesController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/show-sessions', function () {
-    // Get all session data
-    $allSessions = Session::all();
+use App\Models\House;
+use App\Models\SchoolPassword;
+use Illuminate\Support\Facades\Hash;
 
-    dd($allSessions);
-})->name('show.sessions');
+// Route::get('/show-sessions', function () {
+//     // Get all session data
+//     $allSessions = Session::all();
+
+//     dd($allSessions);
+// })->name('show.sessions');
 
 Route::get('/set-admin-session', function () {
     session(['LoggedAdmin' => 1]);
@@ -26,16 +30,57 @@ Route::get('/set-admin-session', function () {
     return redirect('/'); // or where
 });
 
-Route::get('/set-student-session', function () {
-    session(['LoggedStudent' => 1]);
+// Route::get('/set-student-session', function () {
+//     session(['LoggedStudent' => 1]);
 
-    return redirect('/');
-});
+//     return redirect('/');
+// });
 
-Route::get('/set-school', function () {
-    session(['LoggedSchool' => 2]);
+// Route::get('/set-school', function () {
+//     session(['LoggedSchool' => 2]);
 
-    return redirect('/');
+//     return redirect('/');
+// });
+
+
+Route::get('/generate-school-passwords', function () {
+
+    function generateSecurePassword($length = 5)
+    {
+        $numbers = '0123456789';
+        $password = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        }
+
+        return $password;
+    }
+
+    $schools = House::all();
+    $createdPasswords = [];
+
+    foreach ($schools as $school) {
+
+        $plainPassword = generateSecurePassword();
+
+        $schoolPassword = SchoolPassword::updateOrCreate(
+            ['school_id' => $school->Number], // using Number like your logic
+            [
+                'password_plain' => $plainPassword,
+                'password_hashed' => Hash::make($plainPassword),
+            ]
+        );
+
+        $createdPasswords[] = [
+            'school_id' => $school->Number,
+            'password_plain' => $plainPassword
+        ];
+    }
+
+    dd('Passwords generated for all schools successfully');
+
+
 });
 
 Route::get('/logout', function () {
@@ -45,6 +90,10 @@ Route::get('/logout', function () {
 
     return redirect('/');
 })->name('logout');
+
+Route::get('/coming-soon', function () {
+    return view('coming-soon');
+})->name('coming.soon');
 
 Route::controller(UserController::class)->group(function () {
     Route::group(['prefix' => '/users'], function () {
@@ -323,6 +372,7 @@ Route::controller(GradingController::class)->group(function () {
 });
 
 Route::controller(ItebController::class)->group(function () {
+
     Route::group(['middleware' => ['StudentAuth']], function () {
 
         Route::get('/search-iteb-students', 'searchItebStudents')->name('search.iteb.students');
@@ -349,15 +399,77 @@ Route::controller(ItebController::class)->group(function () {
         Route::get('/iteb/analytics/download/{format}', 'downloadReport')->name('iteb.analytics.download');
 
         Route::match(['get', 'post'], '/iteb/exam-statistics', 'examStatistics')->name('iteb.exam.statistics');
+
     });
 
     Route::get('/about', 'about')->name('about.us');
     Route::get('/contact', 'contact')->name('contact.us');
 
     Route::post('iteb/exam-statistics/download', 'downloadExamStatistics')->name('iteb.exam.statistics.download');
-
-
     Route::post('iteb/exam-statistics/download-excel', 'downloadExamStatisticsExcel')->name('iteb.exam.statistics.download.excel');
-Route::post('iteb/exam-statistics/download-pdf', 'downloadExamStatisticsPdf')->name('iteb.exam.statistics.download.pdf');
+    Route::post('iteb/exam-statistics/download-pdf', 'downloadExamStatisticsPdf')->name('iteb.exam.statistics.download.pdf');
+    Route::post('exam-statistics/download/students', 'downloadStudentsReport')->name('iteb.exam.statistics.download.students');
+    Route::post('exam-statistics/download/schools', 'downloadSchoolsReport')->name('iteb.exam.statistics.download.schools');
+
 });
 
+
+Route::group(['middleware' => ['StudentAuth']], function () {
+
+    Route::prefix('school-passwords')
+        ->controller(ItebController::class)
+        ->group(function () {
+
+            Route::get('/setup', 'schoolPasswordsSetup')->name('school.passwords.setup');
+            Route::post('/fetch', 'fetchPassword')->name('school.passwords.fetch');
+            Route::post('/generate', 'generatePassword')->name('school.passwords.generate');
+            Route::post('/save', 'savePassword')->name('school.passwords.save');
+
+        });
+});
+
+
+Route::get('/template', function () {
+
+    return view('template');
+});
+
+Route::get('/certificate', function () {
+
+    return view('Certificates.certificate');
+});
+
+Route::group(['middleware' => ['StudentAuth']], function () {
+
+    Route::prefix('passlip')
+        ->controller(PasslipAndCertificatesController::class)
+        ->group(function () {
+
+            Route::get('/generate-passlips', 'generatePasslip')->name('passlip.generate');
+            Route::post('/fetch-school-records', 'fetchSchoolRecords')->name('fetch.school.records');
+
+            Route::get('/certificate/{student_id}', 'downloadertificate')->name('certificate.view');
+
+            Route::get('passlip/download/{student_id}', 'downloadPasslip')->name('passlip.download');
+    Route::post('/student-photo-upload', 'uploadStudentPhoto')->name('student.photo.upload');
+
+        });
+
+
+});
+
+Route::controller(SchoolsController::class)->group(function () {
+    Route::group(['middleware' => ['SchoolAuth']], function () {
+
+        Route::group(['prefix' => '/school'], function () {
+
+            Route::get('/dashboard', 'schoolDashboard')->name('school.dashboard');
+            Route::get('/grading-summary', 'schoolGradingSummary')->name('school.grading.summary');
+            Route::post('/process-grading', 'processGrading')->name('school.process.grading');
+            Route::post('iteb/grading/results/pdf', 'generateResultsPDF')->name('iteb.grading.results.pdf');
+        });
+    });
+
+    Route::post('/school-passwords/export-all-pdf', 'exportAllPasswordsPDF')->name('school.passwords.export-all-pdf');
+
+});

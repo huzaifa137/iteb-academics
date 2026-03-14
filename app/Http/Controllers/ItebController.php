@@ -13,9 +13,16 @@ use App\Models\StudentResult;
 use App\Http\Controllers\Helper;
 use Illuminate\Support\Facades\DB;
 
+use setasign\Fpdi\Fpdi;
+use Mpdf\Mpdf;
+
 use App\Exports\ExamStatisticsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+
+use App\Models\SchoolPassword;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ItebController extends Controller
 {
@@ -206,11 +213,13 @@ class ItebController extends Controller
             'totalStudents',
             'gradedSoFar',
             'pendingGrading',
-            'avgPerformance'
+            'avgPerformance',
         ));
+
     }
     public function processGrading(Request $request)
     {
+
         $request->validate([
             'year' => 'required',
             'category' => 'required',
@@ -886,7 +895,8 @@ class ItebController extends Controller
 
         $year = $request->year;
         $category = $request->category;
-        $level = $request->level ?? 'A';
+        $level = $request->level
+            ?? ($request->category === 'TH' ? 'A' : 'O');
 
         // Get level name for display
         $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
@@ -1128,23 +1138,42 @@ class ItebController extends Controller
             ->orderBy('year', 'desc')
             ->pluck('year');
 
-        return view('itemGrading.exam-statistics', compact(
-            'year',
-            'years',
-            'category',
-            'level',
-            'levelName',
-            'schoolsTable',
-            'studentsRegisteredTable',
-            'gradingSummary',
-            'totals',
-            'failedBreakdown',
-            'registeredStudents',
-            'totalGraded',
-            'topStudents',
-            'bestSubjects',  // Add best subjects
-            'worstSubjects'  // Add worst subjects
-        ));
+        // After processing all students, calculate school performance
+        $topSchools = $this->calculateSchoolPerformance(
+            $allStudents,
+            $marks,
+            $subjectIds,
+            $totalPossibleMarks,
+            $level,
+            $category,
+            $year
+        );
+
+        $data = $this->getExamStatisticsData($request);
+
+
+        // Merge $data with all other variables
+        $viewData = array_merge($data, [
+            'year' => $year,
+            'years' => $years,
+            'category' => $category,
+            'level' => $level,
+            'levelName' => $levelName,
+            'schoolsTable' => $schoolsTable,
+            'studentsRegisteredTable' => $studentsRegisteredTable,
+            'gradingSummary' => $gradingSummary,
+            'totals' => $totals,
+            'failedBreakdown' => $failedBreakdown,
+            'registeredStudents' => $registeredStudents,
+            'totalGraded' => $totalGraded,
+            'topStudents' => $topStudents,
+            'bestSubjects' => $bestSubjects,
+            'worstSubjects' => $worstSubjects,
+            'topSchools' => $topSchools
+        ]);
+
+        return view('itemGrading.exam-statistics', $viewData);
+
     }
     private function getMarksGrade($percentage, $level)
     {
@@ -1181,11 +1210,10 @@ class ItebController extends Controller
         return $total > 0 ? round(($count / $total) * 100, 2) : 0;
     }
 
-    // Add this helper method to get student info
     private function getStudentInfo($studentId)
     {
         $student = StudentBasic::where('Student_ID', $studentId)->first();
-        // dd(args: $student);
+
         if (!$student) {
             return ['name' => 'N/A', 'school_name' => 'N/A'];
         }
@@ -1214,6 +1242,134 @@ class ItebController extends Controller
         return $schoolName;
     }
 
+    public static function getSchoolNameSplitted($school_code)
+    {
+        // If school_code is like "IT-114", we need to extract just the code part or search appropriately
+        // Based on your houses table, the Number field might be just "IT-001" format
+        $schoolName = DB::table('houses')
+            ->where('Number', $school_code) // This should match exactly if your houses table has "IT-114"
+            ->orWhere('Number', explode('-', $school_code)[0]) // Fallback to just "IT" if needed
+            ->value('House');
+
+        return $schoolName ?: $school_code;
+    }
+
+    private function calculateSchoolPerformance($allStudents, $marks, $subjectIds, $totalPossibleMarks, $level, $category, $year)
+    {
+        $studentsBySchool = [];
+
+        // Group students by school (using full school code from student ID)
+        foreach ($allStudents as $studentId) {
+            // Extract school code (first two parts: IT-114 from IT-114-ID-001-2025)
+            $parts = explode('-', $studentId);
+            $schoolCode = $parts[0] . '-' . $parts[1]; // This gives "IT-114"
+            $studentsBySchool[$schoolCode][] = $studentId;
+        }
+
+        $schoolPerformance = [];
+
+        // Initialize grade counters for each school
+        foreach ($studentsBySchool as $schoolCode => $studentIds) {
+            $schoolName = $this->getSchoolNameSplitted($schoolCode);
+
+            $schoolPerformance[$schoolCode] = [
+                'school_code' => $schoolCode,
+                'school_name' => $schoolName ?: $schoolCode,
+                'total_students' => count($studentIds),
+                'graded_students' => 0,
+                'total_marks' => 0,
+                'average_percentage' => 0,
+                'pass_rate' => 0,
+                'grades' => [
+                    'FIRST CLASS' => 0,
+                    'SECOND CLASS UPPER' => 0,
+                    'SECOND CLASS LOWER' => 0,
+                    'THIRD CLASS' => 0,
+                    'FAIL' => 0,
+                ]
+            ];
+        }
+
+        // Process each student's marks and assign to schools
+        foreach ($allStudents as $studentId) {
+            // Extract school code consistently
+            $parts = explode('-', $studentId);
+            $schoolCode = $parts[0] . '-' . $parts[1]; // This gives "IT-114"
+
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue;
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+
+            // Get grade based on percentage and level
+            $grade = $this->getSchoolGrade($percentage, $level);
+
+            if (isset($schoolPerformance[$schoolCode])) {
+                $schoolPerformance[$schoolCode]['graded_students']++;
+                $schoolPerformance[$schoolCode]['total_marks'] += $totalMarks;
+                $schoolPerformance[$schoolCode]['grades'][$grade]++;
+            }
+        }
+
+        // Remove schools with no graded students
+        $schoolPerformance = array_filter($schoolPerformance, function ($school) {
+            return $school['graded_students'] > 0;
+        });
+
+        // Calculate averages and pass rates
+        foreach ($schoolPerformance as &$school) {
+            if ($school['graded_students'] > 0) {
+                $school['average_percentage'] = round(
+                    ($school['total_marks'] / ($school['graded_students'] * $totalPossibleMarks)) * 100,
+                    2
+                );
+
+                // Calculate pass rate (excluding FAIL)
+                $passedStudents = $school['grades']['FIRST CLASS'] +
+                    $school['grades']['SECOND CLASS UPPER'] +
+                    $school['grades']['SECOND CLASS LOWER'] +
+                    $school['grades']['THIRD CLASS'];
+
+                $school['pass_rate'] = $school['graded_students'] > 0
+                    ? round(($passedStudents / $school['graded_students']) * 100, 2)
+                    : 0;
+            }
+        }
+
+        // Sort schools by average percentage (highest first)
+        usort($schoolPerformance, function ($a, $b) {
+            return $b['average_percentage'] <=> $a['average_percentage'];
+        });
+
+        // Return top 10 schools
+        return array_slice($schoolPerformance, 0, 10);
+    }
+    private function getSchoolGrade($percentage, $level)
+    {
+        $grade = Grading::where('Type', 'Marks')
+            ->where('Level', $level)
+            ->where('From', '<=', $percentage)
+            ->where('To', '>=', $percentage)
+            ->first();
+
+        if (!$grade) {
+            return 'FAIL';
+        }
+
+        $gradeMapping = [
+            'D1' => 'FIRST CLASS',
+            'D2' => 'SECOND CLASS UPPER',
+            'C3' => 'SECOND CLASS LOWER',
+            'C4' => 'THIRD CLASS',
+            'F' => 'FAIL'
+        ];
+
+        return $gradeMapping[$grade->Grade] ?? 'FAIL';
+    }
 
     // Download Implementation 
 
@@ -1638,13 +1794,73 @@ class ItebController extends Controller
     // Add this method for PDF download
     public function downloadExamStatisticsPdf(Request $request)
     {
-        $data = $this->prepareStatisticsData($request);
+        try {
+            $data = $this->prepareStatisticsData($request);
 
-        $pdf = PDF::loadView('itemGrading.exam-statistics-pdf', $data);
-        $pdf->setPaper('A4', 'landscape');
+            // Create mPDF instance with Arabic font support
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4-L',
+                'default_font' => 'dejavusans',
+                'tempDir' => storage_path('tmp'),
+                'autoArabic' => true,
+                'autoLangToFont' => true,
+                'allow_charset_conversion' => true,
+                'charset_in' => 'UTF-8',
+                'useAdobeCJK' => true,
+                'useSubstitutions' => true,
+                'directionality' => 'ltr',
+            ]);
 
-        $filename = "exam_statistics_{$data['year']}_{$data['category']}_{$data['levelName']}.pdf";
-        return $pdf->download($filename);
+            // Add custom fonts for better Arabic support
+            $mpdf->fontdata = [
+                'dejavusans' => [
+                    'R' => 'DejaVuSans.ttf',
+                    'B' => 'DejaVuSans-Bold.ttf',
+                    'I' => 'DejaVuSans-Oblique.ttf',
+                    'BI' => 'DejaVuSans-BoldOblique.ttf',
+                ],
+                'amiri' => [
+                    'R' => 'amiri-regular.ttf',
+                    'B' => 'amiri-bold.ttf',
+                    'I' => 'amiri-italic.ttf',
+                    'BI' => 'amiri-bolditalic.ttf',
+                ]
+            ];
+
+            // Set font
+            $mpdf->SetFont('dejavusans');
+
+            // Enable Arabic
+            $mpdf->SetDirectionality('ltr');
+
+            // Set document properties
+            $mpdf->SetTitle("Exam Statistics Report - {$data['year']}");
+            $mpdf->SetAuthor('ITEB System');
+
+            // Generate HTML content
+            $html = view('itemGrading.pdf.exam-statistics-mpdf', $data)->render();
+
+            // Ensure proper encoding
+            $html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
+
+            // Write to PDF
+            $mpdf->WriteHTML($html);
+
+            // Generate filename
+            $filename = "exam_statistics_{$data['year']}_{$data['category']}_{$data['level']}.pdf";
+
+            // Output PDF
+            return $mpdf->Output($filename, 'D');
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'error' => 'Failed to generate PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Extract common logic to prepare data
@@ -1834,6 +2050,7 @@ class ItebController extends Controller
 
         $topStudents = array_slice($studentPerformance, 0, 10);
 
+
         // Prepare grading summary
         $gradingSummary = [];
         $serial = ['a', 'b', 'c', 'd'];
@@ -1887,4 +2104,796 @@ class ItebController extends Controller
             'worstSubjects' => $worstSubjects,
         ];
     }
+
+    public function downloadStudentsReport(Request $request)
+    {
+        try {
+            $request->validate([
+                'year' => 'required',
+                'category' => 'required',
+                'level' => 'nullable|in:A,O'
+            ]);
+
+            ini_set('memory_limit', '1024M');
+            set_time_limit(600);
+
+            \Log::info('Download Students Report Started', $request->all());
+
+            // Get basic data
+            $data = $this->getExamStatisticsBasicData($request);
+
+            // Create temporary directory for chunks
+            $tempDir = storage_path('app/temp/pdf_chunks_' . uniqid());
+            if (!file_exists($tempDir)) {
+                mkdir($tempDir, 0777, true);
+            }
+
+            \Log::info('Temp directory created: ' . $tempDir);
+
+            // Generate header page
+            $headerPdf = PDF::loadView('itemGrading.pdf.students-report-header', $data);
+            $headerPdf->setPaper('A4', 'landscape');
+            $headerPdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'dpi' => 96,
+            ]);
+            $headerPath = $tempDir . '/header.pdf';
+            file_put_contents($headerPath, $headerPdf->output());
+
+            if (!file_exists($headerPath)) {
+                throw new \Exception('Failed to create header PDF');
+            }
+
+            \Log::info('Header PDF created');
+
+            // Process students in chunks
+            $chunkSize = 100;
+            $allStudents = $data['all_student_ids'];
+            $chunkFiles = [];
+
+            for ($i = 0; $i < count($allStudents); $i += $chunkSize) {
+                $chunkIds = array_slice($allStudents, $i, $chunkSize);
+
+                // Get chunk data
+                $chunkData = $this->getStudentChunkData($chunkIds, $request);
+
+                if (empty($chunkData)) {
+                    continue;
+                }
+
+                $chunkInfo = [
+                    'students' => $chunkData,
+                    'chunk_number' => floor($i / $chunkSize) + 1,
+                    'total_chunks' => ceil(count($allStudents) / $chunkSize),
+                    'start_index' => $i + 1,
+                    'end_index' => min($i + $chunkSize, count($allStudents))
+                ];
+
+                // Generate PDF for this chunk
+                $chunkPdf = PDF::loadView('itemGrading.pdf.students-report-chunk', $chunkInfo);
+                $chunkPdf->setPaper('A4', 'landscape');
+                $chunkPdf->setOptions([
+                    'defaultFont' => 'sans-serif',
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => false,
+                    'dpi' => 96,
+                ]);
+
+                $chunkPath = $tempDir . '/chunk_' . floor($i / $chunkSize) . '.pdf';
+                file_put_contents($chunkPath, $chunkPdf->output());
+
+                if (file_exists($chunkPath)) {
+                    $chunkFiles[] = $chunkPath;
+                    \Log::info('Chunk ' . floor($i / $chunkSize) . ' created with ' . count($chunkData) . ' students');
+                }
+
+                // Clear memory
+                unset($chunkData);
+                unset($chunkPdf);
+                gc_collect_cycles();
+            }
+
+            if (empty($chunkFiles)) {
+                throw new \Exception('No data chunks were generated');
+            }
+
+            // Generate footer
+            $footerPdf = PDF::loadView('itemGrading.pdf.students-report-footer', ['total' => count($allStudents)]);
+            $footerPdf->setPaper('A4', 'landscape');
+            $footerPath = $tempDir . '/footer.pdf';
+            file_put_contents($footerPath, $footerPdf->output());
+
+            if (!file_exists($footerPath)) {
+                throw new \Exception('Failed to create footer PDF');
+            }
+
+            \Log::info('Footer PDF created');
+
+            // Merge all PDFs using FPDI
+            $finalPdf = new FPDI();
+
+            // Merge header
+            $this->mergePdfFile($finalPdf, $headerPath);
+
+            // Merge all chunks
+            foreach ($chunkFiles as $chunkFile) {
+                $this->mergePdfFile($finalPdf, $chunkFile);
+            }
+
+            // Merge footer
+            $this->mergePdfFile($finalPdf, $footerPath);
+
+            // Save final PDF
+            $filename = 'students_full_report_' . $request->year . '_' . $request->category . '.pdf';
+            $finalPath = $tempDir . '/' . $filename;
+
+            // Output the PDF to file
+            $finalPdf->Output('F', $finalPath);
+
+            \Log::info('Final PDF saved to: ' . $finalPath);
+
+            // Verify file exists
+            if (!file_exists($finalPath)) {
+                throw new \Exception('Final PDF file was not created at: ' . $finalPath);
+            }
+
+            if (filesize($finalPath) === 0) {
+                throw new \Exception('Final PDF file is empty');
+            }
+
+            \Log::info('Final PDF size: ' . filesize($finalPath) . ' bytes');
+
+            // Return file download
+            return response()->download($finalPath, $filename, [
+                'Content-Type' => 'application/pdf',
+                'Content-Length' => filesize($finalPath)
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            // Clean up temp directory if it exists
+            if (isset($tempDir) && file_exists($tempDir)) {
+                $this->cleanupTempDir($tempDir);
+            }
+
+            return response()->json([
+                'error' => 'Failed to generate PDF: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function mergePdfFile($finalPdf, $filePath)
+    {
+        try {
+            if (!file_exists($filePath)) {
+                \Log::error('File not found for merging: ' . $filePath);
+                return 0;
+            }
+
+            $pageCount = $finalPdf->setSourceFile($filePath);
+            \Log::info('Merging file: ' . $filePath . ' with ' . $pageCount . ' pages');
+
+            for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+                $templateId = $finalPdf->importPage($pageNo);
+                $size = $finalPdf->getTemplateSize($templateId);
+
+                $finalPdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+                $finalPdf->useTemplate($templateId);
+            }
+
+            return $pageCount;
+        } catch (\Exception $e) {
+            \Log::error('Error merging PDF: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function cleanupTempDir($dir)
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $files = glob($dir . '/*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+        rmdir($dir);
+
+        \Log::info('Cleaned up temp directory: ' . $dir);
+    }
+
+    private function getExamStatisticsBasicData($request)
+    {
+        $year = $request->year;
+        $category = $request->category;
+        $level = $request->level ?? ($request->category === 'TH' ? 'A' : 'O');
+
+        $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
+
+        // Get all student IDs
+        $allStudentIds = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->pluck('Student_ID')
+            ->toArray();
+
+        // Get subjects for percentage calculation to sort later
+        $subjectIds = $this->getSubjectIdsForCategory($category);
+        $totalPossibleMarks = count($subjectIds) * 100;
+
+        // Get marks for ALL students to calculate percentages for sorting
+        $marks = Mark::whereIn('student_id', $allStudentIds)
+            ->whereIn('subject_id', $subjectIds)
+            ->where('year', $year)
+            ->get()
+            ->groupBy('student_id');
+
+        // Calculate percentage for each student and sort
+        $studentsWithPercentage = [];
+        foreach ($allStudentIds as $studentId) {
+            $studentMarks = $marks->get($studentId, collect());
+            if ($studentMarks->isNotEmpty()) {
+                $totalMarks = $studentMarks->sum('mark');
+                $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+                $studentsWithPercentage[] = [
+                    'id' => $studentId,
+                    'percentage' => $percentage
+                ];
+            }
+        }
+
+        // Sort by percentage descending
+        usort($studentsWithPercentage, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        // Extract just the IDs in sorted order
+        $sortedStudentIds = array_column($studentsWithPercentage, 'id');
+
+        $registeredStudents = count($sortedStudentIds);
+
+        return [
+            'year' => $year,
+            'category' => $category,
+            'level' => $level,
+            'levelName' => $levelName,
+            'registeredStudents' => $registeredStudents,
+            'all_student_ids' => $sortedStudentIds, // Now this is sorted by percentage
+            'generation_date' => now()->format('Y-m-d H:i:s')
+        ];
+    }
+
+    private function getStudentChunkData($studentIds, $request)
+    {
+        try {
+            $year = $request->year;
+            $category = $request->category;
+            $level = $request->level ?? ($request->category === 'TH' ? 'A' : 'O');
+
+            // Get subjects for this category
+            $subjectIds = $this->getSubjectIdsForCategory($category);
+            $totalPossibleMarks = count($subjectIds) * 100;
+
+            // Get marks for these students
+            $marks = Mark::whereIn('student_id', $studentIds)
+                ->whereIn('subject_id', $subjectIds)
+                ->where('year', $year)
+                ->get()
+                ->groupBy('student_id');
+
+            $studentsData = [];
+
+            foreach ($studentIds as $studentId) {
+                $studentMarks = $marks->get($studentId, collect());
+
+                if ($studentMarks->isEmpty()) {
+                    continue;
+                }
+
+                $totalMarks = $studentMarks->sum('mark');
+                $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+                $grade = $this->getMarksGrade($percentage, $level);
+                $gender = strtolower($this->getStudentGender($studentId));
+                $studentInfo = $this->getStudentInfo($studentId);
+
+                $studentsData[] = [
+                    'student_id' => $studentId,
+                    'student_name' => $studentInfo['name'] ?? 'N/A',
+                    'school_name' => $studentInfo['school_name'] ?? 'N/A',
+                    'total_marks' => $totalMarks,
+                    'percentage' => $percentage,
+                    'grade' => $grade,
+                    'gender' => $gender
+                ];
+            }
+
+            // Sort by percentage in DESCENDING order (highest first)
+            usort($studentsData, function ($a, $b) {
+                return $b['percentage'] <=> $a['percentage'];
+            });
+
+            \Log::info('Chunk data retrieved: ' . count($studentsData) . ' students');
+
+            return $studentsData;
+
+        } catch (\Exception $e) {
+            \Log::error('Error in getStudentChunkData: ' . $e->getMessage());
+            return [];
+        }
+    }
+    public function downloadSchoolsReport(Request $request)
+    {
+        $request->validate([
+            'year' => 'required',
+            'category' => 'required',
+            'level' => 'nullable|in:A,O'
+        ]);
+
+        // Get all data
+        $data = $this->getExamStatisticsData($request);
+
+        // Generate PDF with ALL schools
+        $pdf = PDF::loadView('itemGrading.pdf.schools-report', $data);
+
+        $filename = 'schools_full_report_' . $request->year . '_' . $request->category . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    private function getExamStatisticsData($request)
+    {
+        $year = $request->year;
+        $category = $request->category;
+        $level = $request->level ?? ($request->category === 'TH' ? 'A' : 'O');
+
+        // Get level name for display
+        $levelName = $level == 'A' ? 'THANAWI (A) LEVEL' : 'IDAAD (O) LEVEL';
+
+        // Get registered schools count
+        $schoolsQuery = ClassAllocation::select('Student_ID')
+            ->where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct();
+
+        $schoolsCount = $schoolsQuery->get()
+            ->map(function ($item) {
+                return explode('-', $item->Student_ID)[0];
+            })
+            ->unique()
+            ->count();
+
+        // Get registered students count
+        $registeredStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->count('Student_ID');
+
+        // Get all students for this category/year
+        $allStudents = ClassAllocation::where('Student_ID', 'LIKE', "%-$category-%")
+            ->where('Student_ID', 'LIKE', "%-$year")
+            ->distinct('Student_ID')
+            ->pluck('Student_ID')
+            ->toArray();
+
+        // Get subjects for this category
+        $subjectIds = $this->getSubjectIdsForCategory($category);
+        $totalPossibleMarks = count($subjectIds) * 100;
+
+        // Get all marks for these students
+        $marks = Mark::whereIn('student_id', $allStudents)
+            ->whereIn('subject_id', $subjectIds)
+            ->where('year', $year)
+            ->get()
+            ->groupBy('student_id');
+
+        // Initialize grade distribution counters
+        $gradeDistribution = [
+            'D1' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'D2' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C3' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'C4' => ['male' => 0, 'female' => 0, 'total' => 0],
+            'F' => ['male' => 0, 'female' => 0, 'total' => 0],
+        ];
+
+        $totalMale = 0;
+        $totalFemale = 0;
+        $totalGraded = 0;
+
+        // Array to store ALL student performance data (not just top 10)
+        $allStudentPerformance = [];
+
+        // Initialize subject performance tracking
+        $subjectPerformance = [];
+
+        // Get subject names based on category
+        if ($category == 'TH') {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.ThanawiPapers')
+            )->get()->keyBy('id');
+        } else {
+            $subjectPapers = MasterData::where(
+                'md_master_code_id',
+                config('constants.options.IdaadPapers')
+            )->get()->keyBy('id');
+        }
+
+        // Initialize subject performance array with subject details
+        foreach ($subjectIds as $subjectId) {
+            $subject = $subjectPapers[$subjectId] ?? null;
+            $subjectPerformance[$subjectId] = [
+                'subject_id' => $subjectId,
+                'subject_name' => $subjectId,
+                'total_marks' => 0,
+                'student_count' => 0,
+                'average' => 0,
+                'highest' => 0,
+                'lowest' => 100,
+                'pass_count' => 0,
+                'fail_count' => 0,
+                'pass_percentage' => 0
+            ];
+        }
+
+        // Process each student
+        foreach ($allStudents as $studentId) {
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue;
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+
+            // Get grade
+            $grade = $this->getMarksGrade($percentage, $level);
+
+            // Get student gender
+            $gender = strtolower($this->getStudentGender($studentId));
+
+            // Get student info
+            $studentInfo = $this->getStudentInfo($studentId);
+
+            // Store ALL student performance data
+            $allStudentPerformance[] = [
+                'student_id' => $studentId,
+                'student_name' => $studentInfo['name'] ?? 'N/A',
+                'school_name' => $studentInfo['school_name'] ?? 'N/A',
+                'total_marks' => $totalMarks,
+                'percentage' => $percentage,
+                'grade' => $grade,
+                'gender' => $gender
+            ];
+
+            // Update subject performance
+            foreach ($studentMarks as $mark) {
+                $subjectId = $mark->subject_id;
+                $markValue = $mark->mark;
+
+                if (isset($subjectPerformance[$subjectId])) {
+                    $subjectPerformance[$subjectId]['total_marks'] += $markValue;
+                    $subjectPerformance[$subjectId]['student_count']++;
+                    $subjectPerformance[$subjectId]['highest'] = max($subjectPerformance[$subjectId]['highest'], $markValue);
+                    $subjectPerformance[$subjectId]['lowest'] = min($subjectPerformance[$subjectId]['lowest'], $markValue);
+
+                    if ($markValue >= 50) {
+                        $subjectPerformance[$subjectId]['pass_count']++;
+                    } else {
+                        $subjectPerformance[$subjectId]['fail_count']++;
+                    }
+                }
+            }
+
+            // Update counters
+            if (isset($gradeDistribution[$grade])) {
+                $gradeDistribution[$grade][$gender]++;
+                $gradeDistribution[$grade]['total']++;
+
+                if ($gender == 'male') {
+                    $totalMale++;
+                } else {
+                    $totalFemale++;
+                }
+                $totalGraded++;
+            }
+        }
+
+        // Calculate subject averages
+        foreach ($subjectPerformance as &$subject) {
+            if ($subject['student_count'] > 0) {
+                $subject['average'] = round($subject['total_marks'] / $subject['student_count'], 2);
+                $subject['pass_percentage'] = round(($subject['pass_count'] / $subject['student_count']) * 100, 2);
+            }
+            if ($subject['lowest'] == 100) {
+                $subject['lowest'] = 0;
+            }
+        }
+
+        // Sort subjects by average
+        usort($subjectPerformance, function ($a, $b) {
+            return $b['average'] <=> $a['average'];
+        });
+
+        // Get top 10 subjects
+        $bestSubjects = array_slice($subjectPerformance, 0, 10);
+        $worstSubjects = array_slice(array_reverse($subjectPerformance), 0, 10);
+
+        // Sort ALL students by percentage
+        usort($allStudentPerformance, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        // Get top 10 for display
+        $topStudents = array_slice($allStudentPerformance, 0, 10);
+
+        // Prepare grading summary
+        $gradingSummary = [];
+        $serial = ['a', 'b', 'c', 'd'];
+        $gradeLabels = [
+            'D1' => 'Excellent D1',
+            'D2' => 'Very good D2',
+            'C3' => 'Good C3',
+            'C4' => 'Pass C4',
+            'F' => 'Fail F'
+        ];
+
+        $i = 0;
+        foreach ($gradeDistribution as $grade => $counts) {
+            if ($grade != 'F') {
+                $gradingSummary[$grade] = [
+                    'serial' => $serial[$i++] ?? '',
+                    'label' => $gradeLabels[$grade],
+                    'male_count' => $counts['male'],
+                    'male_percent' => $this->calculatePercentage($counts['male'], $totalGraded),
+                    'female_count' => $counts['female'],
+                    'female_percent' => $this->calculatePercentage($counts['female'], $totalGraded),
+                    'total' => $counts['total']
+                ];
+            }
+        }
+
+        // Failed breakdown
+        $failedBreakdown = [
+            'male_failed' => $gradeDistribution['F']['male'],
+            'female_failed' => $gradeDistribution['F']['female'],
+            'total_failed' => $gradeDistribution['F']['total']
+        ];
+
+        $totals = [
+            'male_total' => $totalMale,
+            'female_total' => $totalFemale,
+            'overall_total' => $totalGraded
+        ];
+
+        $schoolsTable = [
+            ['level' => $levelName, 'count' => $schoolsCount]
+        ];
+
+        // Calculate school performance
+        $allSchools = $this->calculateAllSchoolsPerformance(
+            $allStudents,
+            $marks,
+            $subjectIds,
+            $totalPossibleMarks,
+            $level,
+            $category,
+            $year
+        );
+
+        $topSchools = array_slice($allSchools, 0, 10);
+
+        // Return all data as an array
+        return [
+            'year' => $year,
+            'category' => $category,
+            'level' => $level,
+            'levelName' => $levelName,
+            'schoolsTable' => $schoolsTable,
+            'gradingSummary' => $gradingSummary,
+            'totals' => $totals,
+            'failedBreakdown' => $failedBreakdown,
+            'registeredStudents' => $registeredStudents,
+            'totalGraded' => $totalGraded,
+            'allStudents' => $allStudentPerformance, // ALL students for full report
+            'topStudents' => $topStudents, // Top 10 for display
+            'bestSubjects' => $bestSubjects,
+            'worstSubjects' => $worstSubjects,
+            'allSchools' => $allSchools, // ALL schools for full report
+            'topSchools' => $topSchools, // Top 10 for display
+            'subjectPerformance' => $subjectPerformance,
+            'gradeDistribution' => $gradeDistribution
+        ];
+    }
+
+    private function calculateAllSchoolsPerformance($allStudents, $marks, $subjectIds, $totalPossibleMarks, $level, $category, $year)
+    {
+        $studentsBySchool = [];
+
+        foreach ($allStudents as $studentId) {
+            $parts = explode('-', $studentId);
+            $schoolCode = $parts[0] . '-' . $parts[1];
+            $studentsBySchool[$schoolCode][] = $studentId;
+        }
+
+        $schoolPerformance = [];
+
+        foreach ($studentsBySchool as $schoolCode => $studentIds) {
+            $schoolName = $this->getSchoolNameSplitted($schoolCode);
+
+            $schoolPerformance[$schoolCode] = [
+                'school_code' => $schoolCode,
+                'school_name' => $schoolName ?: $schoolCode,
+                'total_students' => count($studentIds),
+                'graded_students' => 0,
+                'total_marks' => 0,
+                'average_percentage' => 0,
+                'pass_rate' => 0,
+                'grades' => [
+                    'FIRST CLASS' => 0,
+                    'SECOND CLASS UPPER' => 0,
+                    'SECOND CLASS LOWER' => 0,
+                    'THIRD CLASS' => 0,
+                    'FAIL' => 0,
+                ]
+            ];
+        }
+
+        foreach ($allStudents as $studentId) {
+            $parts = explode('-', $studentId);
+            $schoolCode = $parts[0] . '-' . $parts[1];
+
+            $studentMarks = $marks->get($studentId, collect());
+
+            if ($studentMarks->isEmpty()) {
+                continue;
+            }
+
+            $totalMarks = $studentMarks->sum('mark');
+            $percentage = $totalPossibleMarks > 0 ? round(($totalMarks / $totalPossibleMarks) * 100, 2) : 0;
+            $grade = $this->getSchoolGrade($percentage, $level);
+
+            if (isset($schoolPerformance[$schoolCode])) {
+                $schoolPerformance[$schoolCode]['graded_students']++;
+                $schoolPerformance[$schoolCode]['total_marks'] += $totalMarks;
+                $schoolPerformance[$schoolCode]['grades'][$grade]++;
+            }
+        }
+
+        $schoolPerformance = array_filter($schoolPerformance, function ($school) {
+            return $school['graded_students'] > 0;
+        });
+
+        foreach ($schoolPerformance as &$school) {
+            if ($school['graded_students'] > 0) {
+                $school['average_percentage'] = round(
+                    ($school['total_marks'] / ($school['graded_students'] * $totalPossibleMarks)) * 100,
+                    2
+                );
+
+                $passedStudents = $school['grades']['FIRST CLASS'] +
+                    $school['grades']['SECOND CLASS UPPER'] +
+                    $school['grades']['SECOND CLASS LOWER'] +
+                    $school['grades']['THIRD CLASS'];
+
+                $school['pass_rate'] = $school['graded_students'] > 0
+                    ? round(($passedStudents / $school['graded_students']) * 100, 2)
+                    : 0;
+            }
+        }
+
+        usort($schoolPerformance, function ($a, $b) {
+            return $b['average_percentage'] <=> $a['average_percentage'];
+        });
+
+        return $schoolPerformance; // Return ALL schools
+    }
+
+    public function schoolPasswordsSetup(Request $request)
+    {
+        $houses = House::select('Number', 'House', 'House_AR')
+            ->get()
+            ->map(function ($house) {
+                return (object) [
+                    'ID' => $house->Number,
+                    'House' => $house->House,
+                    'House_AR' => $house->House_AR,
+                    'Number' => $house->Number,
+                ];
+            });
+
+        return view('itemGrading.school-passwords-setup', compact('houses'));
+    }
+
+    public function fetchPassword(Request $request)
+    {
+
+        $request->validate([
+            'school_id' => 'required|exists:houses,Number'
+        ]);
+
+        $school = House::where('Number', $request->school_id)->first();
+
+        $passwordData = null;
+
+        if ($school->schoolPassword) {
+            $passwordData = [
+                'id' => $school->schoolPassword->id,
+                'school_id' => $school->ID,
+                'school_name' => $school->House . ' - ' . $school->House_AR,
+                'password_plain' => $school->schoolPassword->password_plain,
+                'has_password' => true
+            ];
+        } else {
+            $passwordData = [
+                'school_id' => $school->ID,
+                'school_name' => $school->House . ' - ' . $school->House_AR,
+                'has_password' => false
+            ];
+        }
+
+        return response()->json($passwordData);
+    }
+
+    public function generatePassword(Request $request)
+    {
+        $request->validate([
+            'school_id' => 'required|exists:houses,ID'
+        ]);
+
+        // Generate a secure random password
+        $password = $this->generateSecurePassword();
+
+        return response()->json([
+            'school_id' => $request->school_id,
+            'generated_password' => $password
+        ]);
+    }
+
+    public function savePassword(Request $request)
+    {
+
+        $request->validate([
+            'school_id' => 'required|exists:houses,ID',
+            'password' => 'required'
+        ]);
+
+        $uniqueSchoolId = House::where('ID', $request->school_id)->value('Number');
+
+        $schoolPassword = SchoolPassword::updateOrCreate(
+            ['school_id' => $uniqueSchoolId],
+            [
+                'password_plain' => $request->password,
+                'password_hashed' => Hash::make($request->password)
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password saved successfully',
+            'data' => [
+                'id' => $schoolPassword->id,
+                'school_id' => $schoolPassword->school_id,
+                'password_plain' => $schoolPassword->password_plain
+            ]
+        ]);
+    }
+    private function generateSecurePassword($length = 5)
+    {
+        $numbers = '0123456789';
+        $password = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        }
+
+        return $password;
+    }
+
 }

@@ -292,66 +292,106 @@
             }
 
             /* Subject tables styling */
-.card-header {
-    font-weight: 600;
-    padding: 1rem 1.5rem;
-}
+            .card-header {
+                font-weight: 600;
+                padding: 1rem 1.5rem;
+            }
 
-.card-header.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-}
+            .card-header.bg-success {
+                background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+            }
 
-.card-header.bg-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-}
+            .card-header.bg-danger {
+                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+            }
 
-.table td {
-    vertical-align: middle;
-    padding: 0.75rem;
-}
+            .table td {
+                vertical-align: middle;
+                padding: 0.75rem;
+            }
 
-.table tbody tr:hover {
-    background-color: rgba(0,0,0,0.02);
-}
+            .table tbody tr:hover {
+                background-color: rgba(0, 0, 0, 0.02);
+            }
 
-/* Subject badges */
-.badge.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+            /* Subject badges */
+            .badge.bg-success {
+                background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.85rem;
+            }
 
-.badge.bg-warning {
-    color: #212529 !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+            .badge.bg-warning {
+                color: #212529 !important;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.85rem;
+            }
 
-.badge.bg-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+            .badge.bg-info {
+                background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.85rem;
+            }
 
-.badge.bg-danger {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-}
+            .badge.bg-danger {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.85rem;
+            }
 
-/* Bronze badge for 3rd place */
-.badge.bg-bronze {
-    background-color: #cd7f32 !important;
-    color: white;
-}
+            /* Bronze badge for 3rd place */
+            .badge.bg-bronze {
+                background-color: #cd7f32 !important;
+                color: white;
+            }
+
+            /* Responsive button styles */
+            @media (max-width: 767px) {
+                .col-md-4 .btn {
+                    width: 100%;
+                    white-space: normal;
+                    word-wrap: break-word;
+                    font-size: 14px;
+                    padding: 10px 12px;
+                    height: auto;
+                    min-height: 44px;
+                    /* Better touch target */
+                }
+
+                /* Ensure the button container takes full width on mobile */
+                .col-12.col-md-4 {
+                    width: 100%;
+                }
+
+                /* Adjust icon margin for better spacing */
+                .btn i {
+                    margin-right: 8px;
+                }
+            }
+
+            /* For very small screens */
+            @media (max-width: 480px) {
+                .col-md-4 .btn {
+                    font-size: 13px;
+                    padding: 8px 10px;
+                }
+            }
         </style>
 
 
-            <!-- Add Font Awesome if not already included -->
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- Add Font Awesome if not already included -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
         <div class="container mt-4">
 
-           
+            <div class="row">
+                <div class="col-lg-12 col-xl-12 col-md-12 col-sm-12">
+                    <div class="card bg-primary">
+                        <div class="card-header">
+                            @include('layouts.iteb-grading-buttons')
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="card shadow-lg border-0">
                 <div class="card-header text-white d-flex justify-content-between align-items-center"
@@ -363,105 +403,39 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Grading Summary Form -->
-                    <div class="mb-4 pb-3 border-bottom">
-                        <h5 class="mb-3" style="color: #287c44">
-                            <i class="fas fa-calculator me-2"></i> Schools Grading Report
-                        </h5>
-
-                        <form action="{{ route('iteb.process.grading') }}" method="POST" id="gradingFilterForm"
-                            class="mb-3">
-                            @csrf
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold">Year <span class="text-danger">*</span></label>
-                                    <select name="year" class="form-select select2" required>
-                                        <option value="">-- Select Year --</option>
-                                        @foreach ($years as $year)
-                                            <option value="{{ $year }}">{{ $year }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
-                                    <select name="category" class="form-select select2" required>
-                                        <option value="">-- Select Category --</option>
-                                        @foreach ($categories as $key => $value)
-                                            <option value="{{ $key }}">{{ $value }} ({{ $key }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">School</label>
-                                    <select name="school_number" class="form-select select2">
-                                        <option value="">-- All Schools --</option>
-                                        @foreach ($schools as $code => $name)
-                                            <option value="{{ $code }}" title="{{ $name }} ({{ $code }})">
-                                                {{ Str::limit($name, 30) }} ({{ $code }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="text-muted">Optional</small>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <label class="form-label fw-bold">Level</label>
-                                    <select name="level" class="form-select select2" required>
-                                        <option value="">-- Select Level --</option>
-                                        <option value="A">Level A</option>
-                                        <option value="O">Level O</option>
-                                    </select>
-                                    <small class="text-muted">Grading level</small>
-                                </div>
-
-                                <div class="col-12 mt-3" style="text-align: right;">
-                                    <button type="submit" style="
-                            background-color: #287c44;
-                            color: white;
-                            padding: 12px 20px;
-                            border: none;
-                            border-radius: 5px;
-                            width: 100%;
-                            max-width: 100%;
-                            font-size: 14px;
-                            cursor: pointer;
-                        ">
-                                        <i class="fas fa-magnifying-glass-chart" style="margin-right:8px;"></i>
-                                        Generate School Report
-                                    </button>
-                                </div>
-
-                            </div>
-                        </form>
-                    </div>
 
                     <!-- Examination Statistics Form -->
                     <div>
                         <h5 class="mb-3" style="color: #287c44;">
                             <i class="fas fa-poll me-2"></i>
-                            General Examination Statistics
+                            General Examinations Report
                         </h5>
 
                         <form action="{{ route('iteb.exam.statistics') }}" method="GET">
+
                             <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold">Year <span class="text-danger">*</span></label>
+
+                                <!-- Year -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold">
+                                        Year <span class="text-danger">*</span>
+                                    </label>
                                     <select name="year" class="form-select select2" required>
                                         <option value="">-- Select Year --</option>
                                         @foreach ($years ?? [] as $y)
-                                            <option value="{{ $y }}" {{ isset($year) && $y == $year ?: '' }}>
+                                            <option value="{{ $y }}" {{ isset($year) && $y == $year ? 'selected' : '' }}>
                                                 {{ $y }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
-                                    <select name="category" class="form-select select2" required>
+                                <!-- Category -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold">
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="category" class="form-select select2" required style="height: 38px;">
                                         <option value="">-- Select Category --</option>
                                         <option value="ID" {{ isset($category) && $category == 'ID' ? 'selected' : '' }}>
                                             Idaad (ID)
@@ -472,46 +446,92 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-4">
+                                <!-- Hidden Level -->
+                                <input type="hidden" name="level" id="levelInput" value="{{ $level ?? '' }}">
+
+                            </div>
+
+                            <!-- Button Row -->
+                            <div class="row mt-4 justify-content-center">
+                                <div class="col-12 col-md-4">
+                                    <button type="submit" class="btn"
+                                        style="background-color: #287c44; color: white; width: 100%; min-height: 44px;">
+                                        <i class="fas fa-magnifying-glass-chart me-2"></i>
+                                        General Report
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <!-- Grading Summary Form -->
+                    <div class="mb-4 pb-3 mt-4 border-bottom">
+                        <h5 class="mb-3" style="color: #287c44">
+                            <i class="fas fa-calculator me-2"></i> Schools Grading Report
+                        </h5>
+
+                        <form action="{{ route('iteb.process.grading') }}" method="POST" id="gradingFilterForm">
+                            @csrf
+
+                            <div class="row g-3">
+
+                                <!-- Year -->
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold">
+                                        Year <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="year" class="form-select select2" required style="height: 38px;">
+                                        <option value="">-- Select Year --</option>
+                                        @foreach ($years as $year)
+                                            <option value="{{ $year }}">{{ $year }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Category -->
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold">
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="category" class="form-select select2" required style="height: 38px;">
+                                        <option value="">-- Select Category --</option>
+                                        @foreach ($categories as $key => $value)
+                                            <option value="{{ $key }}">
+                                                {{ $value }} ({{ $key }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- School -->
+                                <div class="col-12 col-md-4">
                                     <label class="form-label fw-bold">School</label>
-                                    <select name="school_number" class="form-select select2">
+                                    <select name="school_number" class="form-select select2" style="height: 38px;">
                                         <option value="">-- All Schools --</option>
-                                        @foreach ($schools ?? [] as $code => $name)
+                                        @foreach ($schools as $code => $name)
                                             <option value="{{ $code }}" title="{{ $name }} ({{ $code }})">
                                                 {{ Str::limit($name, 30) }} ({{ $code }})
                                             </option>
                                         @endforeach
                                     </select>
-                                    <small class="text-muted">Optional</small>
+                                    <div style="height: 21px;">
+                                        <small class="text-muted">Optional</small>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-2">
-                                    <label class="form-label fw-bold">Level</label>
-                                    <select name="level" class="form-select select2">
-                                        <option value="">-- All --</option>
-                                        <option value="A" {{ isset($level) && $level == 'A' ? 'selected' : '' }}>
-                                            Level A</option>
-                                        <option value="O" {{ isset($level) && $level == 'O' ? 'selected' : '' }}>
-                                            Level O</option>
-                                    </select>
-                                    <small class="text-muted">Optional</small>
-                                </div>
+                                <!-- Hidden Level -->
+                                <input type="hidden" name="level" id="levelInput">
+
                             </div>
 
-                            <div class="row mt-3">
-                                <div class="col-12" style="text-align: right;">
-                                    <button type="submit" style="
-                                background-color: #287c44;
-                                color: white;
-                                padding: 10px 20px;
-                                border: none;
-                                border-radius: 4px;
-                                width: 100%;
-                                max-width: 100%;
-                                font-size: 14px;
-                            ">
-                                        <i class="fas fa-magnifying-glass-chart" style="margin-right:8px;"></i>
-                                        Generate General Exams Statistics
+                            <!-- Centered Button Row -->
+                            <div class="row justify-content-center">
+                                <div class="col-12 col-md-4">
+                                    <button type="submit" class="btn"
+                                        style="background-color: #287c44; color: white; width: 100%; min-height: 44px;">
+                                        <i class="fas fa-magnifying-glass-chart me-2"></i>
+                                        Generate School Reports
                                     </button>
                                 </div>
                             </div>
@@ -541,7 +561,7 @@
                         </div>
                         <div class="col-md-3 col-6">
                             <div class="bg-light p-2 rounded text-center">
-                                <small class="text-muted">Last Updated</small>
+                                <small class="text-muted">Last Search</small>
                                 <h6 class="mb-0">{{ now()->format('M d, Y') }}</h6>
                             </div>
                         </div>
@@ -550,6 +570,7 @@
             </div>
 
         </div>
+
     </div>
     </div>
     </div>
@@ -559,8 +580,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Handle first form (Grading Report)
         document.getElementById('gradingFilterForm').addEventListener('submit', function (e) {
-
             e.preventDefault();
 
             Swal.fire({
@@ -577,6 +598,52 @@
             setTimeout(() => {
                 e.target.submit();
             }, 300);
+        });
+
+        // Handle second form (Examination Statistics)
+        document.querySelector('form[action="{{ route('iteb.exam.statistics') }}"]').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Generating examination statistics. Please wait.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            setTimeout(() => {
+                e.target.submit();
+            }, 300);
+        });
+
+        // Category and level handling (single implementation)
+        document.addEventListener("DOMContentLoaded", function () {
+            const categorySelect = document.querySelector('select[name="category"]');
+            const levelInput = document.getElementById('levelInput');
+
+            if (categorySelect && levelInput) {
+                function setLevelBasedOnCategory() {
+                    const selectedCategory = categorySelect.value;
+
+                    if (selectedCategory === 'TH') {
+                        levelInput.value = 'A'; // Thanawi → Level A
+                    } else if (selectedCategory === 'ID') {
+                        levelInput.value = 'O'; // Idaad → Level O
+                    } else {
+                        levelInput.value = '';
+                    }
+                }
+
+                // When category changes
+                categorySelect.addEventListener('change', setLevelBasedOnCategory);
+
+                // Set automatically on page load
+                setLevelBasedOnCategory();
+            }
         });
     </script>
 @endsection

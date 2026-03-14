@@ -148,16 +148,15 @@
                     </div>
 
                     {{-- Results Table --}}
+                    {{-- Results Table --}}
                     <div class="card">
                         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Student Results</h5>
                             <div>
-                                <button class="btn btn-sm btn-light" onclick="exportToExcel()">
-                                    <i class="fas fa-file-excel"></i> Export
-                                </button>
-                                <button class="btn btn-sm btn-light" onclick="printResults()">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
+                                 <button class="btn btn-sm btn-light" onclick="exportToPDF()">
+                                        <i class="fas fa-file-pdf"></i>
+                                        Export PDF
+                                    </button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -181,13 +180,13 @@
                                                 <th>Percentage</th>
                                                 <th>Action</th>
                                             </tr>
-                                        </thead>
+                                            <!-- </thead> -->
                                         <tbody>
                                             @foreach ($results as $studentId => $result)
 
                                                             <?php 
-                                                            $StudentSex = StudentBasic::where('Student_ID', $studentId)->value('StudentSex');
-                                                            ?>
+                                                                                $StudentSex = StudentBasic::where('Student_ID', $studentId)->value('StudentSex');
+                                                                                ?>
                                                             <tr>
                                                                 <td>{{ $loop->iteration }}</td>
                                                                 <td>
@@ -211,14 +210,13 @@
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    <span
-                                                                        class="badge 
-                                                                            @if ($result['percentage'] >= 80) bg-success
-                                                                            @elseif($result['percentage'] >= 70) bg-primary text-white
-                                                                            @elseif($result['percentage'] >= 60) bg-info
-                                                                            @elseif($result['percentage'] >= 50) bg-warning
-                                                                            @else bg-danger @endif
-                                                                         ">
+                                                                    <span class="badge 
+                                                                                                @if ($result['percentage'] >= 80) bg-success
+                                                                                                @elseif($result['percentage'] >= 70) bg-primary text-white
+                                                                                                @elseif($result['percentage'] >= 60) bg-info
+                                                                                                @elseif($result['percentage'] >= 50) bg-warning
+                                                                                                @else bg-danger @endif
+                                                                                             ">
                                                                         {{ $result['percentage'] }}%
                                                                     </span>
                                                                 </td>
@@ -277,15 +275,365 @@
 
                         <div class="row mt-3">
                             <div class="col-12 text-center">
-                                <button class="btn btn-success btn-lg" onclick="saveResults()">
-                                    <i class="fas fa-save me-2"></i> Save Grading Results
-                                </button>
                                 <a href="{{ route('iteb.grading.summary') }}" class="btn btn-secondary btn-lg">
                                     <i class="fas fa-arrow-left me-2"></i> Back to Filters
                                 </a>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Add these JavaScript functions for export functionality -->
+                    <script>
+                        // Function to export to Excel (CSV format)
+                        function exportToExcel() {
+                            // Get the table data
+                            const table = document.getElementById('resultsTable');
+                            const rows = table.querySelectorAll('tr');
+
+                            // Create CSV content
+                            let csv = [];
+
+                            // Get headers (excluding the Action column)
+                            const headers = [];
+                            const headerCells = rows[0].querySelectorAll('th');
+                            for (let i = 0; i < headerCells.length - 1; i++) { // Exclude last column (Action)
+                                headers.push(headerCells[i].innerText.trim());
+                            }
+                            csv.push(headers.join(','));
+
+                            // Get data rows
+                            for (let i = 1; i < rows.length; i++) {
+                                const row = [];
+                                const cells = rows[i].querySelectorAll('td');
+
+                                // Process each cell except the last one (Action column)
+                                for (let j = 0; j < cells.length - 1; j++) {
+                                    let cellData = cells[j].innerText.trim();
+
+                                    // Clean up the data (remove extra spaces, newlines)
+                                    cellData = cellData.replace(/\s+/g, ' ').trim();
+
+                                    // Handle gender cell specially to get just the text
+                                    if (j === 4) { // Gender column
+                                        const genderSpan = cells[j].querySelector('span');
+                                        cellData = genderSpan ? genderSpan.innerText.trim() : cellData;
+                                    }
+
+                                    // Handle percentage cell
+                                    if (j === 5) { // Percentage column
+                                        const percentSpan = cells[j].querySelector('span');
+                                        cellData = percentSpan ? percentSpan.innerText.trim() : cellData;
+                                    }
+
+                                    // Escape commas and quotes
+                                    if (cellData.includes(',') || cellData.includes('"') || cellData.includes('\n')) {
+                                        cellData = '"' + cellData.replace(/"/g, '""') + '"';
+                                    }
+
+                                    row.push(cellData);
+                                }
+
+                                csv.push(row.join(','));
+                            }
+
+                            // Create and download the CSV file
+                            const csvContent = csv.join('\n');
+                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            const url = URL.createObjectURL(blob);
+
+                            // Generate filename with current date
+                            const date = new Date();
+                            const dateStr = date.getFullYear() + '-' +
+                                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                                String(date.getDate()).padStart(2, '0');
+                            const filename = `Grading_Results_{{ $schoolName }}_{{ $category }}_{{ $year }}_${dateStr}.csv`;
+
+                            link.setAttribute('href', url);
+                            link.setAttribute('download', filename);
+                            link.style.visibility = 'hidden';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+
+                            // Show success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Export Successful!',
+                                text: 'Your Excel file has been downloaded.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+
+                        // Function to export to PDF
+                        function exportToPDF() {
+                            // Show loading message
+                            Swal.fire({
+                                title: 'Generating PDF...',
+                                text: 'Please wait while we prepare your document.',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+
+                            // Get the school and year info for the filename
+                            const schoolName = '{{ $schoolName }}';
+                            const category = '{{ $category }}';
+                            const year = '{{ $year }}';
+                            const level = '{{ $level }}';
+                            const schoolNumber = '{{ $schoolNumber }}';
+
+                            // Collect all results data from the table
+                            const results = {};
+                            @foreach ($results as $studentId => $result)
+                                results['{{ $studentId }}'] = {
+                                    total_marks: {{ $result['total_marks'] }},
+                                    total_possible: {{ $result['total_possible'] }},
+                                    percentage: {{ $result['percentage'] }},
+                                    grade: '{{ $result['grade'] }}',
+                                    grade_comment: '{{ $result['grade_comment'] }}',
+                                    classification: '{{ $result['classification'] }}',
+                                    classification_comment: '{{ $result['classification_comment'] }}',
+                                    marks_details: @json($result['marks_details'])
+                                };
+                            @endforeach
+
+        // Create a hidden form to submit for PDF generation
+        const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '{{ route("iteb.grading.results.pdf") }}';
+                            form.target = '_blank';
+
+                            // Add CSRF token
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = '_token';
+                            csrfInput.value = '{{ csrf_token() }}';
+                            form.appendChild(csrfInput);
+
+                            // Add parameters
+                            const params = {
+                                year: year,
+                                category: category,
+                                school_number: schoolNumber,
+                                level: level,
+                                school_name: schoolName
+                            };
+
+                            for (const [key, value] of Object.entries(params)) {
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = key;
+                                input.value = value;
+                                form.appendChild(input);
+                            }
+
+                            // Add the results data as JSON string
+                            const resultsInput = document.createElement('input');
+                            resultsInput.type = 'hidden';
+                            resultsInput.name = 'results_data';
+                            resultsInput.value = JSON.stringify(results);
+                            form.appendChild(resultsInput);
+
+                            // Submit the form
+                            document.body.appendChild(form);
+                            form.submit();
+                            document.body.removeChild(form);
+
+                            // Close loading message after a delay
+                            setTimeout(() => {
+                                Swal.close();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'PDF Generated!',
+                                    text: 'Your PDF has been generated and has been download successfully.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                            }, 2000);
+                        }
+
+                        // Function to print results
+                        function printResults() {
+                            // Create a printable version of the table
+                            const printWindow = window.open('', '_blank');
+                            const schoolName = '{{ $schoolName }}';
+                            const category = '{{ $category }}';
+                            const year = '{{ $year }}';
+                            const level = '{{ $level }}';
+
+                            // Get the table HTML (excluding the Action column)
+                            const table = document.getElementById('resultsTable');
+                            const clonedTable = table.cloneNode(true);
+
+                            // Remove the Action column header
+                            const headerRow = clonedTable.querySelector('thead tr');
+                            if (headerRow) {
+                                headerRow.removeChild(headerRow.lastElementChild);
+                            }
+
+                            // Remove Action column from all rows
+                            const rows = clonedTable.querySelectorAll('tbody tr');
+                            rows.forEach(row => {
+                                row.removeChild(row.lastElementChild);
+                            });
+
+                            // Generate print content
+                            printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Grading Results - ${schoolName} - ${category} - ${year}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+                    <style>
+                        body {
+                            font-family: 'Plus Jakarta Sans', sans-serif;
+                            padding: 20px;
+                            color: #1e293b;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            padding-bottom: 20px;
+                            border-bottom: 2px solid #287c44;
+                        }
+                        .header h2 {
+                            color: #287c44;
+                            margin-bottom: 10px;
+                        }
+                        .header p {
+                            color: #64748b;
+                            margin: 5px 0;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                            font-size: 12px;
+                        }
+                        th {
+                            background: #287c44;
+                            color: white;
+                            padding: 12px 8px;
+                            text-align: left;
+                            font-weight: 600;
+                        }
+                        td {
+                            padding: 10px 8px;
+                            border-bottom: 1px solid #e2e8f0;
+                        }
+                        tr:nth-child(even) {
+                            background: #f8fafc;
+                        }
+                        .footer {
+                            margin-top: 30px;
+                            text-align: center;
+                            color: #64748b;
+                            font-size: 12px;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            .header { margin-bottom: 20px; }
+                        }
+                            /* Print-specific styles */
+    @media print {
+        .export-btn, .action-btn, .dataTables_wrapper .dt-buttons {
+            display: none !important;
+        }
+
+        .modern-card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+        .modern-card .card-header {
+            background: #287c44 !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .grade-badge, .gender-badge, .modern-badge {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>Grading Results</h2>
+                        <p><strong>School:</strong> ${schoolName} | <strong>Category:</strong> ${category} | <strong>Year:</strong> ${year} | <strong>Level:</strong> ${level || 'N/A'}</p>
+                        <p><strong>Generated on:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+                    </div>
+
+                    ${clonedTable.outerHTML}
+
+                    <div class="footer">
+                        <p>This is a computer-generated document. No signature is required.</p>
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.onafterprint = function() {
+                                window.close();
+                            };
+                        };
+                    <\/script>
+                </body>
+            </html>
+        `);
+
+                            printWindow.document.close();
+                        }
+
+                        // Also keep the DataTable export functionality as an alternative
+                        $(document).ready(function () {
+                            if (typeof $.fn.DataTable !== 'undefined' && !$.fn.DataTable.isDataTable('#resultsTable')) {
+                                $('#resultsTable').DataTable({
+                                    pageLength: 25,
+                                    order: [[5, 'desc']], // Sort by percentage column
+                                    dom: 'Bfrtip',
+                                    buttons: [
+                                        {
+                                            extend: 'excelHtml5',
+                                            text: '<i class="fas fa-file-excel"></i> Excel (DataTable)',
+                                            className: 'export-btn',
+                                            title: 'Grading_Results_{{ $schoolName }}_{{ $category }}_{{ $year }}',
+                                            exportOptions: {
+                                                columns: [0, 1, 2, 3, 4, 5, 6] // Export all columns except Action
+                                            }
+                                        },
+                                        {
+                                            extend: 'print',
+                                            text: '<i class="fas fa-print"></i> Print (DataTable)',
+                                            className: 'export-btn',
+                                            title: 'Grading Results - {{ $schoolName }} - {{ $category }} - {{ $year }}',
+                                            exportOptions: {
+                                                columns: [0, 1, 2, 3, 4, 5, 6]
+                                            }
+                                        }
+                                    ],
+                                    language: {
+                                        search: "Search:",
+                                        searchPlaceholder: "Search students...",
+                                        lengthMenu: "Show _MENU_ entries",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ students",
+                                        paginate: {
+                                            first: '<i class="fas fa-angle-double-left"></i>',
+                                            previous: '<i class="fas fa-angle-left"></i>',
+                                            next: '<i class="fas fa-angle-right"></i>',
+                                            last: '<i class="fas fa-angle-double-right"></i>'
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>
@@ -374,46 +722,46 @@
 
                 // Build modal content
                 let modalContent = `
-                                                    <h6 class="mb-3">Student Index Number : <strong>${studentId}</strong></h6>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-bordered">
-                                                            <tr>
-                                                                <th style="width: 30%" class="text-dark">Total Marks</th>
-                                                                <td>${totalMarks} / ${totalPossible}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-dark">Percentage</th>
-                                                                <td>${percentage}%</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-dark">Grade</th>
-                                                                <td>${grade}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-dark">Grade Comment</th>
-                                                                <td>${gradeComment || 'N/A'}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-dark">Classification</th>
-                                                                <td>${classification}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-dark">Classification Comment</th>
-                                                                <td>${classificationComment || 'N/A'}</td>
-                                                            </tr>
-                                                        </table>
-                                                    </div>
-                                                    <h6 class="mt-3">Subject Marks</h6>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm table-bordered">
-                                                            <thead class="table-light">
+                                                        <h6 class="mb-3">Student Index Number : <strong>${studentId}</strong></h6>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered">
                                                                 <tr>
-                                                                    <th>Subject</th>
-                                                                    <th>Mark</th>
+                                                                    <th style="width: 30%" class="text-dark">Total Marks</th>
+                                                                    <td>${totalMarks} / ${totalPossible}</td>
                                                                 </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                `;
+                                                                <tr>
+                                                                    <th class="text-dark">Percentage</th>
+                                                                    <td>${percentage}%</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th class="text-dark">Grade</th>
+                                                                    <td>${grade}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th class="text-dark">Grade Comment</th>
+                                                                    <td>${gradeComment || 'N/A'}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th class="text-dark">Classification</th>
+                                                                    <td>${classification}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th class="text-dark">Classification Comment</th>
+                                                                    <td>${classificationComment || 'N/A'}</td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                        <h6 class="mt-3">Subject Marks</h6>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-bordered">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th>Subject</th>
+                                                                        <th>Mark</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                    `;
 
                 // Add subject marks - now using subject_name directly from the data
                 if (marksDetails && marksDetails.length > 0) {
@@ -430,10 +778,10 @@
                 }
 
                 modalContent += `
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                `;
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    `;
 
                 // Update modal content
                 $('#modalContent').html(modalContent);
