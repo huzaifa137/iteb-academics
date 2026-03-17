@@ -406,9 +406,9 @@
                 <div style="font-weight: bold">العام <span style="font-weight: normal;"> : <span
                             style="font-size:1.26em;">{{ Helper::toArabicNumberDate($year) }}</span></span>
                 </div>
-                <div style="font-weight: bold"> {!! Helper::arabicWordSpacing('اسم المدرسة ') !!}<span
+                <div style="font-weight: bold"> {!! Helper::arabicWordSpacing('اسم المدرسة ') !!} <span
                         style="font-weight: normal;"><span style="font-size:1.26em;">:
-                            {{ Helper::ar_schoolName($schoolId) }}</span></span>
+                            {!! Helper::arabicWordSpacing(Helper::ar_schoolName($schoolId)) !!}</span></span>
                 </div>
             </div>
         </div>
