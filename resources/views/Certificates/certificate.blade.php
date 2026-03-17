@@ -247,7 +247,7 @@
                 <div class="left">
                     <h2 style="color: #0d4b1e;">Uganda Muslim Supreme Council</h2>
                     <h3 class="red">Idaad and Thanawi Examinations Board (U)</h3>
-                    <h4 style="text-align: center;">'{{ $level }} Certificate</h4>
+                    <h3 style="text-align: center;"><strong>'{{ $level }} Certificate </strong></h3>
                 </div>
 
 
@@ -258,9 +258,11 @@
 
 
                 <div class="right">
-                    <h2 style="color: #0d4b1e;">المجلس الأعلى الإسلامي الأوغندي</h2>
-                    <h3 class="red">هيئة الامتحانات الإعدادية والثانوية (أوغندا)</h3>
-                    <h4 style="text-align: center;">الشهادة {{ $ArLevel }}</h4>
+                    <h2 style="color: #0d4b1e;">{!! Helper::arabicWordSpacing('المجلس الأعلى الإسلامي الأوغندي') !!}
+                    </h2>
+                    <h3 class="red">{!! Helper::arabicWordSpacing('هيئة الامتحانات الإعدادية والثانوية (أوغندا)') !!}
+                    </h3>
+                    <h4 style="text-align: center;margin-left:7rem;"><strong>الشهادة &nbsp; {{ $ArLevel }}</strong></h4>
                 </div>
             </div>
 
@@ -282,18 +284,33 @@
                 بإحسان
                 إلى يوم الدين أما بعد :
 
-                تشهد الهيئة بأن الطالب <b>{{ Helper::getStudentARName($studentId) }}</b> المولود سنة
-                <b>{{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }} </b> وجنسيته
-                <b>{{ Helper::getStudentARNationality($studentId) }}</b>
+                تشهد الهيئة بأن <b> {!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!} </b>
                 @if(Helper::getStudentSex($studentId) == 'Female')
-                    قد جلست في الامتحان النهائي للشهادة الإعدادية سنة
+                    المولودة
                 @else
-                    قد جلس في الامتحان النهائي للشهادة الإعدادية سنة
+                    المولود
+                @endif سنة
+                <b> {{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }} </b>
+                @if(Helper::getStudentSex($studentId) == 'Female')
+                    وجنسيتها
+                @else
+                    وجنسيته
                 @endif
-                <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}</b>
-                <b>ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم
+                <b> {{ Helper::getStudentARNationality($studentId) }} </b>
+                @if(Helper::getStudentSex($studentId) == 'Female')
+                    قد جلست في الامتحان النهائي للشهادة {{ $ArLevel }} سنة &nbsp;
+                @else
+                    قد جلس في الامتحان النهائي للشهادة {{ $ArLevel }} سنة &nbsp;
+                @endif
+                <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}م</b>
+                <b> ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم
                 <b>{{ Helper::getStudentID_AR($studentId) ?? Helper::toArabicLettersPackage($studentId) }}</b>
-                ونجح بتقدير
+                @if(Helper::getStudentSex($studentId) == 'Female')
+                    ونجحت
+                @else
+                 ونجح
+                @endif
+                بتقدير 
                 <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>
                 @if(Helper::getStudentSex($studentId) == 'Female')
                     . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله لها السداد والتوفيق
@@ -322,7 +339,7 @@
                     <div>Date of Issue {{ $currentDate }}</div>
 
                     <div class="sign">
-                        <b>سكرتير التعليم بالمجل س</b>
+                        <b>{!! Helper::arabicWordSpacing('سكرتير التعليم للمجلس') !!}</b>
                         <div class="signature-space"></div>
                         <strong>Secretary for Education (UMSC)</strong>
                     </div>
@@ -342,10 +359,10 @@
 
 
                 <div class="footer-col date-ar">
-                    <div>التاريخ {{ Helper::toArabicNumberDate($currentDate) }}</div>
+                    <div>التاريخ {{ Helper::toArabicNumberDateReversed($currentDate) }} &nbsp;</div>
 
                     <div class="sign">
-                        <b>السكرتير التنفيذي للهيئة</b>
+                        <b>{!! Helper::arabicWordSpacing('السكرتير التنفيذي للهيئة') !!}</b>
                         <div class="signature-space"></div>
                         <strong>Executive Secretary (ITEBU)</strong>
                     </div>

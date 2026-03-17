@@ -628,6 +628,22 @@ class Helper extends Controller
         return str_replace($western, $arabic, $value);
     }
 
+public static function toArabicNumberDateReversed($date)
+{
+    // Split the date assuming format d/m/Y
+    $parts = explode('/', $date);
+    if(count($parts) !== 3) return $date; // fallback
+
+    // Reverse to Y/m/d
+    $reversed = $parts[2] . '/' . $parts[1] . '/' . $parts[0] . 'م';
+
+    // Map Western digits to Arabic-Indic digits
+    $western = ['0','1','2','3','4','5','6','7','8','9'];
+    $arabic  = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+
+    return str_replace($western, $arabic, $reversed);
+}
+
     public static function toArabicLettersPackage($text)
     {
         // Handle special letter combinations first
