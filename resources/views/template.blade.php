@@ -20,9 +20,20 @@
             font-family: Arial, sans-serif;
         }
 
+        th.code-col {
+            width: 80px;
+            padding: 5px;
+            font-weight: bold;
+        }
+
+        td.code-col {
+            width: 80px;
+            padding: 5px;
+        }
+
         .document-container {
             width: 204mm;
-            height: 283mm;
+            height: 289mm;
             padding: 5mm;
             box-sizing: border-box;
             background-color: #fff;
@@ -31,7 +42,6 @@
             margin: 0 auto;
         }
 
-        /* Watermark */
         .watermark {
             position: absolute;
             top: 50%;
@@ -52,9 +62,27 @@
 
         header {
             text-align: center;
-            border-bottom: 3px solid #000;
+            position: relative;
+            margin-bottom: 0;
             padding-bottom: 10px;
-            margin-bottom: 10px;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 6px;
+            width: 100%;
+            border-bottom: 2px solid #074603;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            border-bottom: 4px solid #074603;
         }
 
         .header-arabic {
@@ -99,6 +127,7 @@
         .student-info {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
             font-size: 11px;
             line-height: 1.4;
             margin-bottom: 10px;
@@ -106,8 +135,35 @@
             z-index: 1;
         }
 
+        .info-col:nth-child(3) {
+            word-break: break-word;
+        }
+
+        .info-col:nth-child(1) {
+            width: 30%;
+        }
+
+        .info-col.center {
+            width: 20%;
+            text-align: center;
+        }
+
+        .info-col:nth-child(3) {
+            width: 50%;
+        }
+
         .info-col {
-            width: 48%;
+            width: 32%;
+        }
+
+        .info-col.center {
+            text-align: center;
+        }
+
+        .info-col.center .label {
+            display: inline-block;
+            width: 70px;
+            text-align: left;
         }
 
         .info-row {
@@ -120,10 +176,6 @@
             min-width: 70px;
         }
 
-        /* .label-ar {
-            font-size: 0px;
-        } */
-
         .photo-box {
             width: 80px;
             height: 100px;
@@ -134,7 +186,6 @@
             font-size: 10px;
         }
 
-        /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -146,9 +197,10 @@
 
         th,
         td {
-            border: 1px solid #000;
+            border: 0.5px solid #000;
             padding: 2px 3px;
             text-align: center;
+            border-collapse: collapse;
         }
 
         .category-row {
@@ -162,7 +214,6 @@
             width: 50px;
         }
 
-        /* Footer & Signatures */
         .footer-stats {
             margin-top: 5px;
             border-top: 2px solid #000;
@@ -216,7 +267,6 @@
             font-weight: bold;
         }
 
-        /* Grading Scale */
         .grading-scale {
             margin-top: 10px;
             font-size: 9px;
@@ -226,6 +276,51 @@
             border-top: 1px solid #ccc;
             padding-top: 5px;
             font-weight: bold;
+        }
+
+        /* Center column rows */
+        .info-col.center .info-row {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-col.center .label {
+            width: 60px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .info-col.center .value {
+            width: 60px;
+            text-align: left;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            page-break-inside: avoid;
+            position: relative;
+            z-index: 1;
+            border: 1px solid #000;
+        }
+
+        th,
+        td {
+            border: 0.25px solid #333;
+            padding: 2px 3px;
+            text-align: center;
+        }
+
+        th,
+        td {
+            border-style: solid;
+            border-color: #000;
+            border-width: 0.5px;
+            padding: 2px 3px;
+            text-align: center;
         }
     </style>
 </head>
@@ -241,7 +336,7 @@
 
         <header>
             <div class="header-arabic" style="color: #1e5cc4;">بسم الله الرحمن الرحيم</div>
-            <div class="header-arabic">هيئة الامتحانات الإعدادية والثانوية (أوغندا)</div>
+            <div class="header-arabic">هيئة الامتحانات الإعدادية والثانوية &nbsp; (أوغندا)</div>
             <div class="header-english">IDAAD AND THANAWI EXAMINATIONS BOARD (U)</div>
 
             <div class="logo-section">
@@ -253,18 +348,35 @@
         </header>
 
         <div class="pass-slip-banner">
-            <h1>PASS SLIP</h1>
-            <h1 style="direction: rtl;">كشف الدرجات</h1>
+            <h1 style="font-family:Georgia, 'Times New Roman', Times, serif">PASS SLIP</h1>
+            <h1 style="direction: rtl;font-family:Georgia, 'Times New Roman', Times, serif;">كشف&nbsp;الدرجات</h1>
         </div>
 
-        <div class="student-info">
-            <div class="info-col">
+        <div class="student-info" style="border: #000 solid 1px;">
+
+            <!-- LEFT -->
+            <div class="info-col" style="padding:5px;">
                 <div class="info-row"><span class="label">NAME:</span> {{ Helper::getStudentName($studentId) }}</div>
                 <div class="info-row"><span class="label">INDEX NO:</span> {{ $studentId }}</div>
                 <div class="info-row"><span class="label">GENDER:</span> {{ Helper::getStudentSex($studentId) }}</div>
                 <div class="info-row"><span class="label">SCH NAME:</span> {{ Helper::getStudentSchool($studentId) }}
                 </div>
             </div>
+
+            <!-- CENTER (NEW) -->
+            <div class="info-col center" style="padding:5px;">
+                <div class="info-row">
+                    <span class="label">LEVEL:</span>
+                    <span class="value">A'LEVEL</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="label">YEAR:</span>
+                    <span class="value">{{ $year }}</span>
+                </div>
+            </div>
+
+            <!-- RIGHT -->
             <div class="info-col" style="text-align: right;">
                 <div class="photo-box" style="float: right; margin-left: 10px;">
                     @php
@@ -280,7 +392,11 @@
                     @endif
                 </div>
 
-                <div style="font-weight: bold">اسم الطالب <span style="font-weight: normal;"> :
+                <div style="font-weight: bold"> @if(Helper::getStudentSex($studentId) == 'Female')
+                    اسم الطالبة
+                @else
+                        اسم الطالب
+                    @endif<span style="font-weight: normal;"> :
                         <span
                             style="font-size:1.26em;">{!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!}</span></span>
                 </div>
@@ -300,59 +416,60 @@
         <table>
             <thead>
                 <tr>
-                    <th class="code-col">PAPER CODE</th>
-                    <th>PAPER</th>
-                    <th class="score-col">SCORE</th>
-                    <th class="score-col">الدرجات</th>
-                    <th>اسم الورقة</th>
-                    <th class="code-col">رمز الورقة</th>
+                    <th></th>
+                    <th class="code-col" style="font-weight: bold;">PAPER CODE</th>
+                    <th style="font-weight: bold;">PAPER</th>
+                    <th class="score-col" style="font-weight: bold;">SCORE</th>
+                    <th class="score-col" style="font-weight: bold;">الدرجات</th>
+                    <th style="font-weight: bold;">{!! Helper::arabicWordSpacing('اسم الورقة') !!}</th>
+                    <th class="code-col" style="font-weight: bold;">رمز الورقة</th>
                 </tr>
             </thead>
-            <tbody>
+@php $serial = 1; @endphp
+<tbody>
+    @foreach ($categories as $category)
+        <tr class="category-row">
+            <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
+            <td colspan="4" style="text-align:right;">
+                {!! Helper::arabicWordSpacing($category['title_ar']) !!}
+            </td>
+        </tr>
 
-                @foreach ($categories as $category)
-                    <tr class="category-row">
-                        <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
-                        <td colspan="3" style="text-align:right;">{!! Helper::arabicWordSpacing($category['title_ar']) !!}
-                        </td>
-                    </tr>
+        @foreach ($category['codes'] as $code)
+            @if (isset($subjects[$code]))
+                <tr>
+                    <td>{{ $serial++ }}</td> <!-- continuous serial number -->
+                    <td class="code-col">{{ $code }}</td>
 
-                    @foreach ($category['codes'] as $code)
-                        @if (isset($subjects[$code]))
-                                <tr>
-                                    <td class="code-col">{{ $code }}</td>
+                    <td style="text-align: left;">
+                        {{ \Illuminate\Support\Str::upper(
+                            Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
+                        ) }}
+                    </td>
 
-                                    <td style="text-align: left;">
-                                        {{ \Illuminate\Support\Str::upper(
-                                Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
-                            ) }}
-                                    </td>
+                    <td class="score-col">
+                        {{ floor(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
+                    </td>
 
-                                    <td class="score-col">
-                                        {{ floor(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
-                                    </td>
+                    <td class="score-col">
+                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
+                    </td>
 
-                                    <td class="score-col">
-                                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
-                                    </td>
+                    <td style="text-align:right;font-size:1.30em;">
+                        @php
+                            $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
+                            $words = explode(' ', $subject); // split by space
+                            $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
+                        @endphp
+                        {!! $subjectWithSpacing !!}
+                    </td>
 
-                                    <td style="text-align:right;font-size:1.30em;">
-                                        @php
-                                            $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
-                                            $words = explode(' ', $subject); // split by space
-                                            $subjectWithSpacing = implode('&nbsp;', $words); // add two non-breaking spaces
-                                        @endphp
-                                        {!! $subjectWithSpacing !!}
-                                    </td>
-
-                                    <td class="code-col">{{ $code }}</td>
-
-                                </tr>
-                        @endif
-                    @endforeach
-                @endforeach
-
-            </tbody>
+                    <td class="code-col">{{ $code }}</td>
+                </tr>
+            @endif
+        @endforeach
+    @endforeach
+</tbody>
         </table>
 
         @php

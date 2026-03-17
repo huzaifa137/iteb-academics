@@ -58,11 +58,11 @@ class PasslipAndCertificatesController extends Controller
         $year = $parts[4];
 
         $categories = [
-            ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-002', 'AR-001', 'AR-004', 'AR-003']],
-            ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-005', 'FC-007', 'FC-006']],
-            ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-009', 'JS-010', 'JS-008']],
-            ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-012', 'PT-013']],
-            ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-014', 'QS-015', 'QS-016']],
+            ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => [ 'AR-004','AR-002', 'AR-003', 'AR-001']],
+            ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-006','FC-005', 'FC-007']],
+            ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-009', 'JS-008','JS-010']],
+            ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013','PT-012']],
+            ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-015','QS-016','QS-014']],
         ];
 
         $subjects = MasterData::where('md_master_code_id', config('constants.options.ThanawiPapers'))
