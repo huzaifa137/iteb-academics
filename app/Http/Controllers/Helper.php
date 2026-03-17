@@ -39,8 +39,8 @@ class Helper extends Controller
     public static function ar_schoolName($school_id)
     {
         $schoolName = DB::table('houses')
-            ->where('id', $school_id)
-            ->value('House');
+            ->where('Number', $school_id)
+            ->value('House_AR');
 
         return $schoolName;
     }
@@ -748,5 +748,12 @@ class Helper extends Controller
         }
 
         return null; // Student not found
+    }
+
+    public static function arabicWordSpacing(string $text, int $spaces = 1): string
+    {
+        $words = explode(' ', $text); // split by space
+        $spacer = str_repeat('&nbsp;', $spaces); // repeated non-breaking spaces
+        return implode($spacer, $words);
     }
 }

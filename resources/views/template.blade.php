@@ -22,7 +22,7 @@
 
         .document-container {
             width: 204mm;
-            height: 277mm;
+            height: 283mm;
             padding: 5mm;
             box-sizing: border-box;
             background-color: #fff;
@@ -120,6 +120,10 @@
             min-width: 70px;
         }
 
+        /* .label-ar {
+            font-size: 0px;
+        } */
+
         .photo-box {
             width: 80px;
             height: 100px;
@@ -154,7 +158,7 @@
 
         .score-col,
         .code-col {
-            font-weight: bold;
+            font-weight: normal;
             width: 50px;
         }
 
@@ -171,6 +175,7 @@
             justify-content: space-between;
             padding: 2px 0;
             font-weight: bold;
+            margin-bottom: 1em;
         }
 
         .signatures {
@@ -205,9 +210,10 @@
         }
 
         .sig-line {
-            border-top: 1px solid #000;
+            border-top: 1px solid transparent;
             margin-top: 5px;
             padding-top: 3px;
+            font-weight: bold;
         }
 
         /* Grading Scale */
@@ -219,6 +225,7 @@
             gap: 5px;
             border-top: 1px solid #ccc;
             padding-top: 5px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -272,9 +279,21 @@
                             style="width:100%; height:100%; object-fit:cover;">
                     @endif
                 </div>
-                <div>اسم الطالب : {{ Helper::getStudentARName($studentId) }}</div>
-                <div>المرحلة: {{ Helper::getStudentARLevel($studentId) }}</div>
-                <div>العام: {{ Helper::toArabicNumberPackge($year) }}</div>
+
+                <div style="font-weight: bold">اسم الطالب <span style="font-weight: normal;"> :
+                        <span
+                            style="font-size:1.26em;">{!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!}</span></span>
+                </div>
+                <div style="font-weight: bold">المرحلة <span style="font-weight: normal;"> : <span
+                            style="font-size:1.26em;">{{ Helper::getStudentARLevel($studentId) }}</span></span>
+                </div>
+                <div style="font-weight: bold">العام <span style="font-weight: normal;"> : <span
+                            style="font-size:1.26em;">{{ Helper::toArabicNumberDate($year) }}</span></span>
+                </div>
+                <div style="font-weight: bold"> {!! Helper::arabicWordSpacing('اسم المدرسة ') !!}<span
+                        style="font-weight: normal;"><span style="font-size:1.26em;">:
+                            {{ Helper::ar_schoolName($schoolId) }}</span></span>
+                </div>
             </div>
         </div>
 
@@ -293,34 +312,42 @@
 
                 @foreach ($categories as $category)
                     <tr class="category-row">
-                        <td colspan="3">{{ $category['title_en'] }}</td>
-                        <td colspan="3" style="text-align:right">{{ $category['title_ar'] }}</td>
+                        <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
+                        <td colspan="3" style="text-align:right;">{!! Helper::arabicWordSpacing($category['title_ar']) !!}
+                        </td>
                     </tr>
 
                     @foreach ($category['codes'] as $code)
                         @if (isset($subjects[$code]))
-                            <tr>
-                                <td class="code-col">{{ $code }}</td>
+                                <tr>
+                                    <td class="code-col">{{ $code }}</td>
 
-                                <td>
-                                    {{ Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code) }}
-                                </td>
+                                    <td style="text-align: left;">
+                                        {{ \Illuminate\Support\Str::upper(
+                                Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
+                            ) }}
+                                    </td>
 
-                                <td class="score-col">
-                                    {{ Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId) }}
-                                </td>
+                                    <td class="score-col">
+                                        {{ floor(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
+                                    </td>
 
-                                <td class="score-col">
-                                    {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
-                                </td>
+                                    <td class="score-col">
+                                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
+                                    </td>
 
-                                <td style="text-align:right">
-                                    {{ Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code) }}
-                                </td>
+                                    <td style="text-align:right;font-size:1.30em;">
+                                        @php
+                                            $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
+                                            $words = explode(' ', $subject); // split by space
+                                            $subjectWithSpacing = implode('&nbsp;', $words); // add two non-breaking spaces
+                                        @endphp
+                                        {!! $subjectWithSpacing !!}
+                                    </td>
 
-                                <td class="code-col">{{ $code }}</td>
+                                    <td class="code-col">{{ $code }}</td>
 
-                            </tr>
+                                </tr>
                         @endif
                     @endforeach
                 @endforeach
@@ -335,19 +362,21 @@
             $stats = Helper::calculatePasslipStats($studentId, $allSubjectCodes, $studentCategory, $year, $schoolId);
         @endphp
 
-        <div class="footer-stats">
+        <div class="footer-stats" style="border:#000 solid 1px">
             <div class="stat-row">
-                <span>TOTAL MARK: {{ $stats['total'] }}</span>
-                <span style="direction: rtl;">المجموع: {{ Helper::toArabicNumberPackge($stats['total']) }}</span>
+                <span style="padding-left: 5px;">TOTAL MARK: {{ $stats['total'] }}</span>
+                <span style="direction: rtl;padding-right: 5px;">المجموع
+                    &nbsp; : {{ Helper::toArabicNumberDate($stats['total']) }}</span>
             </div>
             <div class="stat-row">
-                <span>AVERAGE SCORE: {{ $stats['average'] }}</span>
-                <span style="direction: rtl;">النسبة المئوية :
-                    {{ Helper::toArabicNumberPackge($stats['average']) }}</span>
+                <span style="padding-left: 5px;">AVERAGE SCORE: {{ $stats['average'] }}</span>
+                <span style="direction: rtl;padding-right: 5px;">النسبة المئوية
+                    &nbsp; : {{ Helper::toArabicNumberDate($stats['average']) }}</span>
             </div>
             <div class="stat-row">
-                <span>GRADE: {{ $stats['grade'] }}</span>
-                <span style="direction: rtl;">التقدير: {{ Helper::getArabicGradeComment($stats['grade']) }}</span>
+                <span style="padding-left: 5px;">GRADE: {{ $stats['grade'] }}</span>
+                <span style="direction: rtl;padding-right: 5px;">التقدير
+                    &nbsp; : {{ Helper::getArabicGradeComment($stats['grade']) }}</span>
             </div>
         </div>
 
@@ -355,13 +384,13 @@
 
             <div class="sig-box">
 
-                <strong>مدير هيئة الامتحانات</strong>
+                <strong style="font-size: 1.26em;;">{!! Helper::arabicWordSpacing('مدير هيئة الامتحانات') !!}</strong>
 
                 <div class="sig-img">
                     <img src="{{ asset('assets/signatures/chairman.png') }}" alt="Chairman Signature">
                 </div>
 
-                <div class="sig-line">
+                <div class="sig-line" style="margin-top: 14px;">
                     CHAIRMAN
                 </div>
 
@@ -369,9 +398,9 @@
 
             <div class="sig-box">
 
-                <strong>السكرتير التنفيذي</strong>
+                <strong style="font-size: 1.26em;">{!! Helper::arabicWordSpacing('السكرتير التنفيذي') !!}</strong>
 
-                <div class="sig-img">
+                <div class="sig-img" style="margin-top: 14px;">
                     <img src="{{ asset('assets/signatures/Executive.png') }}" alt="Executive Secretary Signature">
                 </div>
 
@@ -389,16 +418,14 @@
             <div>60-69.9 - GOOD (SECOND CLASS LOWER)</div>
             <div>50-59.9 - PASS (THIRD CLASS)</div>
             <div>0-49.9 - FAIL</div>
+        </div>
 
-            <div>{{ Helper::toArabicNumberPackge(80) }} - {{ Helper::toArabicNumberPackge(100) }} - ممتاز (الدرجة
-                الأولى)</div>
-            <div>{{ Helper::toArabicNumberPackge(70) }} - {{ Helper::toArabicNumberPackge(79.9) }} - جيد جداً (الدرجة
-                الثانية العليا)</div>
-            <div>{{ Helper::toArabicNumberPackge(60) }} - {{ Helper::toArabicNumberPackge(69.9) }} - جيد (الدرجة
-                الثانية الدنيا)</div>
-            <div>{{ Helper::toArabicNumberPackge(50) }} - {{ Helper::toArabicNumberPackge(59.9) }} - مقبول (الدرجة
-                الثالثة)</div>
-            <div>{{ Helper::toArabicNumberPackge(0) }} - {{ Helper::toArabicNumberPackge(49.9) }} - راسب</div>
+        <div style="display: flex; gap: 40px; align-items: center; margin-top:1em;">
+            <div> ممتاز - {{ Helper::toArabicNumberPackge(80) }} - {{ Helper::toArabicNumberPackge(100) }}</div>
+            <div> جيد جداً - {{ Helper::toArabicNumberPackge(70) }} - {{ Helper::toArabicNumberPackge(79.9) }}</div>
+            <div>جيد - {{ Helper::toArabicNumberPackge(60) }} - {{ Helper::toArabicNumberPackge(69.9) }}</div>
+            <div>مقبول - {{ Helper::toArabicNumberPackge(50) }} - {{ Helper::toArabicNumberPackge(59.9) }}</div>
+            <div>راسب - {{ Helper::toArabicNumberPackge(0) }} - {{ Helper::toArabicNumberPackge(49.9) }}</div>
         </div>
     </div>
 

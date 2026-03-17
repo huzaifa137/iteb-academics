@@ -285,7 +285,11 @@
                 تشهد الهيئة بأن الطالب <b>{{ Helper::getStudentARName($studentId) }}</b> المولود سنة
                 <b>{{ Helper::toArabicNumberDate(Helper::getStudentYearofBirth($studentId)) }} </b> وجنسيته
                 <b>{{ Helper::getStudentARNationality($studentId) }}</b>
-                قد جلس في الامتحان النهائي للشهادة الإعدادية سنة
+                @if(Helper::getStudentSex($studentId) == 'Female')
+                    قد جلست في الامتحان النهائي للشهادة الإعدادية سنة
+                @else
+                    قد جلس في الامتحان النهائي للشهادة الإعدادية سنة
+                @endif
                 <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}</b>
                 <b>ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم
                 <b>{{ Helper::getStudentID_AR($studentId) ?? Helper::toArabicLettersPackage($studentId) }}</b>

@@ -784,7 +784,7 @@
                 $('#studentName').text(name + " (" + studentId + ")");
 
                 // Reset preview and file input
-                $('#previewImage').attr('src', '{{ asset('assets/images/default-user.png') }}');
+                $('#previewImage').attr('src', '{{ asset('assets/images/default-user.jpg') }}');
                 $('#photoInput').val('');
                 $('#fileName').text('');
                 $('.upload-area').removeClass('border-success');
