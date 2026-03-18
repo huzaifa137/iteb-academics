@@ -282,9 +282,9 @@
             <div class="arabic">
                 الحمد لله رب العالمين والصلاة والسلام على خاتم الأنبياء والمرسلين نبينا محمد وعلى آله وصحبه ومن تبعهم
                 بإحسان
-                إلى يوم الدين أما بعد :
+                إلى يوم الدين أما بعد <span class="nowrap" style="unicode-bidi:embed; direction:rtl;"> : </span> 
 
-                تشهد الهيئة بأن <b> {!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!} </b>
+                تشهد  الهيئة بأن <b> {!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!} </b>
                 @if(Helper::getStudentSex($studentId) == 'Female')
                     المولودة
                 @else
@@ -303,7 +303,7 @@
                     قد جلس في الامتحان النهائي للشهادة {{ $ArLevel }} سنة &nbsp;
                 @endif
                 <b>{{ Helper::toArabicNumberDate(Helper::getStudentAdmissionYear($studentId)) }}م</b>
-                <b> ب{{ Helper::getStudentARSchool($studentId) }}</b> برقم
+                <b> ب{!! Helper::arabicWordSpacing(Helper::getStudentARSchool($studentId)) !!}</b> برقم
                 <b>{{ Helper::getStudentID_AR($studentId) ?? Helper::toArabicLettersPackage($studentId) }}</b>
                 @if(Helper::getStudentSex($studentId) == 'Female')
                     ونجحت
@@ -312,11 +312,11 @@
                 @endif
                 بتقدير 
                 <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>
-                @if(Helper::getStudentSex($studentId) == 'Female')
-                    . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله لها السداد والتوفيق
-                @else
-                    . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله له السداد والتوفيق
-                @endif
+@if(Helper::getStudentSex($studentId) == 'Female')
+    . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله &zwnj; لها السداد و &zwnj;التوفيق
+@else
+    . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله &zwnj; له السداد و &zwnj;التوفيق
+@endif
             </div>
 
 
