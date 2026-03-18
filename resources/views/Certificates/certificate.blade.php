@@ -165,6 +165,11 @@
             text-align: center;
         }
 
+        .footer-col strong,
+        .footer-col b {
+            white-space: nowrap;
+        }
+
         .sign {
             margin-top: 15px;
         }
@@ -282,9 +287,9 @@
             <div class="arabic">
                 الحمد لله رب العالمين والصلاة والسلام على خاتم الأنبياء والمرسلين نبينا محمد وعلى آله وصحبه ومن تبعهم
                 بإحسان
-                إلى يوم الدين أما بعد <span class="nowrap" style="unicode-bidi:embed; direction:rtl;"> : </span> 
+                إلى يوم الدين أما بعد <span class="nowrap" style="unicode-bidi:embed; direction:rtl;"> : </span>
 
-                تشهد  الهيئة بأن <b> {!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!} </b>
+                تشهد الهيئة بأن <b> {!! Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!} </b>
                 @if(Helper::getStudentSex($studentId) == 'Female')
                     المولودة
                 @else
@@ -308,15 +313,15 @@
                 @if(Helper::getStudentSex($studentId) == 'Female')
                     ونجحت
                 @else
-                 ونجح
+                    ونجح
                 @endif
-                بتقدير 
+                بتقدير
                 <b>{{ Helper::getArabicGradeComment($stats['grade']) }}</b>
-@if(Helper::getStudentSex($studentId) == 'Female')
-    . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله &zwnj; لها السداد و &zwnj;التوفيق
-@else
-    . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله &zwnj; له السداد و &zwnj;التوفيق
-@endif
+                @if(Helper::getStudentSex($studentId) == 'Female')
+                    . والهيئة إذ تمنحها هذه الشَّهادة توصيها بتقوى الله تعالى وتسأل الله &zwnj; لها السداد و &zwnj;التوفيق
+                @else
+                    . والهيئة إذ تمنحه هذه الشَّهادة توصيه بتقوى الله تعالى وتسأل الله &zwnj; له السداد و &zwnj;التوفيق
+                @endif
             </div>
 
 
@@ -337,16 +342,15 @@
 
                 <div class="footer-col">
                     <div>Date of Issue {{ $currentDate }}</div>
-
                     <div class="sign">
                         <b>{!! Helper::arabicWordSpacing('سكرتير التعليم للمجلس') !!}</b>
                         <div class="signature-space"></div>
-                        <strong>Secretary for Education (UMSC)</strong>
+                        <strong style="white-space: nowrap;">Secretary for Education (UMSC)</strong>
                     </div>
                 </div>
 
 
-                <div class="sno-section">
+                <div class="sno-section" style="margin-left: 15mm;">
                     <div style="padding-bottom: 5px;"><strong>SNO: {{ $snoRank }}</strong></div>
                     <div id="qr"></div>
                 </div>
@@ -360,11 +364,10 @@
 
                 <div class="footer-col date-ar">
                     <div>التاريخ {{ Helper::toArabicNumberDateReversed($currentDate) }} &nbsp;</div>
-
                     <div class="sign">
                         <b>{!! Helper::arabicWordSpacing('السكرتير التنفيذي للهيئة') !!}</b>
                         <div class="signature-space"></div>
-                        <strong>Executive Secretary (ITEBU)</strong>
+                        <strong style="white-space: nowrap;">Executive Secretary (ITEBU)</strong>
                     </div>
                 </div>
 
@@ -376,43 +379,86 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        window.onload = function () {
 
-            const element = document.querySelector('.certificate');
+        // In certificate.blade.php, replace window.onload with:
+window.onload = function () {
 
-            // Generate QR code
-            const qrData = "https://iteb-ug.org/";
-            new QRCode(document.getElementById("qr"), {
-                text: qrData,
-                width: 90,
-                height: 90,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
+    // Don't auto-download if loaded inside an iframe (used for bulk export)
+    if (window.self !== window.top) {
+        // Still generate QR, just skip the PDF download
+        const qrData = "https://iteb-ug.org/";
+        new QRCode(document.getElementById("qr"), {
+            text: qrData,
+            width: 90,
+            height: 90,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        return; // ← EXIT early, no pdf download
+    }
 
-            // PDF options
-            const opt = {
-                margin: 0,
-                filename: 'certificate_{{ $studentId }}.pdf',
-                image: {
-                    type: 'jpeg',
-                    quality: 1
-                },
-                html2canvas: {
-                    scale: 4,
-                    useCORS: true,
-                    scrollY: 0
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'landscape'
-                }
-            };
+    const element = document.querySelector('.certificate');
 
-            html2pdf().set(opt).from(element).save();
-        };
+    // Generate QR code
+    const qrData = "https://iteb-ug.org/";
+    new QRCode(document.getElementById("qr"), {
+        text: qrData,
+        width: 90,
+        height: 90,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    const opt = {
+        margin: 0,
+        filename: 'certificate_{{ $studentId }}.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+};
+
+        // window.onload = function () {
+
+        //     const element = document.querySelector('.certificate');
+
+        //     // Generate QR code
+        //     const qrData = "https://iteb-ug.org/";
+        //     new QRCode(document.getElementById("qr"), {
+        //         text: qrData,
+        //         width: 90,
+        //         height: 90,
+        //         colorDark: "#000000",
+        //         colorLight: "#ffffff",
+        //         correctLevel: QRCode.CorrectLevel.H
+        //     });
+
+        //     // PDF options
+        //     const opt = {
+        //         margin: 0,
+        //         filename: 'certificate_{{ $studentId }}.pdf',
+        //         image: {
+        //             type: 'jpeg',
+        //             quality: 1
+        //         },
+        //         html2canvas: {
+        //             scale: 4,
+        //             useCORS: true,
+        //             scrollY: 0
+        //         },
+        //         jsPDF: {
+        //             unit: 'mm',
+        //             format: 'a4',
+        //             orientation: 'landscape'
+        //         }
+        //     };
+
+        //     html2pdf().set(opt).from(element).save();
+        // };
     </script>
 </body>
 

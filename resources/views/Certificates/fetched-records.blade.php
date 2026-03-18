@@ -628,6 +628,297 @@
     <div class="side-app">
         <div class="stats-container">
             @if (isset($groupedByStudent))
+
+                @if(isset($groupedByStudent) && $groupedByStudent->count() > 0)
+
+                    <div class="row justify-content-center">
+
+                        <!-- Certificates -->
+                        <div class="col-12 col-md-6 col-lg-5 text-center mb-4">
+                            <button id="downloadAllBtn" class="btn btn-danger px-5 w-100" disabled>
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Download All Certificates ({{ $groupedByStudent->count() }} students)
+                            </button>
+
+                            <div id="progressWrapper" style="display:none; margin-top: 15px;">
+                                <div style="font-weight:bold; margin-bottom:6px;">
+                                    <span id="progressText">Preparing...</span>
+                                </div>
+                                <div style="background:#e9ecef; border-radius:8px; height:22px; width:100%;">
+                                    <div id="progressBar" style="background:#28a745; height:100%; width:0%; border-radius:8px;
+                                                                        transition:width 0.3s ease; text-align:center; color:white;
+                                                                        font-size:13px; line-height:22px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passlips -->
+                        <div class="col-12 col-md-6 col-lg-5 text-center mb-4">
+                            <button id="downloadAllPasslipBtn" class="btn btn-primary px-5 w-100" disabled>
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Download All Passlips ({{ $groupedByStudent->count() }} students)
+                            </button>
+
+                            <div id="progressWrapperPasslip" style="display:none; margin-top: 15px;">
+                                <div style="font-weight:bold; margin-bottom:6px;">
+                                    <span id="progressTextPasslip">Preparing...</span>
+                                </div>
+                                <div style="background:#e9ecef; border-radius:8px; height:22px; width:100%;">
+                                    <div id="progressBarPasslip" style="background:#28a745; height:100%; width:0%; border-radius:8px;
+                                                                        transition:width 0.3s ease; text-align:center; color:white;
+                                                                        font-size:13px; line-height:22px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+                    <script>
+                        document.getElementById('downloadAllBtn').addEventListener('click', async function () {
+
+                            const ALL_STUDENT_IDS = @json($groupedByStudent->keys()->values());
+
+                            const btn = this;
+                            const progressWrapper = document.getElementById('progressWrapper');
+                            const progressBar = document.getElementById('progressBar');
+                            const progressText = document.getElementById('progressText');
+                            const total = ALL_STUDENT_IDS.length;
+
+                            btn.disabled = true;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generating...';
+                            progressWrapper.style.display = 'block';
+
+                            const { PDFDocument } = PDFLib;
+                            const mergedPdf = await PDFDocument.create();
+
+                            for (let i = 0; i < total; i++) {
+                                const studentId = ALL_STUDENT_IDS[i];
+                                const percent = Math.round((i / total) * 100);
+
+                                progressText.textContent = `Generating ${i + 1} of ${total}: ${studentId}`;
+                                progressBar.style.width = percent + '%';
+                                progressBar.textContent = percent + '%';
+
+                                await new Promise(async (resolve) => {
+                                    // Create hidden iframe pointing to real URL
+                                    const iframe = document.createElement('iframe');
+                                    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1122px;height:794px;border:none;visibility:hidden;';
+                                    document.body.appendChild(iframe);
+
+                                    iframe.onload = async () => {
+                                        try {
+
+                                            // Wait extra time for images/fonts to render fully
+                                            await new Promise(r => setTimeout(r, 2500));
+
+                                            const certEl = iframe.contentDocument.querySelector('.certificate');
+
+                                            if (!certEl) {
+                                                console.warn('No .certificate element found for', studentId);
+                                                document.body.removeChild(iframe);
+                                                resolve();
+                                                return;
+                                            }
+
+                                            // Use html2canvas to capture the element
+                                            const canvas = await html2canvas(certEl, {
+                                                scale: 3,
+                                                useCORS: true,
+                                                allowTaint: false,
+                                                scrollX: 0,
+                                                scrollY: 0,
+                                                width: certEl.offsetWidth,
+                                                height: certEl.offsetHeight,
+                                                windowWidth: 1122,
+                                                windowHeight: 794
+                                            });
+
+                                            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+                                            // Build a single-page PDF from the canvas image
+                                            const { jsPDF } = window.jspdf;
+                                            const pdf = new jsPDF({
+                                                orientation: 'landscape',
+                                                unit: 'mm',
+                                                format: 'a4'
+                                            });
+
+                                            pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+
+                                            const pdfBytes = pdf.output('arraybuffer');
+                                            const studentPdf = await PDFDocument.load(pdfBytes);
+                                            const copiedPages = await mergedPdf.copyPages(studentPdf, studentPdf.getPageIndices());
+                                            copiedPages.forEach(page => mergedPdf.addPage(page));
+
+                                        } catch (err) {
+                                            console.error(`Failed for ${studentId}:`, err);
+                                        }
+
+                                        document.body.removeChild(iframe);
+                                        resolve();
+                                    };
+
+                                    // Point iframe to real certificate URL (auto-download is in window.onload,
+                                    // we override html2pdf before it fires via the onload above — 
+                                    // but we need to inject the override BEFORE window.onload runs)
+                                    // So we load it, then immediately patch html2pdf in the iframe
+                                    iframe.src = `/passlip/certificate/${studentId}`;
+
+                                    // Patch html2pdf inside iframe as early as possible
+                                    iframe.addEventListener('load', () => { }, { once: true });
+
+                                });
+                            }
+
+                            // Final progress
+                            progressText.textContent = 'Finalizing merged PDF...';
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+
+                            const mergedBytes = await mergedPdf.save();
+                            const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `All_Certificates_{{ $filters['school_number'] }}_{{ $filters['year'] }}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-file-pdf me-2"></i> Download All Certificates ({{ $groupedByStudent->count() }} students)';
+                            progressText.textContent = `Done! ${total} certificates merged and downloaded.`;
+                        });
+                    </script>
+
+                    <script>
+                        document.getElementById('downloadAllPasslipBtn').addEventListener('click', async function () {
+
+                            const ALL_STUDENT_IDS = @json($groupedByStudent->keys()->values());
+
+                            const btn = this;
+                            const progressWrapper = document.getElementById('progressWrapperPasslip');
+                            const progressBar = document.getElementById('progressBarPasslip');
+                            const progressText = document.getElementById('progressTextPasslip');
+                            const total = ALL_STUDENT_IDS.length;
+
+                            btn.disabled = true;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generating...';
+                            progressWrapper.style.display = 'block';
+
+                            const { PDFDocument } = PDFLib;
+                            const mergedPdf = await PDFDocument.create();
+
+                            for (let i = 0; i < total; i++) {
+                                const studentId = ALL_STUDENT_IDS[i];
+                                const percent = Math.round((i / total) * 100);
+
+                                progressText.textContent = `Generating ${i + 1} of ${total}: ${studentId}`;
+                                progressBar.style.width = percent + '%';
+                                progressBar.textContent = percent + '%';
+
+                                await new Promise(async (resolve) => {
+                                    // Create hidden iframe pointing to real URL
+                                    const iframe = document.createElement('iframe');
+                                    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1122px;height:794px;border:none;visibility:hidden;';
+                                    document.body.appendChild(iframe);
+
+                                    iframe.onload = async () => {
+                                        try {
+
+                                            // Wait extra time for images/fonts to render fully
+                                            await new Promise(r => setTimeout(r, 2500));
+
+                                            const certEl = iframe.contentDocument.querySelector('.document-container');
+
+                                            if (!certEl) {
+                                                console.warn('No .passlip element found for', studentId);
+                                                document.body.removeChild(iframe);
+                                                resolve();
+                                                return;
+                                            }
+
+                                            // Use html2canvas to capture the element
+                                            const canvas = await html2canvas(certEl, {
+                                                scale: 3,
+                                                useCORS: true,
+                                                allowTaint: false,
+                                                scrollX: 0,
+                                                scrollY: 0,
+                                                width: certEl.offsetWidth,
+                                                height: certEl.offsetHeight,
+                                                windowWidth: 1122,
+                                                windowHeight: 794
+                                            });
+
+                                            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+                                            // Build a single-page PDF from the canvas image
+                                            const { jsPDF } = window.jspdf;
+                                            const pdf = new jsPDF({
+                                                orientation: 'landscape',
+                                                unit: 'mm',
+                                                format: 'a4'
+                                            });
+
+                                            pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+
+                                            const pdfBytes = pdf.output('arraybuffer');
+                                            const studentPdf = await PDFDocument.load(pdfBytes);
+                                            const copiedPages = await mergedPdf.copyPages(studentPdf, studentPdf.getPageIndices());
+                                            copiedPages.forEach(page => mergedPdf.addPage(page));
+
+                                        } catch (err) {
+                                            console.error(`Failed for ${studentId}:`, err);
+                                        }
+
+                                        document.body.removeChild(iframe);
+                                        resolve();
+                                    };
+
+                                    // Point iframe to real certificate URL (auto-download is in window.onload,
+                                    // we override html2pdf before it fires via the onload above — 
+                                    // but we need to inject the override BEFORE window.onload runs)
+                                    // So we load it, then immediately patch html2pdf in the iframe
+                                    iframe.src = `/passlip/passlip/download/${studentId}`;
+
+                                    // Patch html2pdf inside iframe as early as possible
+                                    iframe.addEventListener('load', () => { }, { once: true });
+
+                                });
+                            }
+
+                            // Final progress
+                            progressText.textContent = 'Finalizing merged PDF...';
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+
+                            const mergedBytes = await mergedPdf.save();
+                            const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `All_Passlips_{{ $filters['school_number'] }}_{{ $filters['year'] }}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-file-pdf me-2"></i> Download All Passlips ({{ $groupedByStudent->count() }} students)';
+                            progressText.textContent = `Done! ${total} Passlips merged and downloaded.`;
+                        });
+                    </script>
+                @endif
                 <div class="card mt-4">
                     <div class="card-header text-white d-flex align-items-center" style="background-color: #263f2e;">
                         <div class="w-33 text-start">

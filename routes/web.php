@@ -451,11 +451,9 @@ Route::group(['middleware' => ['StudentAuth']], function () {
             Route::get('/certificate/{student_id}', 'downloadertificate')->name('certificate.view');
 
             Route::get('passlip/download/{student_id}', 'downloadPasslip')->name('passlip.download');
-    Route::post('/student-photo-upload', 'uploadStudentPhoto')->name('student.photo.upload');
+            Route::post('/student-photo-upload', 'uploadStudentPhoto')->name('student.photo.upload');
 
         });
-
-
 });
 
 Route::controller(SchoolsController::class)->group(function () {

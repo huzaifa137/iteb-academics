@@ -367,7 +367,12 @@
             <div class="info-col center" style="padding:5px;">
                 <div class="info-row">
                     <span class="label">LEVEL:</span>
-                    <span class="value">A'LEVEL</span>
+                    @if ($gradeCategory === 'TH')
+                        <span class="value">A'LEVEL</span>
+                    @else
+                        <span class="value">O'LEVEL</span>
+                    @endif
+
                 </div>
 
                 <div class="info-row">
@@ -425,51 +430,51 @@
                     <th class="code-col" style="font-weight: bold;">رمز الورقة</th>
                 </tr>
             </thead>
-@php $serial = 1; @endphp
-<tbody>
-    @foreach ($categories as $category)
-        <tr class="category-row">
-            <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
-            <td colspan="4" style="text-align:right;">
-                {!! Helper::arabicWordSpacing($category['title_ar']) !!}
-            </td>
-        </tr>
+            @php $serial = 1; @endphp
+            <tbody>
+                @foreach ($categories as $category)
+                    <tr class="category-row">
+                        <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
+                        <td colspan="4" style="text-align:right;">
+                            {!! Helper::arabicWordSpacing($category['title_ar']) !!}
+                        </td>
+                    </tr>
 
-        @foreach ($category['codes'] as $code)
-            @if (isset($subjects[$code]))
-                <tr>
-                    <td>{{ $serial++ }}</td> <!-- continuous serial number -->
-                    <td class="code-col">{{ $code }}</td>
+                    @foreach ($category['codes'] as $code)
+                        @if (isset($subjects[$code]))
+                                <tr>
+                                    <td>{{ $serial++ }}</td> <!-- continuous serial number -->
+                                    <td class="code-col">{{ $code }}</td>
 
-                    <td style="text-align: left;">
-                        {{ \Illuminate\Support\Str::upper(
-                            Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
-                        ) }}
-                    </td>
+                                    <td style="text-align: left;">
+                                        {{ \Illuminate\Support\Str::upper(
+                                Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
+                            ) }}
+                                    </td>
 
-                    <td class="score-col">
-                        {{ floor(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
-                    </td>
+                                    <td class="score-col">
+                                        {{ floor(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
+                                    </td>
 
-                    <td class="score-col">
-                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
-                    </td>
+                                    <td class="score-col">
+                                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject($studentId, $code, $studentCategory, $year, $schoolId)) }}
+                                    </td>
 
-                    <td style="text-align:right;font-size:1.30em;">
-                        @php
-                            $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
-                            $words = explode(' ', $subject); // split by space
-                            $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
-                        @endphp
-                        {!! $subjectWithSpacing !!}
-                    </td>
+                                    <td style="text-align:right;font-size:1.30em;">
+                                        @php
+                                            $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
+                                            $words = explode(' ', $subject); // split by space
+                                            $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
+                                        @endphp
+                                        {!! $subjectWithSpacing !!}
+                                    </td>
 
-                    <td class="code-col">{{ $code }}</td>
-                </tr>
-            @endif
-        @endforeach
-    @endforeach
-</tbody>
+                                    <td class="code-col">{{ $code }}</td>
+                                </tr>
+                        @endif
+                    @endforeach
+                @endforeach
+            </tbody>
         </table>
 
         @php
@@ -549,6 +554,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function () {
+
+            // 🚫 Prevent auto-download when loaded in iframe
+            if (window !== window.parent) {
+                return;
+            }
+
+            const element = document.querySelector('.document-container');
+
+            const opt = {
+                margin: 0,
+                filename: 'passlip_{{ $studentId }}.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        };
+    </script>
+    {{--
+    <script>
+        window.onload = function () {
             const element = document.querySelector('.document-container');
 
             const opt = {
@@ -574,7 +602,7 @@
 
             html2pdf().set(opt).from(element).save();
         };
-    </script>
+    </script> --}}
 </body>
 
 </html>
