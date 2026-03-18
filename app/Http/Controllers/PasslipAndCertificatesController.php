@@ -57,29 +57,16 @@ class PasslipAndCertificatesController extends Controller
         $schoolId = $parts[0] . '-' . $parts[1];
         $studentCategory = $parts[2] . '-' . $parts[3];
         $year = $parts[4];
-        $gradeCategory = $parts[2];
 
-        if ($gradeCategory === "TH") {
+        $categories = [
+            ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-004', 'AR-002', 'AR-003', 'AR-001']],
+            ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-006', 'FC-005', 'FC-007']],
+            ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-009', 'JS-008', 'JS-010']],
+            ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013', 'PT-012']],
+            ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-015', 'QS-016', 'QS-014']],
+        ];
 
-            $categories = [
-                ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-004', 'AR-002', 'AR-003', 'AR-001']],
-                ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-006', 'FC-005', 'FC-007']],
-                ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-009', 'JS-008', 'JS-010']],
-                ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013', 'PT-012']],
-                ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-015', 'QS-016', 'QS-014']],
-            ];
-        } elseif ($gradeCategory === "ID") {
-
-            $categories = [
-                ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-003', 'AR-004', 'AR-002',]],
-                ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-007', 'FC-005']],
-                ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-011']],
-                ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013']],
-                ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-016', 'QS-015', 'QS-017']],
-            ];
-        }
-
-        $subjects = MasterData::where('md_master_code_id', config('constants.options.IdaadPapers'))
+        $subjects = MasterData::where('md_master_code_id', config('constants.options.ThanawiPapers'))
             ->get()
             ->keyBy('md_code');
 
@@ -90,10 +77,8 @@ class PasslipAndCertificatesController extends Controller
             'studentCategory',
             'year',
             'categories',
-            'subjects',
-            'gradeCategory',
+            'subjects'
         ))->render();
-
 
         // Generate PDF with html2pdf
         return view('template', compact(
@@ -101,7 +86,6 @@ class PasslipAndCertificatesController extends Controller
             'schoolId',
             'studentCategory',
             'year',
-            'gradeCategory',
             'categories',
             'subjects'
         ));

@@ -367,12 +367,7 @@
             <div class="info-col center" style="padding:5px;">
                 <div class="info-row">
                     <span class="label">LEVEL:</span>
-                    @if ($gradeCategory === 'TH')
-                        <span class="value">A'LEVEL</span>
-                    @else
-                        <span class="value">O'LEVEL</span>
-                    @endif
-
+                    <span class="value">A'LEVEL</span>
                 </div>
 
                 <div class="info-row">
