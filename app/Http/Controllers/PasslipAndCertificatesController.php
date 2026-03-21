@@ -53,42 +53,83 @@ class PasslipAndCertificatesController extends Controller
 
     public function downloadPasslip($studentId)
     {
+
         $parts = explode('-', $studentId);
         $schoolId = $parts[0] . '-' . $parts[1];
         $studentCategory = $parts[2] . '-' . $parts[3];
         $year = $parts[4];
 
-        $categories = [
-            ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-004', 'AR-002', 'AR-003', 'AR-001']],
-            ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-006', 'FC-005', 'FC-007']],
-            ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-009', 'JS-008', 'JS-010']],
-            ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013', 'PT-012']],
-            ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-015', 'QS-016', 'QS-014']],
-        ];
+        $categoryCode = explode('-', $studentCategory)[0]; // This will show "ID" or "TH" 
 
-        $subjects = MasterData::where('md_master_code_id', config('constants.options.ThanawiPapers'))
-            ->get()
-            ->keyBy('md_code');
+        if ($categoryCode == "TH") {
+            $categories = [
+                ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-004', 'AR-002', 'AR-003', 'AR-001']],
+                ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-006', 'FC-005', 'FC-007']],
+                ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-009', 'JS-008', 'JS-010']],
+                ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013', 'PT-012']],
+                ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-015', 'QS-016', 'QS-014']],
+            ];
 
-        // Render the Blade template as HTML
-        $html = view('template', compact(
-            'studentId',
-            'schoolId',
-            'studentCategory',
-            'year',
-            'categories',
-            'subjects'
-        ))->render();
+            $subjects = MasterData::where('md_master_code_id', config('constants.options.ThanawiPapers'))
+                ->get()
+                ->keyBy('md_code');
 
-        // Generate PDF with html2pdf
-        return view('template', compact(
-            'studentId',
-            'schoolId',
-            'studentCategory',
-            'year',
-            'categories',
-            'subjects'
-        ));
+            // Render the Blade template as HTML
+            $html = view('template', compact(
+                'studentId',
+                'schoolId',
+                'studentCategory',
+                'year',
+                'categories',
+                'subjects',
+                'categoryCode',
+            ))->render();
+
+            // Generate PDF with html2pdf
+            return view('template', compact(
+                'studentId',
+                'schoolId',
+                'studentCategory',
+                'year',
+                'categories',
+                'subjects',
+                'categoryCode',
+            ));
+        } else {
+            $categories = [
+                ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-003', 'AR-004', 'AR-002']],
+                ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-007', 'FC-005',]],
+                ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-011']],
+                ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013']],
+                ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-016', 'QS-015', 'QS-017']],
+            ];
+
+            $subjects = MasterData::where('md_master_code_id', config('constants.options.IdaadPapers'))
+                ->get()
+                ->keyBy('md_code');
+
+            // Render the Blade template as HTML
+            $html = view('template', compact(
+                'studentId',
+                'schoolId',
+                'studentCategory',
+                'year',
+                'categories',
+                'subjects',
+                'categoryCode',
+            ))->render();
+
+            // Generate PDF with html2pdf
+            return view('template', compact(
+                'studentId',
+                'schoolId',
+                'studentCategory',
+                'year',
+                'categories',
+                'subjects',
+                'categoryCode',
+            ));
+        }
     }
 
     public function downloadertificate($studentId)

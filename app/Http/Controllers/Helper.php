@@ -528,11 +528,21 @@ class Helper extends Controller
 
     public static function getStudentMarksBySubject($studentId, $subjectCode, $category, $year, $schoolNumber)
     {
+       
+        $categoryCode = explode('-', $category)[0];
+
+        $masterCodeId = $categoryCode === 'ID' ? 21 : 20;
 
         $subjectId = DB::table('master_datas')
             ->where('md_code', $subjectCode)
+            ->where('md_master_code_id', $masterCodeId)
             ->value('md_id');
 
+        if (!$subjectId) {
+            return null; 
+        }
+
+        // Fetch mark from marks table
         $subjectMark = DB::table('marks')
             ->where('student_id', $studentId)
             ->where('subject_id', $subjectId)
@@ -590,7 +600,7 @@ class Helper extends Controller
 
         // Calculate average (percentage)
         $average = $subjectCount > 0 ? $total / $subjectCount : 0;
-
+   
         // Fetch grade from DB based on average (Points type)
         $grade = DB::table('grading')
             ->where('Level', 'A') // or 'O' depending on your context
