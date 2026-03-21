@@ -16,7 +16,7 @@
             width: 297mm;
             height: 210mm;
             margin: auto;
-            background: #e9ecef;
+            background: #FFF;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -345,14 +345,15 @@
                     <div class="sign">
                         <b>{!! Helper::arabicWordSpacing('سكرتير التعليم للمجلس') !!}</b>
                         <div class="signature-space"></div>
-                        <strong style="white-space: nowrap;">Secretary for Education (UMSC)</strong>
+                        <strong style="white-space: nowrap; direction: ltr; unicode-bidi: embed;">Secretary for
+                            Education (UMSC)</strong>
                     </div>
                 </div>
 
 
-                <div class="sno-section" style="margin-left: 15mm;">
+                <div class="sno-section" style="display: flex; flex-direction: column; align-items: center;">
                     <div style="padding-bottom: 5px;"><strong>SNO: {{ $snoRank }}</strong></div>
-                    <div id="qr"></div>
+                    <div id="qr" style="display: flex; justify-content: center;"></div>
                 </div>
 
 
@@ -367,7 +368,9 @@
                     <div class="sign">
                         <b>{!! Helper::arabicWordSpacing('السكرتير التنفيذي للهيئة') !!}</b>
                         <div class="signature-space"></div>
-                        <strong style="white-space: nowrap;">Executive Secretary (ITEBU)</strong>
+                        <strong style="white-space: nowrap; direction: ltr; unicode-bidi: embed;">Executive Secretary
+                            (ITEBU)</strong>
+
                     </div>
                 </div>
 
@@ -381,46 +384,46 @@
     <script>
 
         // In certificate.blade.php, replace window.onload with:
-window.onload = function () {
+        window.onload = function () {
 
-    // Don't auto-download if loaded inside an iframe (used for bulk export)
-    if (window.self !== window.top) {
-        // Still generate QR, just skip the PDF download
-        const qrData = "https://iteb-ug.org/";
-        new QRCode(document.getElementById("qr"), {
-            text: qrData,
-            width: 90,
-            height: 90,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        return; // ← EXIT early, no pdf download
-    }
+            // Don't auto-download if loaded inside an iframe (used for bulk export)
+            if (window.self !== window.top) {
+                // Still generate QR, just skip the PDF download
+                const qrData = "https://iteb-ug.org/";
+                new QRCode(document.getElementById("qr"), {
+                    text: qrData,
+                    width: 90,
+                    height: 90,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                return; // ← EXIT early, no pdf download
+            }
 
-    const element = document.querySelector('.certificate');
+            const element = document.querySelector('.certificate');
 
-    // Generate QR code
-    const qrData = "https://iteb-ug.org/";
-    new QRCode(document.getElementById("qr"), {
-        text: qrData,
-        width: 90,
-        height: 90,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+            // Generate QR code
+            const qrData = "https://iteb-ug.org/";
+            new QRCode(document.getElementById("qr"), {
+                text: qrData,
+                width: 90,
+                height: 90,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
 
-    const opt = {
-        margin: 0,
-        filename: 'certificate_{{ $studentId }}.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
+            const opt = {
+                margin: 0,
+                filename: 'certificate_{{ $studentId }}.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
 
-    html2pdf().set(opt).from(element).save();
-};
+            html2pdf().set(opt).from(element).save();
+        };
 
         // window.onload = function () {
 
