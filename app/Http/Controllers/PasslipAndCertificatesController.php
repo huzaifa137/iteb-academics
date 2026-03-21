@@ -141,12 +141,16 @@ class PasslipAndCertificatesController extends Controller
 
         $categoryParts = explode('-', $studentCategory);
         $firstLetters = $categoryParts[0];
+        $categoryCode = $categoryParts[0];
 
         $rank = Helper::getStudentNationalRank($studentId);
 
         if ($firstLetters === 'TH') {
             $subYear = substr($parts[4], -2);
             $snoRank = '2' . $subYear . $rank;
+        } else {
+            $subYear = substr($parts[4], -2);
+            $snoRank = '1' . $subYear . $rank;
         }
 
         if ($firstLetters == 'ID') {
@@ -165,6 +169,7 @@ class PasslipAndCertificatesController extends Controller
             'level',
             'ArLevel',
             'snoRank',
+            'categoryCode',
         ));
     }
 

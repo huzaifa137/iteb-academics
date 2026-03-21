@@ -271,18 +271,33 @@
                 </div>
             </div>
 
-            @php
-                $allSubjectCodes = DB::table('master_datas')
-                    ->where('md_master_code_id', config('constants.options.ThanawiPapers'))
-                    ->pluck('md_code');
-                $stats = Helper::calculatePasslipStats(
-                    $studentId,
-                    $allSubjectCodes,
-                    $studentCategory,
-                    $year,
-                    $schoolId,
-                );
-            @endphp
+            @if ($categoryCode == "TH")
+                @php
+                    $allSubjectCodes = DB::table('master_datas')
+                        ->where('md_master_code_id', config('constants.options.ThanawiPapers'))
+                        ->pluck('md_code');
+                    $stats = Helper::calculatePasslipStats(
+                        $studentId,
+                        $allSubjectCodes,
+                        $studentCategory,
+                        $year,
+                        $schoolId,
+                    );
+                @endphp
+            @else
+                @php
+                    $allSubjectCodes = DB::table('master_datas')
+                        ->where('md_master_code_id', config('constants.options.IdaadPapers'))
+                        ->pluck('md_code');
+                    $stats = Helper::calculatePasslipStats(
+                        $studentId,
+                        $allSubjectCodes,
+                        $studentCategory,
+                        $year,
+                        $schoolId,
+                    );
+                @endphp
+            @endif
 
             <div class="arabic">
                 الحمد لله رب العالمين والصلاة والسلام على خاتم الأنبياء والمرسلين نبينا محمد وعلى آله وصحبه ومن تبعهم

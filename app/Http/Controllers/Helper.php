@@ -537,11 +537,11 @@ class Helper extends Controller
             ->where('md_code', $subjectCode)
             ->where('md_master_code_id', $masterCodeId)
             ->value('md_id');
-
+        
         if (!$subjectId) {
             return null; 
         }
-
+        // dd($subjectId);
         // Fetch mark from marks table
         $subjectMark = DB::table('marks')
             ->where('student_id', $studentId)
@@ -735,8 +735,9 @@ public static function toArabicNumberDateReversed($date)
 
         // Get subjects for this category
         $subjectIds = self::getSubjectIdsForCategory($category);
+       
         $totalPossibleMarks = count($subjectIds) * 100;
-
+ 
         // Array to store each student's total marks and percentage
         $studentsWithPercentage = [];
 
