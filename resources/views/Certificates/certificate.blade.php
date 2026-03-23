@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>A LEVEL Certificate</title>
+        <title>Certificate</title>
     <style>
         html,
         body {
@@ -265,8 +265,10 @@
                 <div class="right">
                     <h2 style="color: #0d4b1e;">{!! Helper::arabicWordSpacing('المجلس الأعلى الإسلامي الأوغندي') !!}
                     </h2>
-                    <h3 class="red">{!! Helper::arabicWordSpacing('هيئة الامتحانات الإعدادية والثانوية (أوغندا)') !!}
-                    </h3>
+                    <h3 class="red">
+    {!! Helper::arabicWordSpacing('هيئة الامتحانات الإعدادية والثانوية') !!}
+    <span style="direction: rtl; unicode-bidi: embed;">(أوغندا)</span>
+</h3>
                     <h4 style="text-align: center;margin-left:7rem;"><strong>الشهادة &nbsp; {{ $ArLevel }}</strong></h4>
                 </div>
             </div>
@@ -439,44 +441,6 @@
 
             html2pdf().set(opt).from(element).save();
         };
-
-        // window.onload = function () {
-
-        //     const element = document.querySelector('.certificate');
-
-        //     // Generate QR code
-        //     const qrData = "https://iteb-ug.org/";
-        //     new QRCode(document.getElementById("qr"), {
-        //         text: qrData,
-        //         width: 90,
-        //         height: 90,
-        //         colorDark: "#000000",
-        //         colorLight: "#ffffff",
-        //         correctLevel: QRCode.CorrectLevel.H
-        //     });
-
-        //     // PDF options
-        //     const opt = {
-        //         margin: 0,
-        //         filename: 'certificate_{{ $studentId }}.pdf',
-        //         image: {
-        //             type: 'jpeg',
-        //             quality: 1
-        //         },
-        //         html2canvas: {
-        //             scale: 4,
-        //             useCORS: true,
-        //             scrollY: 0
-        //         },
-        //         jsPDF: {
-        //             unit: 'mm',
-        //             format: 'a4',
-        //             orientation: 'landscape'
-        //         }
-        //     };
-
-        //     html2pdf().set(opt).from(element).save();
-        // };
     </script>
 </body>
 

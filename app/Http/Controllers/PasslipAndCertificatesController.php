@@ -132,46 +132,117 @@ class PasslipAndCertificatesController extends Controller
         }
     }
 
+    // public function downloadertificate($studentId)
+    // {
+    //     $parts = explode('-', $studentId);
+    //     $schoolId = $parts[0] . '-' . $parts[1];
+    //     $studentCategory = $parts[2] . '-' . $parts[3];
+    //     $year = $parts[4];
+
+    //     $categoryParts = explode('-', $studentCategory);
+    //     $firstLetters = $categoryParts[0];
+    //     $categoryCode = $categoryParts[0];
+
+    //     $rank = Helper::getStudentNationalRank($studentId);
+        
+    //     if ($firstLetters === 'TH') {
+    //         $subYear = substr($parts[4], -2);
+    //         $snoRank = '2' . $subYear . $rank;
+    //     } else {
+    //         $subYear = substr($parts[4], -2);
+    //         $snoRank = '1' . $subYear . $rank;
+    //     }
+
+    //     if ($firstLetters == 'ID') {
+    //         $level = "O'LEVEL";
+    //         $ArLevel = 'الإعدادية';
+    //     } else {
+    //         $level = "A'LEVEL";
+    //         $ArLevel = 'الثانوية';
+    //     }
+
+    //     return view('Certificates.certificate', compact(
+    //         'studentId',
+    //         'schoolId',
+    //         'studentCategory',
+    //         'year',
+    //         'level',
+    //         'ArLevel',
+    //         'snoRank',
+    //         'categoryCode',
+    //     ));
+    // }
+
     public function downloadertificate($studentId)
-    {
-        $parts = explode('-', $studentId);
-        $schoolId = $parts[0] . '-' . $parts[1];
-        $studentCategory = $parts[2] . '-' . $parts[3];
-        $year = $parts[4];
+{
+    $parts = explode('-', $studentId);
+    $schoolId = $parts[0] . '-' . $parts[1];
+    $studentCategory = $parts[2] . '-' . $parts[3];
+    $year = $parts[4];
 
-        $categoryParts = explode('-', $studentCategory);
-        $firstLetters = $categoryParts[0];
-        $categoryCode = $categoryParts[0];
+    $categoryParts = explode('-', $studentCategory);
+    $firstLetters = $categoryParts[0];
+    $categoryCode = $categoryParts[0];
 
-        $rank = Helper::getStudentNationalRank($studentId);
+    $rank = Helper::getStudentNationalRank($studentId);
 
-        if ($firstLetters === 'TH') {
-            $subYear = substr($parts[4], -2);
-            $snoRank = '2' . $subYear . $rank;
-        } else {
-            $subYear = substr($parts[4], -2);
-            $snoRank = '1' . $subYear . $rank;
-        }
-
-        if ($firstLetters == 'ID') {
-            $level = "O'LEVEL";
-            $ArLevel = 'الإعدادية';
-        } else {
-            $level = "A'LEVEL";
-            $ArLevel = 'الثانوية';
-        }
-
-        return view('Certificates.certificate', compact(
-            'studentId',
-            'schoolId',
-            'studentCategory',
-            'year',
-            'level',
-            'ArLevel',
-            'snoRank',
-            'categoryCode',
-        ));
+    if ($firstLetters === 'TH') {
+        $subYear = substr($parts[4], -2);
+        $snoRank = '2' . $subYear . $rank;
+    } else {
+        $subYear = substr($parts[4], -2);
+        $snoRank = '1' . $subYear . $rank;
     }
+
+    if ($firstLetters == 'ID') {
+        $level = "O'LEVEL";
+        $ArLevel = 'الإعدادية';
+        $allSubjectCodes = DB::table('master_datas')
+            ->where('md_master_code_id', config('constants.options.IdaadPapers'))
+            ->pluck('md_code');
+    } else {
+        $level = "A'LEVEL";
+        $ArLevel = 'الثانوية';
+        $allSubjectCodes = DB::table('master_datas')
+            ->where('md_master_code_id', config('constants.options.ThanawiPapers'))
+            ->pluck('md_code');
+    }
+
+    // Check grade before rendering
+    $stats = Helper::calculatePasslipStats(
+        $studentId,
+        $allSubjectCodes,
+        $studentCategory,
+        $year,
+        $schoolId,
+    );
+
+    // If student failed, return a special response
+    if (strtoupper($stats['grade']) === 'FAIL' || strtoupper($stats['grade']) === 'F') {
+        // For bulk iframe detection: return blank page with a flag
+        if (request()->has('bulk')) {
+            return response('<html><body data-skipped="true"></body></html>', 200)
+                ->header('Content-Type', 'text/html');
+        }
+        // For individual download: abort with a message
+    // For individual download: redirect back with error message
+return response()->view('errors.certificate-failed', [
+    'studentId' => $studentId,
+    'studentName' => Helper::getStudentName($studentId),
+], 200);
+    }
+
+    return view('Certificates.certificate', compact(
+        'studentId',
+        'schoolId',
+        'studentCategory',
+        'year',
+        'level',
+        'ArLevel',
+        'snoRank',
+        'categoryCode',
+    ));
+}
 
     public function uploadStudentPhoto(Request $request)
     {

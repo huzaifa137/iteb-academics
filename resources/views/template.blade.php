@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idaad and Thanawi Pass Slip</title>
+
+    <title>Pass Slip</title>
 
     <style>
         @page {
@@ -328,7 +329,7 @@
 <body>
     <div class="document-container">
         @php
-            use App\Http\Controllers\Helper;
+        use App\Http\Controllers\Helper;
         @endphp
         <div class="watermark">
             <img src="{{ asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo">
@@ -336,7 +337,9 @@
 
         <header>
             <div class="header-arabic" style="color: #1e5cc4;">بسم الله الرحمن الرحيم</div>
-            <div class="header-arabic">هيئة الامتحانات الإعدادية والثانوية &nbsp; (أوغندا)</div>
+            <div class="header-arabic" style="direction: rtl;">
+    هيئة الامتحانات الإعدادية والثانوية (أوغندا)
+</div>
             <div class="header-english">IDAAD AND THANAWI EXAMINATIONS BOARD (U)</div>
 
             <div class="logo-section">
@@ -368,9 +371,9 @@
                 <div class="info-row">
                     <span class="label">LEVEL:</span>
                     @if ($categoryCode == "TH")
-                        <span class="value">A'LEVEL</span>
+                    <span class="value">A'LEVEL</span>
                     @else
-                        <span class="value">O'LEVEL</span>
+                    <span class="value">O'LEVEL</span>
                     @endif
                 </div>
 
@@ -384,25 +387,25 @@
             <div class="info-col" style="text-align: right;">
                 <div class="photo-box" style="float: right; margin-left: 10px;">
                     @php
-                        $photo = public_path('assets/student_photos/' . $studentId . '.jpg');
+                    $photo = public_path('assets/student_photos/' . $studentId . '.jpg');
                     @endphp
 
                     @if(file_exists($photo))
-                        <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') }}"
-                            style="width:100%; height:100%; object-fit:cover;">
+                    <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') }}"
+                        style="width:100%; height:100%; object-fit:cover;">
                     @else
-                        <img src="{{ asset('assets/images/default-user.png') }}"
-                            style="width:100%; height:100%; object-fit:cover;">
+                    <img src="{{ asset('assets/images/default-user.png') }}"
+                        style="width:100%; height:100%; object-fit:cover;">
                     @endif
                 </div>
 
                 <div style="font-weight: bold"> @if(Helper::getStudentSex($studentId) == 'Female')
                     اسم الطالبة
-                @else
-                        اسم الطالب
+                    @else
+                    اسم الطالب
                     @endif<span style="font-weight: normal;"> :
                         <span style="font-size:1.26em;">{!!
-    Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!}</span></span>
+                            Helper::arabicWordSpacing(Helper::getStudentARName($studentId)) !!}</span></span>
                 </div>
                 <div style="font-weight: bold">المرحلة <span style="font-weight: normal;"> : <span
                             style="font-size:1.26em;">{{ Helper::getStudentARLevel($studentId) }}</span></span>
@@ -432,96 +435,96 @@
             @php $serial = 1; @endphp
             <tbody>
                 @foreach ($categories as $category)
-                    <tr class="category-row">
-                        <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
-                        <td colspan="4" style="text-align:right;">
-                            {!! Helper::arabicWordSpacing($category['title_ar']) !!}
-                        </td>
-                    </tr>
+                <tr class="category-row">
+                    <td colspan="3" style="text-align: left;">{{ $category['title_en'] }}</td>
+                    <td colspan="4" style="text-align:right;">
+                        {!! Helper::arabicWordSpacing($category['title_ar']) !!}
+                    </td>
+                </tr>
 
-                    @foreach ($category['codes'] as $code)
-                        @if (isset($subjects[$code]))
-                                <tr>
-                                    <td>{{ $serial++ }}</td> <!-- continuous serial number -->
-                                    <td class="code-col">{{ $code }}</td>
+                @foreach ($category['codes'] as $code)
+                @if (isset($subjects[$code]))
+                <tr>
+                    <td>{{ $serial++ }}</td> <!-- continuous serial number -->
+                    <td class="code-col">{{ $code }}</td>
 
-                                    @if ($categoryCode == "TH")
-                                            <td style="text-align: left;">
-                                                {{ \Illuminate\Support\Str::upper(
-                                            Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
-                                        ) }}
-                                            </td>
-                                    @else
-                                            <td style="text-align: left;">
-                                                {{ \Illuminate\Support\Str::upper(
-                                            Helper::getPasslipSubjectEnName(config('constants.options.IdaadPapers'), $code)
-                                        ) }}
-                                            </td>
-                                    @endif
+                    @if ($categoryCode == "TH")
+                    <td style="text-align: left;">
+                        {{ \Illuminate\Support\Str::upper(
+                        Helper::getPasslipSubjectEnName(config('constants.options.ThanawiPapers'), $code)
+                        ) }}
+                    </td>
+                    @else
+                    <td style="text-align: left;">
+                        {{ \Illuminate\Support\Str::upper(
+                        Helper::getPasslipSubjectEnName(config('constants.options.IdaadPapers'), $code)
+                        ) }}
+                    </td>
+                    @endif
 
 
-                                    <td class="score-col">
-                                        {{ floor(Helper::getStudentMarksBySubject(
-                                $studentId,
-                                $code,
-                                $studentCategory,
-                                $year,
-                                $schoolId
-                            )) }}
-                                    </td>
+                    <td class="score-col">
+                        {{ floor(Helper::getStudentMarksBySubject(
+                        $studentId,
+                        $code,
+                        $studentCategory,
+                        $year,
+                        $schoolId
+                        )) }}
+                    </td>
 
-                                    <td class="score-col">
-                                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject(
-                                $studentId,
-                                $code,
-                                $studentCategory,
-                                $year,
-                                $schoolId
-                            )) }}
-                                    </td>
+                    <td class="score-col">
+                        {{ Helper::numberToArabicDB(Helper::getStudentMarksBySubject(
+                        $studentId,
+                        $code,
+                        $studentCategory,
+                        $year,
+                        $schoolId
+                        )) }}
+                    </td>
 
-                                    @if ($categoryCode == "TH")
-                                        <td style="text-align:right;font-size:1.30em;">
-                                            @php
-                                                $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
-                                                $words = explode(' ', $subject); // split by space
-                                                $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
-                                            @endphp
-                                            {!! $subjectWithSpacing !!}
-                                        </td>
-                                    @else
-                                        <td style="text-align:right;font-size:1.30em;">
-                                            @php
-                                                $subject = Helper::getPasslipSubjectARName(config('constants.options.IdaadPapers'), $code);
-                                                $words = explode(' ', $subject); // split by space
-                                                $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
-                                            @endphp
-                                            {!! $subjectWithSpacing !!}
-                                        </td>
-                                    @endif
+                    @if ($categoryCode == "TH")
+                    <td style="text-align:right;font-size:1.30em;">
+                        @php
+                        $subject = Helper::getPasslipSubjectARName(config('constants.options.ThanawiPapers'), $code);
+                        $words = explode(' ', $subject); // split by space
+                        $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
+                        @endphp
+                        {!! $subjectWithSpacing !!}
+                    </td>
+                    @else
+                    <td style="text-align:right;font-size:1.30em;">
+                        @php
+                        $subject = Helper::getPasslipSubjectARName(config('constants.options.IdaadPapers'), $code);
+                        $words = explode(' ', $subject); // split by space
+                        $subjectWithSpacing = implode('&nbsp;', $words); // add spaces
+                        @endphp
+                        {!! $subjectWithSpacing !!}
+                    </td>
+                    @endif
 
-                                    <td class="code-col">{{ $code }}</td>
-                                </tr>
-                        @endif
-                    @endforeach
+                    <td class="code-col">{{ $code }}</td>
+                </tr>
+                @endif
+                @endforeach
                 @endforeach
             </tbody>
         </table>
 
         @if ($categoryCode == "TH")
-            @php
-                $allSubjectCodes = DB::table('master_datas')
-                    ->where('md_master_code_id', config('constants.options.ThanawiPapers'))
-                    ->pluck('md_code');
-                $stats = Helper::calculatePasslipStats($studentId, $allSubjectCodes, $studentCategory, $year, $schoolId);
-            @endphp
+        @php
+        $allSubjectCodes = DB::table('master_datas')
+        ->where('md_master_code_id', config('constants.options.ThanawiPapers'))
+        ->pluck('md_code');
+        $stats = Helper::calculatePasslipStats($studentId, $allSubjectCodes, $studentCategory, $year, $schoolId);
+        @endphp
         @else
-            @php
-                $allSubjectCodes = DB::table('master_datas')
-                    ->where('md_master_code_id', config('constants.options.IdaadPapers'))
-                    ->pluck('md_code');
-                $stats = Helper::calculatePasslipStats($studentId, $allSubjectCodes, $studentCategory, $year, $schoolId);
-            @endphp
+        @php
+        $allSubjectCodes = DB::table('master_datas')
+        ->where('md_master_code_id', config('constants.options.IdaadPapers'))
+        ->pluck('md_code');
+        $stats = Helper::calculatePasslipStats($studentId, $allSubjectCodes, $studentCategory, $year, $schoolId);
+        @endphp
         @endif
 
 
