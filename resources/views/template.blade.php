@@ -599,7 +599,6 @@
     <script>
         window.onload = function () {
 
-            // 🚫 Prevent auto-download when loaded in iframe
             if (window !== window.parent) {
                 return;
             }
@@ -618,35 +617,6 @@
             html2pdf().set(opt).from(element).save();
         };
     </script>
-    {{--
-    <script>
-        window.onload = function () {
-            const element = document.querySelector('.document-container');
-
-            const opt = {
-                margin: 0,
-                filename: 'passlip_{{ $studentId }}.pdf',
-                image: {
-                    type: 'jpeg',
-                    quality: 1
-                },
-                html2canvas: {
-                    scale: 3, // higher scale for sharper PDF
-                    useCORS: true
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                },
-                pagebreak: {
-                    mode: ['avoid-all', 'css', 'legacy']
-                }
-            };
-
-            html2pdf().set(opt).from(element).save();
-        };
-    </script> --}}
 </body>
 
 </html>

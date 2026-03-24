@@ -23,7 +23,6 @@
         }
 
         /* CERTIFICATE CONTAINER */
-        /* CERTIFICATE CONTAINER */
         .certificate {
             width: 287mm;
             height: 198mm;
@@ -131,22 +130,25 @@
 
         /* ARABIC PARAGRAPH */
 
-.arabic {
-    direction: rtl;
-    text-align: justify;  /* changed from 'right' */
-    font-size: 20px;
-    line-height: 1.7;
-    margin-top: 10px;
-}
+        .arabic {
+            direction: rtl;
+            text-align: justify;
+            /* changed from 'right' */
+            font-size: 20px;
+            line-height: 1.7;
+            margin-top: 10px;
+        }
 
-.english {
-    margin-top: 8px;
-    font-size: 16px;
-    line-height: 1.7;
-    font-family: Tahoma, Arial, sans-serif;
-    text-align: justify;  /* add this */
-}
-        /* ENGLISH PARAGRAPH */    
+        .english {
+            margin-top: 8px;
+            font-size: 16px;
+            line-height: 1.7;
+            font-family: Tahoma, Arial, sans-serif;
+            text-align: justify;
+            /* add this */
+        }
+
+        /* ENGLISH PARAGRAPH */
 
         /* FOOTER */
 
@@ -239,10 +241,6 @@
 
         <div class="certificate-content">
 
-            {{-- <div class="bismillah">
-                بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْم
-            </div> --}}
-
             <div class="bismillah">
                 <img src="{{ asset('assets/basmallah.png') }}" alt="Watermark" style="height: 40px; width: auto;">
             </div>
@@ -278,7 +276,8 @@
                         <span style="direction: rtl; unicode-bidi: embed;">(أوغندا)</span>
                     </h3>
                     <h4 style="text-align: center;margin-left:7rem;font-size:1.5em;">
-                        <strong>الشهادة&nbsp;{{ $ArLevel }}</strong></h4>
+                        <strong>الشهادة&nbsp;{{ $ArLevel }}</strong>
+                    </h4>
                 </div>
             </div>
 
@@ -382,12 +381,9 @@
                     <div id="qr" style="display: flex; justify-content: center;"></div>
                 </div>
 
-
-                <!-- NEW EMPTY SECTION -->
                 <div class="footer-empty">
                     &nbsp;
                 </div>
-
 
                 <div class="footer-col date-ar">
                     <div>التاريخ {{ Helper::toArabicNumberDateReversed($currentDate) }} &nbsp;</div>
@@ -401,36 +397,17 @@
                 </div>
 
             </div>
-            <!-- bottom-ornament DIV removed (the ball border) -->
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    <script>
+<script>
+    window.onload = function () {
 
-        // In certificate.blade.php, replace window.onload with:
-        window.onload = function () {
+        const qrData = "Name: {{ $studentRegisteredname }}\nIndex No: {{ $studentRegisteredNumber }}\nGrade: {{ $studentAchievedGrade }}";
 
-            // Don't auto-download if loaded inside an iframe (used for bulk export)
-            if (window.self !== window.top) {
-                // Still generate QR, just skip the PDF download
-                const qrData = "https://iteb-ug.org/";
-                new QRCode(document.getElementById("qr"), {
-                    text: qrData,
-                    width: 90,
-                    height: 90,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-                return; // ← EXIT early, no pdf download
-            }
-
-            const element = document.querySelector('.certificate');
-
-            // Generate QR code
-            const qrData = "https://iteb-ug.org/";
+        if (window.self !== window.top) {
             new QRCode(document.getElementById("qr"), {
                 text: qrData,
                 width: 90,
@@ -439,18 +416,33 @@
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+            return;
+        }
 
-            const opt = {
-                margin: 0,
-                filename: 'certificate_{{ $studentId }}.pdf',
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
+        const element = document.querySelector('.certificate');
 
-            html2pdf().set(opt).from(element).save();
+        new QRCode(document.getElementById("qr"), {
+            text: qrData,
+            width: 90,
+            height: 90,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        const opt = {
+            margin: 0,
+            filename: 'certificate_{{ $studentId }}.pdf',
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
         };
-    </script>
+
+        setTimeout(function () {
+            html2pdf().set(opt).from(element).save();
+        }, 500);
+    };
+</script>
 </body>
 
 </html>
