@@ -257,7 +257,7 @@
                     @if ($level == "A'LEVEL")
                         <h3 style="text-align: center;"><strong>'A' LEVEL Certificate </strong></h3>
                     @else
-                        <h3 style="text-align: center;"><strong>'A' LEVEL Certificate </strong></h3>
+                        <h3 style="text-align: center;"><strong>'O' LEVEL Certificate </strong></h3>
                     @endif
                 </div>
 
