@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-        <title>Certificate</title>
+    <title>Certificate</title>
     <style>
         html,
         body {
@@ -59,8 +59,9 @@
             position: absolute;
             left: 22mm;
             right: 22mm;
-            top: 16mm;
-            bottom: 22mm;
+            top: 10mm;
+            /* top: 16mm; */
+            bottom: 18mm;
         }
 
         /* BISMILLAH */
@@ -130,23 +131,22 @@
 
         /* ARABIC PARAGRAPH */
 
-        .arabic {
-            direction: rtl;
-            text-align: right;
-            font-size: 20px;
-            line-height: 2;
-            margin-top: 20px;
-        }
+.arabic {
+    direction: rtl;
+    text-align: justify;  /* changed from 'right' */
+    font-size: 20px;
+    line-height: 1.7;
+    margin-top: 10px;
+}
 
-        .english {
-            margin-top: 20px;
-            font-size: 16px;
-            line-height: 1.7;
-            font-family: Tahoma, Arial, sans-serif;
-        }
-
-        /* ENGLISH PARAGRAPH */
-
+.english {
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 1.7;
+    font-family: Tahoma, Arial, sans-serif;
+    text-align: justify;  /* add this */
+}
+        /* ENGLISH PARAGRAPH */    
 
         /* FOOTER */
 
@@ -239,8 +239,12 @@
 
         <div class="certificate-content">
 
-            <div class="bismillah">
+            {{-- <div class="bismillah">
                 بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْم
+            </div> --}}
+
+            <div class="bismillah">
+                <img src="{{ asset('assets/basmallah.png') }}" alt="Watermark" style="height: 40px; width: auto;">
             </div>
 
             <div class="bismillah-translation" style="color: #1e5cc4;">
@@ -252,7 +256,11 @@
                 <div class="left">
                     <h2 style="color: #0d4b1e;">Uganda Muslim Supreme Council</h2>
                     <h3 class="red">Idaad and Thanawi Examinations Board (U)</h3>
-                    <h3 style="text-align: center;"><strong>'{{ $level }} Certificate </strong></h3>
+                    @if ($level == "A'LEVEL")
+                        <h3 style="text-align: center;"><strong>'A' LEVEL Certificate </strong></h3>
+                    @else
+                        <h3 style="text-align: center;"><strong>'A' LEVEL Certificate </strong></h3>
+                    @endif
                 </div>
 
 
@@ -266,10 +274,11 @@
                     <h2 style="color: #0d4b1e;">{!! Helper::arabicWordSpacing('المجلس الأعلى الإسلامي الأوغندي') !!}
                     </h2>
                     <h3 class="red">
-    {!! Helper::arabicWordSpacing('هيئة الامتحانات الإعدادية والثانوية') !!}
-    <span style="direction: rtl; unicode-bidi: embed;">(أوغندا)</span>
-</h3>
-                    <h4 style="text-align: center;margin-left:7rem;"><strong>الشهادة &nbsp; {{ $ArLevel }}</strong></h4>
+                        {!! Helper::arabicWordSpacing('هيئة الامتحانات الإعدادية والثانوية') !!}
+                        <span style="direction: rtl; unicode-bidi: embed;">(أوغندا)</span>
+                    </h3>
+                    <h4 style="text-align: center;margin-left:7rem;font-size:1.5em;">
+                        <strong>الشهادة&nbsp;{{ $ArLevel }}</strong></h4>
                 </div>
             </div>
 

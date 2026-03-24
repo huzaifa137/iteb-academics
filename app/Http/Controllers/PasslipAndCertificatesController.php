@@ -132,47 +132,6 @@ class PasslipAndCertificatesController extends Controller
         }
     }
 
-    // public function downloadertificate($studentId)
-    // {
-    //     $parts = explode('-', $studentId);
-    //     $schoolId = $parts[0] . '-' . $parts[1];
-    //     $studentCategory = $parts[2] . '-' . $parts[3];
-    //     $year = $parts[4];
-
-    //     $categoryParts = explode('-', $studentCategory);
-    //     $firstLetters = $categoryParts[0];
-    //     $categoryCode = $categoryParts[0];
-
-    //     $rank = Helper::getStudentNationalRank($studentId);
-        
-    //     if ($firstLetters === 'TH') {
-    //         $subYear = substr($parts[4], -2);
-    //         $snoRank = '2' . $subYear . $rank;
-    //     } else {
-    //         $subYear = substr($parts[4], -2);
-    //         $snoRank = '1' . $subYear . $rank;
-    //     }
-
-    //     if ($firstLetters == 'ID') {
-    //         $level = "O'LEVEL";
-    //         $ArLevel = 'الإعدادية';
-    //     } else {
-    //         $level = "A'LEVEL";
-    //         $ArLevel = 'الثانوية';
-    //     }
-
-    //     return view('Certificates.certificate', compact(
-    //         'studentId',
-    //         'schoolId',
-    //         'studentCategory',
-    //         'year',
-    //         'level',
-    //         'ArLevel',
-    //         'snoRank',
-    //         'categoryCode',
-    //     ));
-    // }
-
     public function downloadertificate($studentId)
 {
     $parts = explode('-', $studentId);
@@ -232,6 +191,13 @@ return response()->view('errors.certificate-failed', [
 ], 200);
     }
 
+    $bismillahPath = public_path('assets/certificates/bismillah.jpg');
+$bismillahBase64 = '';
+if (file_exists($bismillahPath)) {
+    $bismillahBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bismillahPath));
+}
+
+// dd($level);
     return view('Certificates.certificate', compact(
         'studentId',
         'schoolId',
@@ -241,6 +207,7 @@ return response()->view('errors.certificate-failed', [
         'ArLevel',
         'snoRank',
         'categoryCode',
+        'bismillahBase64',
     ));
 }
 
