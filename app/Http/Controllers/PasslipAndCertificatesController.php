@@ -214,26 +214,26 @@ class PasslipAndCertificatesController extends Controller
         ));
     }
 
-    public function uploadStudentPhoto(Request $request)
-    {
-        $request->validate([
-            'photo' => 'required|image|mimes:jpg,jpeg,png',
-            'studentId' => 'required'
-        ]);
+public function uploadStudentPhoto(Request $request)
+{
+    $request->validate([
+        'photo' => 'required|image|mimes:jpg,jpeg,png',
+        'studentId' => 'required'
+    ]);
 
-        $studentId = $request->studentId;
+    $studentId = $request->studentId;
+    $file = $request->file('photo');
+    $path = public_path('assets/student_photos');
 
-        $file = $request->file('photo');
-
-        $path = public_path('assets/student_photos');
-
-        if (!file_exists($path)) {
-            mkdir($path, 0755, true);
-        }
-
-        $file->move($path, $studentId . '.jpg');
-
-        return response()->json(['success' => true]);
-
+    if (!file_exists($path)) {
+        mkdir($path, 0755, true);
     }
+
+    $file->move($path, $studentId . '.jpg');
+
+    return response()->json(['success' => true])
+        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
+}
 }

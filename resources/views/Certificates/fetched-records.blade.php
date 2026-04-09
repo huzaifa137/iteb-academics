@@ -1007,22 +1007,23 @@ progressText.textContent = `Done! ${generated} certificates generated (${total -
                         </thead>
                         <tbody>
                             @foreach ($groupedByStudent as $studentId => $allocations)
-                            @php
-                            $photoPath = public_path('assets/student_photos/' . $studentId . '.jpg');
-                            $photoExists = file_exists($photoPath);
-                            @endphp
+                           @php
+$photoPath = public_path('assets/student_photos/' . $studentId . '.jpg');
+$photoExists = file_exists($photoPath);
+$cacheBuster = $photoExists ? '?v=' . filemtime($photoPath) : '';
+@endphp
 
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td style="text-align:center; width:140px;">
-                                    @if($photoExists)
-                                    <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') }}"
-                                        style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
-                                    @else
-                                    <img src="{{ asset('assets/images/default-user.jpg') }}"
-                                        style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
-                                    @endif
-                                </td>
+    @if($photoExists)
+    <img src="{{ asset('assets/student_photos/' . $studentId . '.jpg') . $cacheBuster }}"
+        style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
+    @else
+    <img src="{{ asset('assets/images/default-user.jpg') }}"
+        style="width:110px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9ecef;">
+    @endif
+</td>
                                 <td>
                                     <strong>{{ $studentId }}</strong> - {{ Helper::getStudentName($studentId) }}
                                 </td>
@@ -1239,7 +1240,17 @@ progressText.textContent = `Done! ${generated} certificates generated (${total -
                                         confirmButtonColor: '#263f2e'
                                     }).then(() => {
                                         $('#uploadModal').modal('hide');
-                                        location.reload();
+                                        
+                                        // Instead of full page reload, update just the image
+                                        let studentId = $('#studentId').val();
+                                        let timestamp = new Date().getTime();
+                                        let newSrc = `/assets/student_photos/${studentId}.jpg?v=${timestamp}`;
+                                        
+                                        // Find the image in the table row and update it
+                                        $(`button[data-student="${studentId}"]`).closest('tr').find('img').attr('src', newSrc);
+                                        
+                                        // Update button text
+                                        $(`button[data-student="${studentId}"]`).html('<i class="fas fa-edit"></i> Update');
                                     });
                                 },
                                 error: function (xhr) {

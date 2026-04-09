@@ -24,11 +24,11 @@ use Illuminate\Support\Facades\Hash;
 //     dd($allSessions);
 // })->name('show.sessions');
 
-Route::get('/set-admin-session', function () {
-    session(['LoggedAdmin' => 1]);
+// Route::get('/set-admin-session', function () {
+//     session(['LoggedAdmin' => 1]);
 
-    return redirect('/'); // or where
-});
+//     return redirect('/'); // or where
+// });
 
 // Route::get('/set-student-session', function () {
 //     session(['LoggedStudent' => 1]);
