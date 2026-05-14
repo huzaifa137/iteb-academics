@@ -759,3 +759,14 @@ return redirect()->route('student.dashboard')->with('error', 'You do not have pe
             MAIL_USERNAME=huzaifabukenya227@gmail.com
             MAIL_PASSWORD=dmdzbelafzfsmelm
             MAIL_ENCRYPTION=tls
+
+
+            <select name="admission_year" class="form-control select2" required>
+                <option value="">-- Select Year --</option>
+
+                @foreach (Helper::academicYears() as $year)
+                    <option value="{{ $year->year_en }}">
+                        {{ $year->year_en }} - {{ $year->year_ar }}
+                    </option>
+                @endforeach
+            </select>

@@ -17,6 +17,7 @@ use App\Exports\StudentsExamExport;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use Mail;
+use App\Models\AcademicYear;
 use App\Models\School;
 use App\Imports\StudentExamImport;
 use App\Models\Exam;
@@ -24,7 +25,7 @@ use App\Services\GradingService;
 use App\Models\Mark;
 use App\Models\ClassAllocation;
 use App\Models\Grading;
-use App\Models\StudentResult;
+use Illuminate\Support\Facades\File;
 use App\Http\Controllers\Helper;
 
 
@@ -336,18 +337,18 @@ class StudentController extends Controller
 
     public function addNewStudent()
     {
-        $years = StudentBasic::selectRaw('DISTINCT SUBSTRING_INDEX(Student_ID, "-", -1) as year')
-            ->whereRaw('Student_ID REGEXP ".*-[0-9]{4}$"')
-            ->orderBy('year', 'desc')
-            ->pluck('year');
+        // Get years from academic_years table
+        $years = Helper::academicYears();
 
         $schools = House::select('ID', 'House', 'Number')->get();
 
+        $activeYear = AcademicYear::where('status', 'Active')->first();
+        $currentYear = $activeYear ? $activeYear->year_en : date('Y');
+
         $defaultSchoolNumber = $schools->first() ? $schools->first()->Number : 'IT-001';
-        $currentYear = date('Y');
         $newStudentId = $defaultSchoolNumber . '-ID-001-' . $currentYear;
 
-        return view('student.add-new-student', compact('schools', 'years', 'newStudentId'));
+        return view('student.add-new-student', compact('schools', 'years', 'newStudentId', 'currentYear'));
     }
 
 
@@ -392,8 +393,6 @@ class StudentController extends Controller
 
     public function storeStudent(Request $request)
     {
-
-    
         $validated = $request->validate([
             'school_id' => 'required|string|max:45',
             'Category' => 'required|string|max:10',
@@ -401,10 +400,21 @@ class StudentController extends Controller
             'Student_ID' => 'required|string|max:25|unique:students_basic,Student_ID',
             'Student_Name' => 'required|string|max:100',
             'Student_Name_AR' => 'nullable|string|max:45',
-            'Date_of_Birth' => 'nullable|date',
+            'date_of_birth' => 'nullable|date',
             'StudentSex' => 'required|string|in:Male,Female',
-            'StudentNationality' => 'nullable|string|max:45',
+            'nationality' => 'nullable|string|max:45',
         ]);
+
+
+        $category = $request->Category;
+
+        if ($category == 'ID') {
+            $Class = 'Senior Four';
+            $Class_AR = 'الإعدادية';
+        } else {
+            $Class = 'Senior Six';
+            $Class_AR = 'الثانوي';
+        }
 
         DB::beginTransaction();
 
@@ -414,13 +424,18 @@ class StudentController extends Controller
                 'Student_ID' => $validated['Student_ID'],
                 'Student_Name' => $validated['Student_Name'],
                 'Student_Name_AR' => $validated['Student_Name_AR'] ?? null,
-                'Date_of_Birth' => $validated['Date_of_Birth'] ?? null,
+                'Date_of_Birth' => $validated['date_of_birth'] ?? null,
                 'StudentSex' => $validated['StudentSex'],
-                'StudentsNationality' => $validated['StudentNationality'] ?? null,
-                'House' => Helper::ar_schoolName($validated['school_id']),
-                'Class' => $validated['Category'],
+                'StudentsNationality' => $validated['nationality'] ?? null,
+                'House' => Helper::schoolNameByID($validated['school_id']),
                 'admnyr' => $validated['Admission_Year'],
                 'EntryDate' => now(),
+                'Section' => 'Day',
+                'Class' => $Class,
+                'Class_AR' => $Class_AR,
+                'state' => 'Active',
+                'StudentsCitizenship' => Helper::toArabicLettersCountriesAndWordsPackage($validated['nationality']),
+                'Date_of_Birth_AR' => Helper::toArabicDate($validated['date_of_birth']),
             ]);
 
             ClassAllocation::create([
@@ -450,10 +465,7 @@ class StudentController extends Controller
     {
         $houses = House::orderBy('House')->get();
 
-        $years = StudentBasic::selectRaw('DISTINCT SUBSTRING_INDEX(Student_ID, "-", -1) as year')
-            ->whereRaw('Student_ID REGEXP ".*-[0-9]{4}$"')
-            ->orderBy('year', 'desc')
-            ->pluck('year');
+        $years = Helper::academicYears();
 
         $studentsQuery = StudentBasic::with('house');
 
@@ -476,6 +488,7 @@ class StudentController extends Controller
                 $studentsQuery->where('Student_ID', 'LIKE', '%-TH-%');
             }
         }
+
 
         $students = $studentsQuery
             ->orderBy('Student_ID', 'asc')
@@ -579,20 +592,19 @@ class StudentController extends Controller
                 break;
 
             case 'name':
-                $students = Student::where('firstname', 'like', '%' . $request->firstname . '%')
-                    ->where('lastname', 'like', '%' . $request->lastname . '%')
-                    ->where('senior', $request->senior)
+                $students = StudentBasic::where('Student_Name', 'like', '%' . $request->firstname . '%')
+                    ->where('Student_Name', 'like', '%' . $request->lastname . '%')
                     ->get();
                 break;
 
             case 'phone':
-                $students = Student::where('primary_contact', $request->phone)
+                $students = StudentBasic::where('primary_contact', $request->phone)
                     ->orWhere('other_contact', $request->phone)
                     ->get();
                 break;
 
             case 'student_id':
-                $students = Student::where('id', $request->student_id)->get();
+                $students = StudentBasic::where('id', $request->student_id)->get();
                 break;
 
             default:
@@ -671,40 +683,57 @@ class StudentController extends Controller
 
     public function updateStudentInformation(Request $request, $id)
     {
+        $student = StudentBasic::where('Student_ID', $id)->first();
 
-        $validated = $request->validate([
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'senior' => 'nullable|max:255',
-            'stream' => 'nullable|max:255',
-            'gender' => 'required|in:Male,Female,Other',
-            'school_id' => 'sometimes|integer|exists:schools,id',
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
 
-            'admission_number' => 'nullable|string|max:255|unique:students,admission_number,' . $id,
-            'primary_contact' => 'nullable|string|max:255',
-            'other_contact' => 'nullable|string|max:255',
-            'date_of_admission' => 'nullable|date',
-            'date_of_birth' => 'nullable|date',
-            'place_of_birth' => 'nullable|string|max:255',
-            'nationality' => 'nullable|string|max:255',
-            'ple_score' => 'nullable|numeric|between:0,999.99',
-            'uce_score' => 'nullable|numeric|between:0,999.99',
-            'previous_school' => 'nullable|string|max:255',
-            'primary_school_name' => 'nullable|string|max:255',
-            'guardian_names' => 'nullable|string|max:255',
-            'relation' => 'nullable|string|max:255',
-            'guardian_phone' => 'nullable|string|max:255',
-            'guardian_email' => 'nullable|email|max:255',
-            'home_address' => 'nullable|string',
-            'birth_certificate_entry_number' => 'nullable|string|max:255',
-            'medical_history' => 'nullable|string',
-            'comments' => 'nullable|string',
+        // Update student information
+        $student->Student_Name = $request->student_name;
+        $student->Student_Name_AR = $request->student_name_ar;
+        $student->StudentSex = $request->student_sex;
+        $student->Date_of_Birth = $request->date_of_birth;
+        $student->Birth_Place = $request->birth_place;
+        $student->Birth_Place_AR = $request->birth_place_ar;
+        $student->Class = $request->class;
+        $student->Section = $request->section;
+        $student->House = $request->house;
+        $student->District = $request->district;
+        $student->District_AR = $request->district_ar;
+        $student->Fatherscontact = $request->fathers_contact;
+        $student->MothersContact = $request->mothers_contact;
+        $student->GuardiansContact = $request->guardians_contact;
+        $student->GuardianName = $request->guardian_name;
+        $student->GuardianRelationship = $request->guardian_relationship;
+        $student->GuardiansJob = $request->guardians_job;
+        $student->Disabilities = $request->disabilities;
+        $student->ChronicleDiseases = $request->chronic_diseases;
+
+        // Handle photo upload if provided
+        if ($request->hasFile('photo')) {
+
+            $path = public_path('assets/student_photos');
+
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+
+            $oldImage = $path . '/' . $id . '.jpg';
+
+            if (File::exists($oldImage)) {
+                File::delete($oldImage);
+            }
+
+            $request->file('photo')->move($path, $id . '.jpg');
+        }
+
+        $student->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Student information updated successfully'
         ]);
-
-        $student = Student::findOrFail($id);
-        $student->update($validated);
-
-        return response()->json(['message' => 'Student updated successfully']);
     }
 
     public function moveStudentForm()

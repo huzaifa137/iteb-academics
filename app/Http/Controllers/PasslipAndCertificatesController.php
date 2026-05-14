@@ -97,11 +97,11 @@ class PasslipAndCertificatesController extends Controller
             ));
         } else {
             $categories = [
-                ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-002','AR-003', 'AR-004']],
-                ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-005','FC-007']],
+                ['title_en' => 'ARABIC LANGUAGE', 'title_ar' => 'اللغة العربية', 'codes' => ['AR-002', 'AR-003', 'AR-004']],
+                ['title_en' => 'FAITH & CIVILIZATION', 'title_ar' => 'العقيدة والحضارة', 'codes' => ['FC-005', 'FC-007']],
                 ['title_en' => 'JURISPRUDENCE & ITS SOURCES', 'title_ar' => 'الفقه وأصوله', 'codes' => ['JS-011']],
                 ['title_en' => 'PROPHETIC TRADITIONS', 'title_ar' => 'السنة', 'codes' => ['PT-013']],
-                ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-017','QS-015','QS-016',]],
+                ['title_en' => 'QURAN & ITS SCIENCES', 'title_ar' => 'القرآن وعلومه', 'codes' => ['QS-017', 'QS-015', 'QS-016',]],
             ];
 
             $subjects = MasterData::where('md_master_code_id', config('constants.options.IdaadPapers'))
@@ -214,26 +214,26 @@ class PasslipAndCertificatesController extends Controller
         ));
     }
 
-public function uploadStudentPhoto(Request $request)
-{
-    $request->validate([
-        'photo' => 'required|image|mimes:jpg,jpeg,png',
-        'studentId' => 'required'
-    ]);
+    public function uploadStudentPhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpg,jpeg,png',
+            'studentId' => 'required'
+        ]);
 
-    $studentId = $request->studentId;
-    $file = $request->file('photo');
-    $path = public_path('assets/student_photos');
+        $studentId = $request->studentId;
+        $file = $request->file('photo');
+        $path = public_path('assets/student_photos');
 
-    if (!file_exists($path)) {
-        mkdir($path, 0755, true);
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+
+        $file->move($path, $studentId . '.jpg');
+
+        return response()->json(['success' => true])
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
-
-    $file->move($path, $studentId . '.jpg');
-
-    return response()->json(['success' => true])
-        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        ->header('Pragma', 'no-cache')
-        ->header('Expires', '0');
-}
 }

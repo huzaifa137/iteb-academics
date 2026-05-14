@@ -26,6 +26,15 @@ class Helper extends Controller
         return $schoolName;
     }
 
+    public static function schoolNumber($school_id)
+    {
+        $schoolNumber = DB::table('houses')
+            ->where('ID', $school_id)
+            ->value('Number');
+
+        return $schoolNumber;
+    }
+
     public static function schoolNameByID($school_id)
     {
         $schoolName = DB::table('houses')
@@ -528,7 +537,7 @@ class Helper extends Controller
 
     public static function getStudentMarksBySubject($studentId, $subjectCode, $category, $year, $schoolNumber)
     {
-       
+
         $categoryCode = explode('-', $category)[0];
 
         $masterCodeId = $categoryCode === 'ID' ? 21 : 20;
@@ -537,9 +546,9 @@ class Helper extends Controller
             ->where('md_code', $subjectCode)
             ->where('md_master_code_id', $masterCodeId)
             ->value('md_id');
-        
+
         if (!$subjectId) {
-            return null; 
+            return null;
         }
         // dd($subjectId);
         // Fetch mark from marks table
@@ -600,7 +609,7 @@ class Helper extends Controller
 
         // Calculate average (percentage)
         $average = $subjectCount > 0 ? $total / $subjectCount : 0;
-   
+
         // Fetch grade from DB based on average (Points type)
         $grade = DB::table('grading')
             ->where('Level', 'A') // or 'O' depending on your context
@@ -624,6 +633,22 @@ class Helper extends Controller
             ->value('Comment');
     }
 
+    public static function toArabicDate($date, $format = 'Y-m-d')
+    {
+        if (empty($date)) {
+            return null;
+        }
+
+        // Parse the date
+        $formatted = Carbon::parse($date)->format($format);
+
+        // Convert English digits to Arabic digits
+        $western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+        return str_replace($western, $arabic, $formatted);
+    }
+
     public static function toArabicNumberPackge($number)
     {
         $formatter = new NumberFormatter('ar', NumberFormatter::DECIMAL);
@@ -638,21 +663,115 @@ class Helper extends Controller
         return str_replace($western, $arabic, $value);
     }
 
-public static function toArabicNumberDateReversed($date)
-{
-    // Split the date assuming format d/m/Y
-    $parts = explode('/', $date);
-    if(count($parts) !== 3) return $date; // fallback
+    public static function toArabicNumberDateReversed($date)
+    {
+        // Split the date assuming format d/m/Y
+        $parts = explode('/', $date);
+        if (count($parts) !== 3)
+            return $date; // fallback
 
-    // Reverse to Y/m/d
-    $reversed = $parts[2] . '/' . $parts[1] . '/' . $parts[0] . 'م';
+        // Reverse to Y/m/d
+        $reversed = $parts[2] . '/' . $parts[1] . '/' . $parts[0] . 'م';
 
-    // Map Western digits to Arabic-Indic digits
-    $western = ['0','1','2','3','4','5','6','7','8','9'];
-    $arabic  = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+        // Map Western digits to Arabic-Indic digits
+        $western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 
-    return str_replace($western, $arabic, $reversed);
-}
+        return str_replace($western, $arabic, $reversed);
+    }
+
+    public static function toArabicLettersCountriesAndWordsPackage($text)
+    {
+        $dictionary = [
+
+            // Countries
+            'UGANDA' => 'أوغندا',
+            'KENYA' => 'كينيا',
+            'TANZANIA' => 'تنزانيا',
+            'RWANDA' => 'رواندا',
+            'BURUNDI' => 'بوروندي',
+            'SOUTH SUDAN' => 'جنوب السودان',
+
+            // Cities
+            'KAMPALA' => 'كمبالا',
+            'JINJA' => 'جينجا',
+            'MASAKA' => 'مساكا',
+            'MBALE' => 'مبالي',
+
+            // Nationalities
+            'UGANDAN' => 'أوغندي',
+            'KENYAN' => 'كيني',
+
+            // Gender
+            'MALE' => 'ذكر',
+            'FEMALE' => 'أنثى',
+        ];
+
+        $upper = strtoupper(trim($text));
+
+        // Exact dictionary match
+        if (isset($dictionary[$upper])) {
+            return $dictionary[$upper];
+        }
+
+        // Fallback transliteration
+        $special = [
+            'TH' => 'ث',
+            'SH' => 'ش',
+            'CH' => 'تش',
+            'PH' => 'ف',
+            'KH' => 'خ',
+            'GH' => 'غ'
+        ];
+
+        $text = str_ireplace(
+            array_keys($special),
+            array_values($special),
+            strtoupper($text)
+        );
+
+        $map = [
+            'A' => 'ا',
+            'B' => 'ب',
+            'C' => 'ك',
+            'D' => 'د',
+            'E' => 'ي',
+            'F' => 'ف',
+            'G' => 'ج',
+            'H' => 'ه',
+            'I' => 'ي',
+            'J' => 'ج',
+            'K' => 'ك',
+            'L' => 'ل',
+            'M' => 'م',
+            'N' => 'ن',
+            'O' => 'و',
+            'P' => 'ب',
+            'Q' => 'ق',
+            'R' => 'ر',
+            'S' => 'س',
+            'T' => 'ت',
+            'U' => 'و',
+            'V' => 'ف',
+            'W' => 'و',
+            'X' => 'كس',
+            'Y' => 'ي',
+            'Z' => 'ز',
+
+            '0' => '٠',
+            '1' => '١',
+            '2' => '٢',
+            '3' => '٣',
+            '4' => '٤',
+            '5' => '٥',
+            '6' => '٦',
+            '7' => '٧',
+            '8' => '٨',
+            '9' => '٩',
+        ];
+
+        return strtr($text, $map);
+    }
 
     public static function toArabicLettersPackage($text)
     {
@@ -735,9 +854,9 @@ public static function toArabicNumberDateReversed($date)
 
         // Get subjects for this category
         $subjectIds = self::getSubjectIdsForCategory($category);
-       
+
         $totalPossibleMarks = count($subjectIds) * 100;
- 
+
         // Array to store each student's total marks and percentage
         $studentsWithPercentage = [];
 
@@ -782,5 +901,10 @@ public static function toArabicNumberDateReversed($date)
         $words = explode(' ', $text); // split by space
         $spacer = str_repeat('&nbsp;', $spaces); // repeated non-breaking spaces
         return implode($spacer, $words);
+    }
+
+    public static function academicYears()
+    {
+        return AcademicYear::orderBy('year_en', 'desc')->get();
     }
 }

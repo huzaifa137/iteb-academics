@@ -43,7 +43,7 @@ use App\Http\Controllers\Helper;
                                 <!-- Year -->
                                 <div class="col-12 col-md-2">
                                     <label for="year" class="form-label">Filter by Year:</label>
-                                    <select name="year" id="year" class="form-control select2">
+                                    <!-- <select name="" id="year" class="form-control select2">
                                         <option value="">All Years</option>
                                         @foreach ($years as $year)
                                             <option value="{{ $year }}"
@@ -51,7 +51,17 @@ use App\Http\Controllers\Helper;
                                                 {{ $year }}
                                             </option>
                                         @endforeach
+                                    </select> -->
+
+                                     <select name="year" id="year" class="form-control select2">
+                                        <option value="">-- Select Year --</option>
+                                        @foreach ($years as $year)
+                                            <option value="{{ $year->year_en }}" {{ request('year') == $year->year_en ? 'selected' : '' }}>
+                                                {{ $year->year_en }} - {{ $year->year_ar }}
+                                            </option>
+                                        @endforeach
                                     </select>
+
                                 </div>
 
                                 <!-- Type -->

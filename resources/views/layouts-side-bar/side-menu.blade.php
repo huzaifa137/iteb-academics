@@ -1,5 +1,4 @@
 <div class="app-sidebar app-sidebar2">
-    {{-- <div class="app-sidebar__logo" style="height: 155px; padding: 50px 10px;"> --}}
     <div class="app-sidebar__logo">
         <a class="header-brand" href="{{ url('/student/dashboard') }}">
             <img src="{{ URL::asset('assets/images/brand/uplogolight.png') }}" alt="Covido logo"
@@ -40,6 +39,12 @@ use App\Helpers\PermissionHelper;
             </li>
 
             <li class="slide">
+                <a class="side-menu__item" href="{{ route('academic.years') }}">
+                    <i class="fas fa-clock fa-2x mr-3"></i> Academic Years
+                </a>
+            </li>
+
+            <li class="slide">
                 <a class="side-menu__item" href="{{ url('/enter-marks') }}">
                     <i class="fas fa-balance-scale-right fa-2x mr-3"></i>
                     Grading & Marks
@@ -59,6 +64,21 @@ use App\Helpers\PermissionHelper;
                     Passlips & Certificates
                 </a>
             </li>
+
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('admin.student.approvals') }}">
+                    <i class="fas fa-user-check fa-2x mr-3"></i>
+                    Student Approvals
+                    @php
+                        $pendingApprovalCount = \App\Models\StudentRegistration::where('status', 'Pending Admin Approval')->count();
+                    @endphp
+                    @if($pendingApprovalCount > 0)
+                        <span class="badge badge-danger ml-2" style="border-radius:12px; font-size:11px; padding:3px 8px;">
+                            {{ $pendingApprovalCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
         @endif
 
         @if (!Session('LoggedStudent'))
@@ -66,6 +86,14 @@ use App\Helpers\PermissionHelper;
                 <a class="side-menu__item" href="{{ url('/school/dashboard') }}">
                     <i class="fa fa-home fa-2x mr-3"></i>
                     Dashboard
+                </a>
+            </li>
+
+            <!-- Add this new link -->
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('school.register.student') }}">
+                    <i class="fas fa-user-plus fa-2x mr-3"></i>
+                    Register Student
                 </a>
             </li>
         @endif
@@ -100,14 +128,36 @@ use App\Helpers\PermissionHelper;
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#helpSupportToggle').on('click', function(e) {
+    $(document).ready(function () {
+        // Check localStorage for sidebar state and apply it
+        const sidebarState = localStorage.getItem('sidebar-state');
+
+        if (sidebarState === 'closed') {
+            $('body').addClass('sidenav-toggled');
+        } else {
+            $('body').removeClass('sidenav-toggled');
+        }
+
+        // Watch for sidebar toggle clicks
+        $(document).on('click', '[data-toggle="sidebar"]', function () {
+            setTimeout(function () {
+                if ($('body').hasClass('sidenav-toggled')) {
+                    localStorage.setItem('sidebar-state', 'closed');
+                } else {
+                    localStorage.setItem('sidebar-state', 'open');
+                }
+            }, 100);
+        });
+
+        // Help & Support toggle
+        $('#helpSupportToggle').on('click', function (e) {
             e.preventDefault();
             $(this).parent('.slide').toggleClass('active');
         });
     });
 
-    document.getElementById('logoutMenu').addEventListener('click', function(event) {
+    // Logout handler
+    document.getElementById('logoutMenu').addEventListener('click', function (event) {
         event.preventDefault();
 
         Swal.fire({

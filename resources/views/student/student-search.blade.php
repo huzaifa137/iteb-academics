@@ -29,7 +29,7 @@ use App\Http\Controllers\Helper;
                                 <select id="search_criteria" class="form-control">
                                     <option value="" selected disabled>Select...</option>
                                     <option value="admission_number">Admission Number</option>
-                                    {{-- <option value="name">Name & Class</option> --}}
+                                    <option value="name">Student Full Name</option>
                                     {{-- <option value="phone">Phone Number</option> --}}
                                     {{-- <option value="student_id">Student ID</option> --}}
                                 </select>
@@ -40,7 +40,8 @@ use App\Http\Controllers\Helper;
                             </div>
 
                             <div class="mt-3">
-                                <button type="submit" class="btn d-none text-white" id="searchBtn" style="background-color:#287c44;">
+                                <button type="submit" class="btn d-none text-white" id="searchBtn"
+                                    style="background-color:#287c44;">
                                     <i class="fas fa-search"></i> Search
                                 </button>
                             </div>
@@ -71,57 +72,46 @@ use App\Http\Controllers\Helper;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             const searchInputs = {
                 admission_number: `
-                            <div class="form-group">
-                                <label for="admission_number">Admission Number</label>
-                                <input type="text" name="admission_number" class="form-control" placeholder="Enter admission number">
-                            </div>
-                        `,
+                                    <div class="form-group">
+                                        <label for="admission_number">Admission Number</label>
+                                        <input type="text" name="admission_number" class="form-control" placeholder="Enter admission number">
+                                    </div>
+                                `,
                 name: `
-                            <div class="form-group">
-                                <label for="firstname">First Name</label>
-                                <input type="text" name="firstname" class="form-control" placeholder="Enter first name">
-                            </div>
-                            <div class="form-group">
-                                <label for="lastname">Last Name</label>
-                                <input type="text" name="lastname" class="form-control" placeholder="Enter last name">
-                            </div>
-                            <div class="form-group">
-                                <label for="senior">Class</label>
-                                <select class="form-control select2" name="senior">
-                                    <option value="">-- Select --</option>
-                                    @foreach ($classRecord as $class)
-                                        <option value="{{ $class->md_id }}">
-                                            {{ $class->md_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        `,
+                                    <div class="form-group">
+                                        <label for="firstname">First Name</label>
+                                        <input type="text" name="firstname" class="form-control" placeholder="Enter first name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastname">Last Name</label>
+                                        <input type="text" name="lastname" class="form-control" placeholder="Enter last name">
+                                    </div>
+                                `,
                 phone: `
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="text" name="phone" class="form-control" placeholder="Enter phone number">
-                            </div>
-                        `,
+                                    <div class="form-group">
+                                        <label for="phone">Phone Number</label>
+                                        <input type="text" name="phone" class="form-control" placeholder="Enter phone number">
+                                    </div>
+                                `,
                 student_id: `
-                            <div class="form-group">
-                                <label for="student_id">Student ID</label>
-                                <input type="number" name="student_id" class="form-control" placeholder="Enter student ID">
-                            </div>
-                        `
+                                    <div class="form-group">
+                                        <label for="student_id">Student ID</label>
+                                        <input type="number" name="student_id" class="form-control" placeholder="Enter student ID">
+                                    </div>
+                                `
             };
 
-            $('#search_criteria').on('change', function() {
+            $('#search_criteria').on('change', function () {
                 const selected = $(this).val();
                 $('#search_inputs').html(searchInputs[selected] || '');
                 $('#searchBtn').removeClass('d-none');
                 $('#resultsCard').addClass('d-none');
             });
 
-            $('#studentSearchForm').on('submit', function(e) {
+            $('#studentSearchForm').on('submit', function (e) {
                 e.preventDefault();
 
                 const criteria = $('#search_criteria').val();
@@ -139,17 +129,17 @@ use App\Http\Controllers\Helper;
                     url: '{{ route('students.search.ajax') }}',
                     method: 'GET',
                     data: formData + '&criteria=' + criteria,
-                    success: function(response) {
+                    success: function (response) {
                         $('#resultsCard').removeClass('d-none');
                         $('#searchResults').html(response.html);
                     },
                     // error: function (xhr) {
                     //     Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong.', 'error');
                     // },
-                    error: function(data) {
+                    error: function (data) {
                         $('body').html(data.responseText);
                     },
-                    complete: function() {
+                    complete: function () {
                         $('#searchBtn').prop('disabled', false).html(
                             '<i class="fas fa-search"></i> Search');
                     }

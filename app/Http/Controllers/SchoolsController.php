@@ -8,12 +8,15 @@ use App\Models\ClassAllocation;
 use App\Models\StudentBasic;
 use App\Http\Controllers\Helper;
 use App\Models\Grading;
+use App\Models\AcademicYear;
 use App\Models\MasterData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\SchoolPassword;
-
+use App\Models\StudentRegistration;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\View;
+use App\Models\House;
+use DB;
+
 
 class SchoolsController extends Controller
 {
@@ -761,5 +764,569 @@ class SchoolsController extends Controller
         }
     }
 
+    // Method for school to view registration form
+    public function schoolStudentRegistration()
+    {
+        $schoolId = session('LoggedSchool');
 
+        if (!$schoolId) {
+            return redirect()->route('school.login')->with('error', 'Please login first');
+        }
+
+        $school = House::find($schoolId);
+
+        if (!$school) {
+            return redirect()->back()->with('error', 'School not found');
+        }
+
+        // Get years from academic_years table using the Helper function
+        $years = Helper::academicYears();
+
+        // Get the active year or latest year as default
+        $activeYear = AcademicYear::where('status', 'Active')->first();
+        $currentYear = $activeYear ? $activeYear->year_en : date('Y');
+
+        // Generate the next student ID for this school
+        $lastNumber = DB::table('students_basic')
+            ->where('Student_ID', 'LIKE', $school->Number . '-%-%-' . $currentYear)
+            ->selectRaw("
+            MAX(
+                CAST(
+                    SUBSTRING_INDEX(
+                        SUBSTRING_INDEX(Student_ID, '-', 4),
+                        '-', 
+                        -1
+                    ) AS UNSIGNED
+                )
+            ) as max_number
+        ")
+            ->value('max_number');
+
+        $newNumber = str_pad(($lastNumber ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+
+        return view('school.register-student', compact('school', 'years', 'currentYear', 'newNumber'));
+    }
+
+    // Method to generate student ID for school registration
+    public function generateSchoolStudentID(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+        $category = $request->category;
+        $year = $request->year;
+
+        if (!$schoolId || !$category || !$year) {
+            return response()->json(['student_id' => ''], 200);
+        }
+
+        $school = DB::table('houses')->where('ID', $schoolId)->first();
+        if (!$school) {
+            return response()->json(['student_id' => ''], 200);
+        }
+
+        $schoolNumber = $school->Number;
+
+        // Check both main table and registrations table for last number
+        $lastMainNumber = DB::table('students_basic')
+            ->where('Student_ID', 'LIKE', $schoolNumber . '-' . $category . '-%-' . $year)
+            ->selectRaw("
+            MAX(
+                CAST(
+                    SUBSTRING_INDEX(
+                        SUBSTRING_INDEX(Student_ID, '-', 4),
+                        '-', 
+                        -1
+                    ) AS UNSIGNED
+                )
+            ) as max_number
+        ")
+            ->value('max_number');
+
+        $lastRegNumber = DB::table('student_registrations')
+            ->where('student_id', 'LIKE', $schoolNumber . '-' . $category . '-%-' . $year)
+            ->where('admission_year', $year)
+            ->selectRaw("
+            MAX(
+                CAST(
+                    SUBSTRING_INDEX(
+                        SUBSTRING_INDEX(student_id, '-', 4),
+                        '-', 
+                        -1
+                    ) AS UNSIGNED
+                )
+            ) as max_number
+        ")
+            ->value('max_number');
+
+        $lastNumber = max($lastMainNumber ?? 0, $lastRegNumber ?? 0);
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        $newStudentID = $schoolNumber . '-' . $category . '-' . $newNumber . '-' . $year;
+
+        return response()->json(['student_id' => $newStudentID]);
+    }
+
+    // Method to store school registration
+    public function storeSchoolRegistration(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'category' => 'required|string|max:10',
+            'admission_year' => 'required|integer',
+            'student_id' => 'required|string|max:25|unique:student_registrations,student_id|unique:students_basic,Student_ID',
+            'student_name' => 'required|string|max:100',
+            'student_name_ar' => 'nullable|string|max:45',
+            'date_of_birth' => 'nullable|date',
+            'student_sex' => 'required|string|in:Male,Female',
+            'student_nationality' => 'nullable|string|max:45',
+            'birth_place' => 'nullable|string|max:100',
+            'birth_place_ar' => 'nullable|string|max:100',
+            'class' => 'nullable|string|max:45',
+            'section' => 'nullable|string|max:45',
+            'district' => 'nullable|string|max:45',
+            'district_ar' => 'nullable|string|max:45',
+        ]);
+
+        $school = House::find($schoolId);
+
+        try {
+            $registration = StudentRegistration::create([
+                'school_id' => $schoolId,
+                'category' => $validated['category'],
+                'admission_year' => $validated['admission_year'],
+                'student_id' => $validated['student_id'],
+                'student_name' => $validated['student_name'],
+                'student_name_ar' => $validated['student_name_ar'] ?? null,
+                'date_of_birth' => $validated['date_of_birth'] ?? null,
+                'student_sex' => $validated['student_sex'],
+                'student_nationality' => $validated['student_nationality'] ?? null,
+                'birth_place' => $validated['birth_place'] ?? null,
+                'birth_place_ar' => $validated['birth_place_ar'] ?? null,
+                'class' => $validated['class'] ?? null,
+                'section' => $validated['section'] ?? null,
+                'house' => $school ? $school->House : null,
+                'district' => $validated['district'] ?? null,
+                'district_ar' => $validated['district_ar'] ?? null,
+                'entry_date' => now(),
+                'status' => 'Pending Photo Submission',
+            ]);
+
+            return response()->json([
+                'message' => 'Student registration submitted successfully! Awaiting admin approval.',
+                'registration_id' => $registration->id,
+                'student_id' => $registration->student_id
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Method to get recent registrations for the logged-in school
+    public function getRecentRegistrations()
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['registrations' => []], 200);
+        }
+
+        $registrations = StudentRegistration::where('school_id', $schoolId)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json(['registrations' => $registrations]);
+    }
+
+    public function deleteRegistration(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required'
+        ]);
+
+        $deleted = StudentRegistration::where('student_id', $request->student_id)->first();
+
+        if (!$deleted) {
+            return response()->json([
+                'message' => 'Student not found'
+            ], 404);
+        }
+
+        $deleted->delete();
+
+        return response()->json([
+            'message' => 'Student deleted successfully',
+            'student_id' => $request->student_id
+        ]);
+    }
+
+    public function getRegistration(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $registration = StudentRegistration::where('id', $request->id)
+            ->where('student_id', $request->student_id)
+            ->where('school_id', $schoolId)
+            ->first();
+
+        if (!$registration) {
+            return response()->json(['message' => 'Registration not found'], 404);
+        }
+
+        return response()->json(['registration' => $registration]);
+    }
+
+    public function updateRegistration(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'id' => 'required|integer',
+            'student_id' => 'required|string|max:25',
+            'category' => 'required|string|max:10',
+            'admission_year' => 'required|integer',
+            'student_name' => 'required|string|max:100',
+            'student_name_ar' => 'nullable|string|max:45',
+            'date_of_birth' => 'nullable|date',
+            'student_sex' => 'required|string|in:Male,Female',
+            'student_nationality' => 'nullable|string|max:45',
+            'birth_place' => 'nullable|string|max:100',
+            'birth_place_ar' => 'nullable|string|max:100',
+            'class' => 'nullable|string|max:45',
+            'section' => 'nullable|string|max:45',
+            'district' => 'nullable|string|max:45',
+            'district_ar' => 'nullable|string|max:45',
+        ]);
+
+        try {
+            $registration = StudentRegistration::where('id', $validated['id'])
+                ->where('school_id', $schoolId)
+                ->first();
+
+            if (!$registration) {
+                return response()->json(['message' => 'Registration not found'], 404);
+            }
+
+            $registration->update([
+                'category' => $validated['category'],
+                'admission_year' => $validated['admission_year'],
+                'student_name' => $validated['student_name'],
+                'student_name_ar' => $validated['student_name_ar'] ?? null,
+                'date_of_birth' => $validated['date_of_birth'] ?? null,
+                'student_sex' => $validated['student_sex'],
+                'student_nationality' => $validated['student_nationality'] ?? null,
+                'birth_place' => $validated['birth_place'] ?? null,
+                'birth_place_ar' => $validated['birth_place_ar'] ?? null,
+                'class' => $validated['class'] ?? null,
+                'section' => $validated['section'] ?? null,
+                'district' => $validated['district'] ?? null,
+                'district_ar' => $validated['district_ar'] ?? null,
+            ]);
+
+            return response()->json([
+                'message' => 'Student registration updated successfully!'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function uploadRegistrationPhoto(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'student_id' => 'required|string',
+            'photo' => 'required|image|mimes:jpeg,jpg,png|max:2048',
+        ]);
+
+        $registration = StudentRegistration::where('student_id', $request->student_id)
+            ->where('school_id', $schoolId)
+            ->first();
+
+        if (!$registration) {
+            return response()->json(['message' => 'Registration not found'], 404);
+        }
+
+        $path = public_path('assets/student_photos');
+
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+
+        $oldImage = $path . '/' . $request->student_id . '.jpg';
+        if (\Illuminate\Support\Facades\File::exists($oldImage)) {
+            \Illuminate\Support\Facades\File::delete($oldImage);
+        }
+
+        $request->file('photo')->move($path, $request->student_id . '.jpg');
+
+        // Update status since photo is now available
+        $registration->status = 'Attached Image, Pending Submission';
+        $registration->save();
+
+        return response()->json([
+            'message' => 'Photo uploaded successfully',
+            'status' => $registration->status,
+        ]);
+    }
+
+    public function removeRegistrationPhoto(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $request->validate(['student_id' => 'required|string']);
+
+        $registration = StudentRegistration::where('student_id', $request->student_id)
+            ->where('school_id', $schoolId)
+            ->first();
+
+        if (!$registration) {
+            return response()->json(['message' => 'Registration not found'], 404);
+        }
+
+        $image = public_path('assets/student_photos/' . $request->student_id . '.jpg');
+        if (\Illuminate\Support\Facades\File::exists($image)) {
+            \Illuminate\Support\Facades\File::delete($image);
+        }
+
+        $registration->status = 'Pending Photo Submission';
+        $registration->save();
+
+        return response()->json(['message' => 'Photo removed successfully']);
+    }
+
+    // Add these methods to your SchoolsController.php file, before the closing brace of the class
+
+    public function step3Students(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['students' => [], 'debug' => 'no session'], 200);
+        }
+
+        $year = (int) $request->year;
+        $category = trim($request->category);
+
+        $students = StudentRegistration::where('school_id', (string) $schoolId)
+            ->where('status', 'Attached Image, Pending Submission')
+            ->where('admission_year', $year)
+            ->where('category', $category)
+            ->get();
+
+        return response()->json([
+            'students' => $students,
+            'debug' => [
+                'school_id' => (string) $schoolId,
+                'year' => $year,
+                'category' => $category,
+                'count' => $students->count(),
+            ]
+        ]);
+    }
+
+    public function step3Submit(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $ids = json_decode($request->ids, true);
+
+        if (empty($ids)) {
+            return response()->json(['message' => 'No students selected.'], 422);
+        }
+
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+
+            $fileName = 'submission_' . time() . '.' . $file->extension();
+
+            $file->move(public_path('submission_docs'), $fileName);
+        }
+
+        StudentRegistration::whereIn('id', $ids)
+            ->where('school_id', $schoolId)
+            ->where('status', 'Attached Image, Pending Submission')
+            ->update(['status' => 'Pending Admin Approval']);
+
+        return response()->json(['message' => count($ids) . ' student(s) submitted for admin approval successfully.']);
+    }
+
+    public function adminStudentApprovals()
+    {
+        // Get all pending approval registrations
+        $registrations = StudentRegistration::where('status', 'Pending Admin Approval')
+            ->get();
+
+        // Group by school prefix (e.g. IT-001, IT-002)
+        $grouped = $registrations->groupBy(function ($reg) {
+            $parts = explode('-', $reg->student_id);
+            return $parts[0] . '-' . $parts[1]; // e.g. IT-001
+        });
+
+        // Build school cards data
+        $schools = [];
+        foreach ($grouped as $prefix => $students) {
+
+            $schoolId = $students->first()->school_id;
+
+            $schoolId = $students->first()->school_id;
+            $admissionYear = $students->first()->admission_year;
+
+            $approvedCount = DB::table('student_registrations')
+                ->where('school_id', $schoolId)
+                ->where('admission_year', $admissionYear)
+                ->where('status', 'Approved')
+                ->count();
+
+            $schools[] = [
+                'prefix' => $prefix,
+                'school_id' => $schoolId,
+                'school_name' => Helper::schoolNameByID($schoolId) ?? $prefix,
+                'pending_count' => $students->count(),
+                'approved_count' => $approvedCount,
+                'latest_submission' => $students->max('updated_at'),
+            ];
+        }
+
+        return view('school.admin-approvals', compact('schools'));
+    }
+
+    public function adminSchoolApprovalDetail($schoolPrefix)
+    {
+        $registrations = StudentRegistration::where('status', 'Pending Admin Approval')
+            ->where('student_id', 'LIKE', $schoolPrefix . '-%')
+            ->orderBy('student_id')
+            ->get();
+
+        $schoolId = $registrations->first()->school_id ?? null;
+        $schoolName = $schoolId ? (Helper::schoolNameByID($schoolId) ?? $schoolPrefix) : $schoolPrefix;
+
+        return view('school.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName'));
+    }
+
+    public function adminUpdateApprovalStatus(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|string',
+            'action' => 'required|in:Approved,Rejected',
+        ]);
+
+        $ids = json_decode($request->ids, true);
+        $action = $request->action;
+
+        if (empty($ids)) {
+            return response()->json(['message' => 'No students selected.'], 422);
+        }
+
+        $registrations = StudentRegistration::whereIn('id', $ids)
+            ->where('status', 'Pending Admin Approval')
+            ->get();
+
+        if ($registrations->isEmpty()) {
+            return response()->json(['message' => 'No matching records found.'], 404);
+        }
+
+        $approved = 0;
+        $rejected = 0;
+        $errors = [];
+
+        foreach ($registrations as $reg) {
+            if ($action === 'Approved') {
+                // Check not already in students_basic
+                $exists = DB::table('students_basic')
+                    ->where('Student_ID', $reg->student_id)
+                    ->exists();
+
+                if ($exists) {
+                    $errors[] = $reg->student_id . ' already exists in students_basic.';
+                    continue;
+                }
+
+                $category = $reg->category;
+                $Class = $category === 'ID' ? 'Senior Four' : 'Senior Six';
+                $Class_AR = $category === 'ID' ? 'الإعدادية' : 'الثانوي';
+
+                DB::beginTransaction();
+                try {
+                    $student = StudentBasic::create([
+                        'Student_ID' => $reg->student_id,
+                        'Student_Name' => $reg->student_name,
+                        'Student_Name_AR' => $reg->student_name_ar,
+                        'Date_of_Birth' => $reg->date_of_birth,
+                        'StudentSex' => $reg->student_sex,
+                        'StudentsNationality' => $reg->student_nationality,
+                        'House' => $reg->house ?? Helper::schoolNameByID($reg->school_id),
+                        'admnyr' => $reg->admission_year,
+                        'EntryDate' => now(),
+                        'Section' => $reg->section ?? 'Day',
+                        'Class' => $Class,
+                        'Class_AR' => $Class_AR,
+                        'state' => 'Active',
+                        'StudentsCitizenship' => Helper::toArabicLettersCountriesAndWordsPackage($reg->student_nationality),
+                        'Date_of_Birth_AR' => Helper::toArabicDate($reg->date_of_birth),
+                    ]);
+
+                    ClassAllocation::create([
+                        'Student_ID' => $student->Student_ID,
+                        'Class_ID' => 001,
+                    ]);
+
+                    $reg->update(['status' => 'Approved']);
+
+                    DB::commit();
+                    $approved++;
+
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    $errors[] = $reg->student_id . ': ' . $e->getMessage();
+                }
+
+            } else {
+                // Send back to previous status
+                $reg->update(['status' => 'Attached Image, Pending Submission']);
+                $rejected++;
+            }
+        }
+
+        $message = '';
+        if ($approved > 0)
+            $message .= "{$approved} student(s) approved and added to the system. ";
+        if ($rejected > 0)
+            $message .= "{$rejected} student(s) sent back for resubmission. ";
+        if (!empty($errors))
+            $message .= 'Errors: ' . implode('; ', $errors);
+
+        return response()->json(['message' => trim($message)]);
+    }
 }

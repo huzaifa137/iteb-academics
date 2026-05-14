@@ -12,6 +12,7 @@ use App\Http\Controllers\SchoolsController;
 use App\Http\Controllers\GradingController;
 use App\Http\Controllers\PasslipAndCertificatesController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AcademicYearController;
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -317,7 +318,6 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
 
                 Route::get('/add-new-student', 'addNewStudent')->name('students.add.new.student');
 
-                Route::put('/update/{id}', 'updateStudentInformation');
                 Route::post('/students/store', 'storeStudent')->name('students.store');
 
                 Route::get('/transfer-form', 'moveStudentForm')->name('students.transfer');
@@ -329,6 +329,7 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
 
                 Route::get('students/generate-id', 'generateStudentID')->name('students.generate-id');
 
+                Route::post('/update/{id}', 'updateStudentInformation')->name('students.update.info');
             });
         });
 });
@@ -465,9 +466,44 @@ Route::controller(SchoolsController::class)->group(function () {
             Route::get('/grading-summary', 'schoolGradingSummary')->name('school.grading.summary');
             Route::post('/process-grading', 'processGrading')->name('school.process.grading');
             Route::post('iteb/grading/results/pdf', 'generateResultsPDF')->name('iteb.grading.results.pdf');
+
+            Route::get('/register-student', 'schoolStudentRegistration')->name('school.register.student');
+            Route::post('/store-registration', 'storeSchoolRegistration')->name('school.store.registration');
+            Route::get('/generate-student-id', 'generateSchoolStudentID')->name('school.generate.student.id');
+            Route::get('/recent-registrations', 'getRecentRegistrations')->name('school.recent.registrations');
+            Route::post('/school/delete-registration', 'deleteRegistration')->name('school.delete.registration');
+
+            Route::get('/school/get-registration', 'getRegistration')->name('school.get.registration');
+            Route::post('/school/update-registration', 'updateRegistration')->name('school.update.registration');
+
+            Route::post('/school/registration/upload-photo', 'uploadRegistrationPhoto')->name('school.upload.registration.photo');
+            Route::post('/school/registration/remove-photo', 'removeRegistrationPhoto')->name('school.remove.registration.photo');
+
+            Route::get('/school/step3/students', 'step3Students')->name('school.step3.students');
+            Route::post('/school/step3/submit', 'step3Submit')->name('school.step3.submit');
+
         });
     });
 
+
+    Route::group(['middleware' => ['StudentAuth']], function () {
+        Route::group(['prefix' => '/school'], function () {
+
+            Route::get('/admin/student-approvals', 'adminStudentApprovals')->name('admin.student.approvals');
+            Route::get('/admin/student-approvals/{schoolPrefix}', 'adminSchoolApprovalDetail')->name('admin.student.approvals.detail');
+            Route::post('/admin/student-approvals/update-status', 'adminUpdateApprovalStatus')->name('admin.update.approval.status');
+
+        });
+    });
     Route::post('/school-passwords/export-all-pdf', 'exportAllPasswordsPDF')->name('school.passwords.export-all-pdf');
+});
+
+Route::controller(AcademicYearController::class)->group(function () {
+
+    Route::get('/academic-years', 'index')->name('academic.years');
+    Route::post('/academic-years/store', 'store')->name('academic.years.store');
+    Route::get('/academic-years/edit/{id}', 'edit')->name('academic.years.edit');
+    Route::post('/academic-years/update/{id}', 'update')->name('academic.years.update');
+    Route::delete('/academic-years/delete/{id}', 'destroy')->name('academic.years.delete');
 
 });

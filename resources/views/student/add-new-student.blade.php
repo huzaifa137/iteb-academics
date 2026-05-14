@@ -55,12 +55,9 @@ use App\Http\Controllers\Helper;
                                 <div class="form-group">
                                     <label>Admission Year <span class="text-danger">*</span></label>
                                     <select name="Admission_Year" id="year" class="form-control select2" required>
-                                        <option value="">All Years</option>
+                                        <option value="">-- Select Year --</option>
                                         @foreach ($years as $year)
-                                            <option value="{{ $year }}"
-                                                {{ request('year') == $year ? 'selected' : '' }}>
-                                                {{ $year }}
-                                            </option>
+                                            <option value="{{ $year->year_en}}">{{ $year->year_en }} - {{ $year->year_ar }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -140,7 +137,7 @@ use App\Http\Controllers\Helper;
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
             function submitStudentForm($form, $submitBtn) {
 
@@ -166,15 +163,15 @@ use App\Http\Controllers\Helper;
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    success: function(response) {
+                    success: function (response) {
                         Swal.fire('Success!', response.message, 'success');
                         $form[0].reset();
                         $('.select2').val('').trigger('change');
                     },
-                    error: function(data) {
+                    error: function (data) {
                         $('body').html(data.responseText);
                     },
-                    complete: function() {
+                    complete: function () {
                         $submitBtn.prop('disabled', false).html(originalHtml);
                     }
                 });
@@ -208,7 +205,7 @@ use App\Http\Controllers\Helper;
                 updateStudentID);
 
             // Form submission with validation and SweetAlert confirmation
-            $('#createStudentForm').on('submit', function(e) {
+            $('#createStudentForm').on('submit', function (e) {
                 e.preventDefault();
 
                 let $form = $(this);
