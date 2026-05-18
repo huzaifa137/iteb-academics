@@ -33,13 +33,25 @@ class StudentRegistration extends Model
         'admin_remarks',
     ];
 
-protected $casts = [
-    'date_of_birth' => 'date:Y-m-d',
-    'entry_date'    => 'date:Y-m-d',
-];
+    protected $casts = [
+        'date_of_birth' => 'date:Y-m-d',
+        'entry_date' => 'date:Y-m-d',
+    ];
 
     public function school()
     {
         return $this->belongsTo(House::class, 'school_id', 'ID');
+    }
+
+    public function submissionDocument()
+    {
+        return $this->belongsTo(SubmissionDocument::class, 'submission_document_id');
+    }
+    /**
+     * Check if this registration has a submission document.
+     */
+    public function hasSubmissionDocument()
+    {
+        return $this->submission_document_id !== null;
     }
 }

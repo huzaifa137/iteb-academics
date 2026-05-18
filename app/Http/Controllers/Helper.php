@@ -26,6 +26,24 @@ class Helper extends Controller
         return $schoolName;
     }
 
+    public static function schoolRegistrationCode($school_id)
+    {
+        $registrationCode = DB::table('schools')
+            ->where('id', $school_id)
+            ->value('registration_code');
+
+        return $registrationCode;
+    }
+
+    public static function getschoolIDbyNumber($Number)
+    {
+        $registrationCode = DB::table('houses')
+            ->where('Number', $Number)
+            ->value('ID');
+
+        return $registrationCode;
+    }
+
     public static function schoolNumber($school_id)
     {
         $schoolNumber = DB::table('houses')

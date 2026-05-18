@@ -6,6 +6,7 @@ use App\Models\Mark;
 use Illuminate\Http\Request;
 use App\Models\ClassAllocation;
 use App\Models\StudentBasic;
+use App\Models\SubmissionDocument;
 use App\Http\Controllers\Helper;
 use App\Models\Grading;
 use App\Models\AcademicYear;
@@ -770,7 +771,7 @@ class SchoolsController extends Controller
         $schoolId = session('LoggedSchool');
 
         if (!$schoolId) {
-            return redirect()->route('school.login')->with('error', 'Please login first');
+            return redirect()->route('School.login')->with('error', 'Please login first');
         }
 
         $school = House::find($schoolId);
@@ -804,7 +805,7 @@ class SchoolsController extends Controller
 
         $newNumber = str_pad(($lastNumber ?? 0) + 1, 3, '0', STR_PAD_LEFT);
 
-        return view('school.register-student', compact('school', 'years', 'currentYear', 'newNumber'));
+        return view('School.register-student', compact('school', 'years', 'currentYear', 'newNumber'));
     }
 
     // Method to generate student ID for school registration
@@ -1152,75 +1153,108 @@ class SchoolsController extends Controller
         ]);
     }
 
-    public function step3Submit(Request $request)
-    {
-        $schoolId = session('LoggedSchool');
+public function step3Submit(Request $request)
+{
+    $schoolId = session('LoggedSchool');
 
-        if (!$schoolId) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
+    if (!$schoolId) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
 
-        $ids = json_decode($request->ids, true);
+    $ids = json_decode($request->ids, true);
 
-        if (empty($ids)) {
-            return response()->json(['message' => 'No students selected.'], 422);
-        }
+    if (empty($ids)) {
+        return response()->json(['message' => 'No students selected.'], 422);
+    }
 
-        if ($request->hasFile('document')) {
-            $file = $request->file('document');
+    $submissionDocument = null;
+    
+    if ($request->hasFile('document')) {
+        $file = $request->file('document');
+        $originalName = $file->getClientOriginalName();
+        $fileSize = $file->getSize();
+        $fileType = $file->getMimeType();
+        $extension = $file->getClientOriginalExtension();
+        
+        // Generate unique filename
+        $fileName = 'submission_' . time() . '_' . uniqid() . '.' . $extension;
+        
+        // Store file
+        $file->move(public_path('submission_docs'), $fileName);
+        
+        // Save document record
+        $submissionDocument = SubmissionDocument::create([
+            'submission_batch_id' => null,
+            'file_name' => $originalName,
+            'file_path' => 'submission_docs/' . $fileName,
+            'file_type' => $fileType,
+            'file_size' => $fileSize,
+            'student_ids' => json_encode($ids),
+            'school_id' => $schoolId,
+        ]);
+    }
 
-            $fileName = 'submission_' . time() . '.' . $file->extension();
+    // Update student statuses
+    StudentRegistration::whereIn('id', $ids)
+        ->where('school_id', $schoolId)
+        ->where('status', 'Attached Image, Pending Submission')
+        ->update([
+            'status' => 'Pending Admin Approval',
+            'submission_document_id' => $submissionDocument ? $submissionDocument->id : null
+        ]);
 
-            $file->move(public_path('submission_docs'), $fileName);
-        }
+    return response()->json([
+        'message' => count($ids) . ' student(s) submitted for admin approval successfully.',
+        'document' => $submissionDocument
+    ]);
+}
+public function adminStudentApprovals()
+{
+    // Get all pending approval registrations with their documents
+    $registrations = StudentRegistration::where('status', 'Pending Admin Approval')
+        ->with(['submissionDocument']) // Assuming you have a relationship
+        ->get();
 
-        StudentRegistration::whereIn('id', $ids)
+    // Group by school prefix (e.g. IT-001, IT-002)
+    $grouped = $registrations->groupBy(function ($reg) {
+        $parts = explode('-', $reg->student_id);
+        return $parts[0] . '-' . $parts[1]; // e.g. IT-001
+    });
+
+    // Build school cards data
+    $schools = [];
+    foreach ($grouped as $prefix => $students) {
+        $schoolId = $students->first()->school_id;
+        $admissionYear = $students->first()->admission_year;
+
+        $approvedCount = DB::table('student_registrations')
             ->where('school_id', $schoolId)
-            ->where('status', 'Attached Image, Pending Submission')
-            ->update(['status' => 'Pending Admin Approval']);
+            ->where('admission_year', $admissionYear)
+            ->where('status', 'Approved')
+            ->count();
 
-        return response()->json(['message' => count($ids) . ' student(s) submitted for admin approval successfully.']);
-    }
-
-    public function adminStudentApprovals()
-    {
-        // Get all pending approval registrations
-        $registrations = StudentRegistration::where('status', 'Pending Admin Approval')
-            ->get();
-
-        // Group by school prefix (e.g. IT-001, IT-002)
-        $grouped = $registrations->groupBy(function ($reg) {
-            $parts = explode('-', $reg->student_id);
-            return $parts[0] . '-' . $parts[1]; // e.g. IT-001
-        });
-
-        // Build school cards data
-        $schools = [];
-        foreach ($grouped as $prefix => $students) {
-
-            $schoolId = $students->first()->school_id;
-
-            $schoolId = $students->first()->school_id;
-            $admissionYear = $students->first()->admission_year;
-
-            $approvedCount = DB::table('student_registrations')
-                ->where('school_id', $schoolId)
-                ->where('admission_year', $admissionYear)
-                ->where('status', 'Approved')
-                ->count();
-
-            $schools[] = [
-                'prefix' => $prefix,
-                'school_id' => $schoolId,
-                'school_name' => Helper::schoolNameByID($schoolId) ?? $prefix,
-                'pending_count' => $students->count(),
-                'approved_count' => $approvedCount,
-                'latest_submission' => $students->max('updated_at'),
-            ];
+        // Get unique documents for this school group
+        $documents = [];
+        foreach ($students as $student) {
+            if ($student->submissionDocument) {
+                $documents[$student->submissionDocument->file_path] = $student->submissionDocument;
+            }
         }
 
-        return view('school.admin-approvals', compact('schools'));
+        $schools[] = [
+            'prefix' => $prefix,
+            'school_id' => $schoolId,
+            'school_name' => Helper::schoolNameByID($schoolId) ?? $prefix,
+            'pending_count' => $students->count(),
+            'approved_count' => $approvedCount,
+            'latest_submission' => $students->max('updated_at'),
+            'documents' => array_values($documents), // Attach documents
+            'has_documents' => count($documents) > 0,
+        ];
     }
+
+    return view('School.admin-approvals', compact('schools'));
+}
 
     public function adminSchoolApprovalDetail($schoolPrefix)
     {
@@ -1232,7 +1266,7 @@ class SchoolsController extends Controller
         $schoolId = $registrations->first()->school_id ?? null;
         $schoolName = $schoolId ? (Helper::schoolNameByID($schoolId) ?? $schoolPrefix) : $schoolPrefix;
 
-        return view('school.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName'));
+        return view('School.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName'));
     }
 
     public function adminUpdateApprovalStatus(Request $request)

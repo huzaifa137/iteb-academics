@@ -327,12 +327,11 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
                 Route::get('/students/search', 'searchStudentsByClassStream')->name('students.search');
                 Route::post('/students/move', 'moveStudent')->name('students.move');
 
-                Route::get('students/generate-id', 'generateStudentID')->name('students.generate-id');
-
+                Route::get('generate-id', 'generateStudentID')->name('students.generate-id');
                 Route::post('/update/{id}', 'updateStudentInformation')->name('students.update.info');
             });
         });
-});
+    });
 
 Route::controller(ExamController::class)->group(function () {
     Route::group(['middleware' => ['StudentAuth']], function () {
