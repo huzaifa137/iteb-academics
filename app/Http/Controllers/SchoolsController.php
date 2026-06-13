@@ -14,10 +14,13 @@ use App\Models\MasterData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\SchoolPassword;
 use App\Models\StudentRegistration;
+use App\Models\SchoolRegistrationSlot;
+use App\Models\SchoolSlotHistory;
+use App\Models\RegistrationPeriod;
 use Illuminate\Support\Facades\Log;
 use App\Models\House;
+use Carbon\Carbon;
 use DB;
-
 
 class SchoolsController extends Controller
 {
@@ -867,12 +870,42 @@ class SchoolsController extends Controller
     }
 
     // Method to store school registration
+// Method to store school registration
     public function storeSchoolRegistration(Request $request)
     {
         $schoolId = session('LoggedSchool');
-
         if (!$schoolId) {
             return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // 1. Determine active year for slot/period checks
+        $activeYear = AcademicYear::where('status', 'Active')->first();
+        $checkYear = $activeYear ? $activeYear->year_en : date('Y');
+
+        $existingSlot = SchoolRegistrationSlot::where('school_id', $schoolId)
+            ->where('admission_year', $checkYear)
+            ->first();
+
+        // 2. Registration period check: global OR per-school override
+        $globalOpen = RegistrationPeriod::globallyOpen();
+
+        // Per-school flag: true = open override, false = explicitly closed for this school
+        $schoolExplicitlyClosed = $existingSlot && $existingSlot->registration_open === false;
+        $schoolExplicitlyOpen = $existingSlot && $existingSlot->registration_open === true;
+
+        // Block if: global is closed AND school has no open override
+        // Also block if: school is explicitly closed regardless of global status
+
+        if ($schoolExplicitlyClosed) {
+            return response()->json([
+                'message' => 'Registration has been closed for your school by the admin.'
+            ], 403);
+        }
+
+        if (!$globalOpen && !$schoolExplicitlyOpen) {
+            return response()->json([
+                'message' => 'Registration is currently closed globally. Contact the admin.'
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -891,6 +924,25 @@ class SchoolsController extends Controller
             'district' => 'nullable|string|max:45',
             'district_ar' => 'nullable|string|max:45',
         ]);
+
+        // 3. Slot allocation check
+        $slot = SchoolRegistrationSlot::where('school_id', $schoolId)
+            ->where('admission_year', $validated['admission_year'])
+            ->first();
+
+        if (!$slot || $slot->slots_allocated <= 0) {
+            return response()->json([
+                'message' => 'No registration slots have been allocated for your school for ' . $validated['admission_year'] . '. Please contact the admin.'
+            ], 403);
+        }
+
+        $slot->syncUsed();
+
+        if ($slot->slotsRemaining() <= 0) {
+            return response()->json([
+                'message' => 'All ' . $slot->slots_allocated . ' allocated slots have been used. Contact the admin to request more.'
+            ], 403);
+        }
 
         $school = House::find($schoolId);
 
@@ -914,14 +966,18 @@ class SchoolsController extends Controller
                 'district_ar' => $validated['district_ar'] ?? null,
                 'entry_date' => now(),
                 'status' => 'Pending Photo Submission',
+                'is_locked' => false,
             ]);
+
+            $slot->slots_used += 1;
+            $slot->save();
 
             return response()->json([
-                'message' => 'Student registration submitted successfully! Awaiting admin approval.',
+                'message' => 'Student registered successfully!',
                 'registration_id' => $registration->id,
-                'student_id' => $registration->student_id
+                'student_id' => $registration->student_id,
+                'slots_remaining' => $slot->slotsRemaining(),
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error: ' . $e->getMessage()
@@ -933,17 +989,37 @@ class SchoolsController extends Controller
     public function getRecentRegistrations()
     {
         $schoolId = session('LoggedSchool');
-
         if (!$schoolId) {
-            return response()->json(['registrations' => []], 200);
+            return response()->json(['registrations' => [], 'slot' => null], 200);
         }
 
+        // Get all registrations for this school
         $registrations = StudentRegistration::where('school_id', $schoolId)
             ->orderBy('created_at', 'desc')
-            ->limit(10)
             ->get();
 
-        return response()->json(['registrations' => $registrations]);
+        // Slot info for the active year
+        $activeYear = AcademicYear::where('status', 'Active')->first();
+        $year = $activeYear ? $activeYear->year_en : date('Y');
+        $slot = SchoolRegistrationSlot::where('school_id', $schoolId)
+            ->where('admission_year', $year)
+            ->first();
+
+        $slotInfo = $slot ? [
+            'slots_allocated' => $slot->slots_allocated,
+            'slots_used' => $slot->slots_used,
+            'slots_remaining' => $slot->slotsRemaining(),
+            'registration_open' => $slot->registration_open,
+        ] : null;
+
+        // Check if global registration period is open
+        $periodOpen = RegistrationPeriod::globallyOpen();
+
+        return response()->json([
+            'registrations' => $registrations,
+            'slot' => $slotInfo,
+            'global_open' => $periodOpen,
+        ]);
     }
 
     public function deleteRegistration(Request $request)
@@ -1021,6 +1097,12 @@ class SchoolsController extends Controller
 
             if (!$registration) {
                 return response()->json(['message' => 'Registration not found'], 404);
+            }
+
+            if ($registration->is_locked) {
+                return response()->json([
+                    'message' => 'This student record is locked after submission. Contact admin to make changes.'
+                ], 403);
             }
 
             $registration->update([
@@ -1137,7 +1219,10 @@ class SchoolsController extends Controller
         $category = trim($request->category);
 
         $students = StudentRegistration::where('school_id', (string) $schoolId)
-            ->where('status', 'Attached Image, Pending Submission')
+            ->whereIn('status', [
+                'Attached Image, Pending Submission',
+                'Returned'
+            ])
             ->where('admission_year', $year)
             ->where('category', $category)
             ->get();
@@ -1153,120 +1238,143 @@ class SchoolsController extends Controller
         ]);
     }
 
-public function step3Submit(Request $request)
-{
-    $schoolId = session('LoggedSchool');
 
-    if (!$schoolId) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
+    public function step3Submit(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
 
-    $ids = json_decode($request->ids, true);
-
-    if (empty($ids)) {
-        return response()->json(['message' => 'No students selected.'], 422);
-    }
-
-    $submissionDocument = null;
-    
-    if ($request->hasFile('document')) {
-        $file = $request->file('document');
-        $originalName = $file->getClientOriginalName();
-        $fileSize = $file->getSize();
-        $fileType = $file->getMimeType();
-        $extension = $file->getClientOriginalExtension();
-        
-        // Generate unique filename
-        $fileName = 'submission_' . time() . '_' . uniqid() . '.' . $extension;
-        
-        // Store file
-        $file->move(public_path('submission_docs'), $fileName);
-        
-        // Save document record
-        $submissionDocument = SubmissionDocument::create([
-            'submission_batch_id' => null,
-            'file_name' => $originalName,
-            'file_path' => 'submission_docs/' . $fileName,
-            'file_type' => $fileType,
-            'file_size' => $fileSize,
-            'student_ids' => json_encode($ids),
-            'school_id' => $schoolId,
-        ]);
-    }
-
-    // Update student statuses
-    StudentRegistration::whereIn('id', $ids)
-        ->where('school_id', $schoolId)
-        ->where('status', 'Attached Image, Pending Submission')
-        ->update([
-            'status' => 'Pending Admin Approval',
-            'submission_document_id' => $submissionDocument ? $submissionDocument->id : null
-        ]);
-
-    return response()->json([
-        'message' => count($ids) . ' student(s) submitted for admin approval successfully.',
-        'document' => $submissionDocument
-    ]);
-}
-public function adminStudentApprovals()
-{
-    // Get all pending approval registrations with their documents
-    $registrations = StudentRegistration::where('status', 'Pending Admin Approval')
-        ->with(['submissionDocument']) // Assuming you have a relationship
-        ->get();
-
-    // Group by school prefix (e.g. IT-001, IT-002)
-    $grouped = $registrations->groupBy(function ($reg) {
-        $parts = explode('-', $reg->student_id);
-        return $parts[0] . '-' . $parts[1]; // e.g. IT-001
-    });
-
-    // Build school cards data
-    $schools = [];
-    foreach ($grouped as $prefix => $students) {
-        $schoolId = $students->first()->school_id;
-        $admissionYear = $students->first()->admission_year;
-
-        $approvedCount = DB::table('student_registrations')
-            ->where('school_id', $schoolId)
-            ->where('admission_year', $admissionYear)
-            ->where('status', 'Approved')
-            ->count();
-
-        // Get unique documents for this school group
-        $documents = [];
-        foreach ($students as $student) {
-            if ($student->submissionDocument) {
-                $documents[$student->submissionDocument->file_path] = $student->submissionDocument;
-            }
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $schools[] = [
-            'prefix' => $prefix,
-            'school_id' => $schoolId,
-            'school_name' => Helper::schoolNameByID($schoolId) ?? $prefix,
-            'pending_count' => $students->count(),
-            'approved_count' => $approvedCount,
-            'latest_submission' => $students->max('updated_at'),
-            'documents' => array_values($documents), // Attach documents
-            'has_documents' => count($documents) > 0,
-        ];
+        $ids = json_decode($request->ids, true);
+
+        if (empty($ids)) {
+            return response()->json(['message' => 'No students selected.'], 422);
+        }
+
+        $submissionDocument = null;
+
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $originalName = $file->getClientOriginalName();
+            $fileSize = $file->getSize();
+            $fileType = $file->getMimeType();
+            $extension = $file->getClientOriginalExtension();
+
+            // Generate unique filename
+            $fileName = 'submission_' . time() . '_' . uniqid() . '.' . $extension;
+
+            // Store file
+            $file->move(public_path('submission_docs'), $fileName);
+
+            // Save document record
+            $submissionDocument = SubmissionDocument::create([
+                'submission_batch_id' => null,
+                'file_name' => $originalName,
+                'file_path' => 'submission_docs/' . $fileName,
+                'file_type' => $fileType,
+                'file_size' => $fileSize,
+                'student_ids' => json_encode($ids),
+                'school_id' => $schoolId,
+            ]);
+        }
+
+        // Update student statuses and lock records
+        StudentRegistration::whereIn('id', $ids)
+            ->where('school_id', $schoolId)
+            ->whereIn('status', [
+                'Attached Image, Pending Submission',
+                'Returned'
+            ])
+            ->update([
+                'status' => 'Pending Admin Approval',
+                'is_locked' => true,
+                'submitted_at' => now(),
+                'submission_document_id' => $submissionDocument ? $submissionDocument->id : null
+            ]);
+
+        return response()->json([
+            'message' => count($ids) . ' student(s) submitted for admin approval successfully.',
+            'document' => $submissionDocument
+        ]);
     }
 
-    return view('School.admin-approvals', compact('schools'));
-}
+
+    public function adminStudentApprovals()
+    {
+        $allRegistrations = StudentRegistration::select('school_id', 'admission_year')
+            ->distinct()
+            ->get();
+
+        $schools = [];
+        $seen = [];
+
+        foreach ($allRegistrations as $row) {
+            $key = $row->school_id . '_' . $row->admission_year;
+            if (in_array($key, $seen))
+                continue;
+            $seen[] = $key;
+
+            $sid = $row->school_id;
+            $year = $row->admission_year;
+
+            $pending = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->where('status', 'Pending Admin Approval')->count();
+            $approved = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->where('status', 'Approved')->count();
+            $total = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->count();
+
+            $slot = SchoolRegistrationSlot::where('school_id', $sid)->where('admission_year', $year)->first();
+
+            $firstReg = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->first();
+            $parts = $firstReg ? explode('-', $firstReg->student_id) : [];
+            $prefix = count($parts) >= 2 ? $parts[0] . '-' . $parts[1] : (string) $sid;
+
+            $schools[] = [
+                'prefix' => $prefix,
+                'school_id' => $sid,
+                'admission_year' => $year,
+                'school_name' => Helper::schoolNameByID($sid) ?? $prefix,
+                'pending_count' => $pending,
+                'approved_count' => $approved,
+                'total_registered' => $total,
+                'slots_allocated' => $slot ? $slot->slots_allocated : 0,
+                'slots_used' => $slot ? $slot->slots_used : 0,
+                'slots_remaining' => $slot ? $slot->slotsRemaining() : 0,
+                'school_reg_open' => $slot ? $slot->registration_open : false,
+                'latest_submission' => StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->max('updated_at'),
+            ];
+        }
+
+        usort($schools, fn($a, $b) => $b['pending_count'] <=> $a['pending_count']);
+
+        $globalPeriod = RegistrationPeriod::active();
+        $globalOpen = RegistrationPeriod::globallyOpen();
+        $activeYear = AcademicYear::where('status', 'Active')->first();
+        $allSchools = House::orderBy('House')->get();
+
+        return view('School.admin-approvals', compact(
+            'schools',
+            'globalPeriod',
+            'globalOpen',
+            'activeYear',
+            'allSchools'
+        ));
+    }
 
     public function adminSchoolApprovalDetail($schoolPrefix)
     {
-        $registrations = StudentRegistration::where('status', 'Pending Admin Approval')
-            ->where('student_id', 'LIKE', $schoolPrefix . '-%')
+        $registrations = StudentRegistration::where('student_id', 'LIKE', $schoolPrefix . '-%')
             ->orderBy('student_id')
             ->get();
 
         $schoolId = $registrations->first()->school_id ?? null;
         $schoolName = $schoolId ? (Helper::schoolNameByID($schoolId) ?? $schoolPrefix) : $schoolPrefix;
 
-        return view('School.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName'));
+        $slot = $schoolId
+            ? SchoolRegistrationSlot::where('school_id', $schoolId)->orderByDesc('admission_year')->first()
+            : null;
+
+        return view('School.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName', 'slot'));
     }
 
     public function adminUpdateApprovalStatus(Request $request)
@@ -1297,70 +1405,273 @@ public function adminStudentApprovals()
 
         foreach ($registrations as $reg) {
             if ($action === 'Approved') {
-                // Check not already in students_basic
-                $exists = DB::table('students_basic')
-                    ->where('Student_ID', $reg->student_id)
-                    ->exists();
-
-                if ($exists) {
-                    $errors[] = $reg->student_id . ' already exists in students_basic.';
-                    continue;
-                }
+                // Remove existing record first so we always re-insert the latest approved data
+                DB::table('students_basic')->where('Student_ID', $reg->student_id)->delete();
 
                 $category = $reg->category;
-                $Class = $category === 'ID' ? 'Senior Four' : 'Senior Six';
-                $Class_AR = $category === 'ID' ? 'الإعدادية' : 'الثانوي';
+                $class = $category === 'ID' ? 'Senior Four' : 'Senior Six';
+                $classAR = $category === 'ID' ? 'الإعدادية' : 'الثانوي';
 
-                DB::beginTransaction();
-                try {
-                    $student = StudentBasic::create([
-                        'Student_ID' => $reg->student_id,
-                        'Student_Name' => $reg->student_name,
-                        'Student_Name_AR' => $reg->student_name_ar,
-                        'Date_of_Birth' => $reg->date_of_birth,
-                        'StudentSex' => $reg->student_sex,
-                        'StudentsNationality' => $reg->student_nationality,
-                        'House' => $reg->house ?? Helper::schoolNameByID($reg->school_id),
-                        'admnyr' => $reg->admission_year,
-                        'EntryDate' => now(),
-                        'Section' => $reg->section ?? 'Day',
-                        'Class' => $Class,
-                        'Class_AR' => $Class_AR,
-                        'state' => 'Active',
-                        'StudentsCitizenship' => Helper::toArabicLettersCountriesAndWordsPackage($reg->student_nationality),
-                        'Date_of_Birth_AR' => Helper::toArabicDate($reg->date_of_birth),
-                    ]);
+                DB::table('students_basic')->insert([
+                    'Student_ID' => $reg->student_id,
+                    'Student_Name' => $reg->student_name,
+                    'Student_Name_AR' => $reg->student_name_ar,
+                    'Date_of_Birth' => $reg->date_of_birth,
+                    'StudentSex' => $reg->student_sex,
+                    'StudentsNationality' => $reg->student_nationality,
+                    'House' => $reg->house,
+                    'admnyr' => $reg->admission_year,
+                    'EntryDate' => now(),
+                    'Section' => $reg->section ?? 'Day',
+                    'Class' => $class,
+                    'Class_AR' => $classAR,
+                    'state' => 'Active',
+                    'Birth_Place' => $reg->birth_place,
+                    'Birth_Place_AR' => $reg->birth_place_ar,
+                    'District' => $reg->district,
+                    'District_AR' => $reg->district_ar,
+                ]);
 
-                    ClassAllocation::create([
-                        'Student_ID' => $student->Student_ID,
-                        'Class_ID' => 001,
-                    ]);
+                // DB::table('class_allocations')->insert([
+                //     'Student_ID' => $reg->student_id,
+                //     'Class_ID' => 1,
+                // ]);
 
-                    $reg->update(['status' => 'Approved']);
-
-                    DB::commit();
-                    $approved++;
-
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    $errors[] = $reg->student_id . ': ' . $e->getMessage();
-                }
+                $reg->status = 'Approved';
+                $reg->save();
+                $approved++;
 
             } else {
-                // Send back to previous status
-                $reg->update(['status' => 'Attached Image, Pending Submission']);
+                $reg->status = 'Returned';
+                $reg->is_locked = false;
+                $reg->save();
                 $rejected++;
             }
         }
 
-        $message = '';
-        if ($approved > 0)
-            $message .= "{$approved} student(s) approved and added to the system. ";
-        if ($rejected > 0)
-            $message .= "{$rejected} student(s) sent back for resubmission. ";
-        if (!empty($errors))
-            $message .= 'Errors: ' . implode('; ', $errors);
+        return response()->json([
+            'message' => "$approved approved, $rejected returned.",
+            'errors' => $errors,
+            'approved' => $approved,
+            'rejected' => $rejected,
+        ]);
+    }
 
-        return response()->json(['message' => trim($message)]);
+
+    // =========================================================
+    // SLOT MANAGEMENT METHODS
+    // =========================================================
+
+    public function adminSearchSchoolsForSlots(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        $schools = House::when($q, function ($query) use ($q) {
+            $query->where('House', 'LIKE', "%{$q}%")
+                ->orWhere('Number', 'LIKE', "%{$q}%");
+        })
+            ->orderBy('House')
+            ->limit(25)
+            ->get(['ID', 'House', 'Number', 'Location']);
+
+        $activeYear = AcademicYear::where('status', 'Active')->first();
+        $year = $activeYear ? (int) $activeYear->year_en : (int) date('Y');
+
+        $schools = $schools->map(function ($school) use ($year) {
+            $slot = SchoolRegistrationSlot::where('school_id', $school->ID)
+                ->where('admission_year', $year)
+                ->first();
+
+            $school->slot = $slot ? [
+                'id' => $slot->id,
+                'slots_allocated' => $slot->slots_allocated,
+                'slots_used' => $slot->slots_used,
+                'slots_remaining' => $slot->slotsRemaining(),
+                'registration_open' => (bool) $slot->registration_open,
+            ] : null;
+
+            return $school;
+        });
+
+        return response()->json(['schools' => $schools, 'year' => $year]);
+    }
+
+    public function adminAssignSlots(Request $request)
+    {
+        $request->validate([
+            'school_id' => 'required',
+            'admission_year' => 'required|integer',
+            'slots' => 'required|integer|min:1|max:1000',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $adminId = session('LoggedAdmin') ?? session('LoggedStudent');
+
+        $slot = SchoolRegistrationSlot::firstOrCreate(
+            ['school_id' => $request->school_id, 'admission_year' => (int) $request->admission_year],
+            ['slots_allocated' => 0, 'slots_used' => 0, 'registration_open' => true, 'allocated_by' => $adminId]
+        );
+
+        $slot->syncUsed();
+        $slot->slots_allocated += (int) $request->slots;
+        $slot->registration_open = true;
+        $slot->allocated_by = $adminId;
+        $slot->save();
+
+        SchoolSlotHistory::create([
+            'school_id' => $request->school_id,
+            'admission_year' => (int) $request->admission_year,
+            'slots_added' => (int) $request->slots,
+            'total_after' => $slot->slots_allocated,
+            'reason' => $request->reason,
+            'added_by' => $adminId,
+        ]);
+
+        return response()->json([
+            'message' => $request->slots . ' slot(s) added successfully.',
+            'slots_allocated' => $slot->slots_allocated,
+            'slots_used' => $slot->slots_used,
+            'slots_remaining' => $slot->slotsRemaining(),
+        ]);
+    }
+
+    public function adminToggleSchoolRegistration(Request $request)
+    {
+        $request->validate([
+            'school_id' => 'required',
+            'admission_year' => 'required|integer',
+            'open' => 'required|boolean',
+        ]);
+
+        $slot = SchoolRegistrationSlot::firstOrCreate(
+            ['school_id' => $request->school_id, 'admission_year' => (int) $request->admission_year],
+            ['slots_allocated' => 0, 'slots_used' => 0, 'registration_open' => false]
+        );
+
+        $slot->registration_open = (bool) $request->open;
+        $slot->save();
+
+        $status = $slot->registration_open ? 'opened' : 'closed';
+
+        return response()->json([
+            'message' => "Registration {$status} for this school.",
+            'registration_open' => $slot->registration_open,
+        ]);
+    }
+
+    public function adminSlotHistory(Request $request)
+    {
+        $request->validate([
+            'school_id' => 'required',
+            'admission_year' => 'required|integer',
+        ]);
+
+        $history = SchoolSlotHistory::where('school_id', $request->school_id)
+            ->where('admission_year', (int) $request->admission_year)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json(['history' => $history]);
+    }
+
+    // =========================================================
+    // GLOBAL REGISTRATION PERIOD METHODS
+    // =========================================================
+
+    public function adminSaveRegistrationPeriod(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:100',
+            'admission_year' => 'required|integer',
+            'opens_at' => 'nullable|date',
+            'closes_at' => 'nullable|date',
+            'is_active' => 'required|boolean',
+        ]);
+
+        $adminId = session('LoggedAdmin') ?? session('LoggedStudent');
+
+        try {
+            if ($request->is_active) {
+                RegistrationPeriod::where('is_active', true)->update(['is_active' => false]);
+            }
+
+            $period = RegistrationPeriod::create([
+                'name' => $request->name,
+                'admission_year' => (int) $request->admission_year,
+                'opens_at' => $request->opens_at ?: null,
+                'closes_at' => $request->closes_at ?: null,
+                'is_active' => (bool) $request->is_active,
+                'created_by' => $adminId,
+            ]);
+
+            return response()->json([
+                'message' => 'Registration period saved' . ($request->is_active ? ' and activated.' : '.'),
+                'period' => $period,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Database error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function adminUpdateRegistrationPeriod(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:100',
+            'admission_year' => 'nullable|integer',
+            'opens_at' => 'nullable|date',
+            'closes_at' => 'nullable|date',
+            'is_active' => 'required|boolean',
+        ]);
+
+        $period = RegistrationPeriod::findOrFail($id);
+
+        if ($request->is_active && !$period->is_active) {
+            RegistrationPeriod::where('is_active', true)->update(['is_active' => false]);
+        }
+
+        $period->update([
+            'name' => $request->name ?: $period->name,
+            'admission_year' => $request->admission_year ?: $period->admission_year,
+            'opens_at' => $request->opens_at ?: null,
+            'closes_at' => $request->closes_at ?: null,
+            'is_active' => (bool) $request->is_active,
+        ]);
+
+        return response()->json(['message' => 'Period updated.', 'period' => $period]);
+    }
+
+    public function adminDeleteRegistrationPeriod($id)
+    {
+        RegistrationPeriod::findOrFail($id)->delete();
+        return response()->json(['message' => 'Period deleted.']);
+    }
+
+    // Admin: Toggle lock status on a single student registration
+    public function adminToggleStudentLock(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'lock' => 'required|boolean',
+        ]);
+
+        $reg = StudentRegistration::findOrFail($request->id);
+        $reg->is_locked = (bool) $request->lock;
+
+        // If unlocking, revert status so school can edit and resubmit
+        if (!$reg->is_locked && $reg->status === 'Pending Admin Approval') {
+            $reg->status = 'Attached Image, Pending Submission';
+            $reg->submitted_at = null;
+        }
+
+        $reg->save();
+
+        return response()->json([
+            'message' => $reg->is_locked ? 'Student locked.' : 'Student unlocked — school can now edit and resubmit.',
+            'is_locked' => $reg->is_locked,
+            'status' => $reg->status,
+        ]);
     }
 }

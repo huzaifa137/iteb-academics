@@ -6,8 +6,8 @@ use App\Http\Controllers\Helper;
 
     <style>
         /* ═══════════════════════════════════════════
-                               FONTS & BASE
-                            ═══════════════════════════════════════════ */
+                                           FONTS & BASE
+                                        ═══════════════════════════════════════════ */
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
         :root {
@@ -37,8 +37,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               HERO BANNER
-                            ═══════════════════════════════════════════ */
+                                           HERO BANNER
+                                        ═══════════════════════════════════════════ */
         .reg-hero {
             background: linear-gradient(135deg, #0d4b1f 0%, #1a6b30 45%, #287C44 100%);
             border-radius: 20px;
@@ -104,8 +104,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               ANALYTICS STAT CARDS
-                            ═══════════════════════════════════════════ */
+                                           ANALYTICS STAT CARDS
+                                        ═══════════════════════════════════════════ */
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -231,8 +231,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               STEP WIZARD NAV
-                            ═══════════════════════════════════════════ */
+                                           STEP WIZARD NAV
+                                        ═══════════════════════════════════════════ */
         .step-nav {
             display: flex;
             gap: 0;
@@ -329,8 +329,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               STEP PANELS
-                            ═══════════════════════════════════════════ */
+                                           STEP PANELS
+                                        ═══════════════════════════════════════════ */
         .step-panel {
             display: none;
             animation: fadeSlide 0.35s ease;
@@ -353,8 +353,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               MAIN CARD
-                            ═══════════════════════════════════════════ */
+                                           MAIN CARD
+                                        ═══════════════════════════════════════════ */
         .reg-card {
             background: #fff;
             border-radius: var(--radius);
@@ -394,8 +394,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               SECTION LABELS
-                            ═══════════════════════════════════════════ */
+                                           SECTION LABELS
+                                        ═══════════════════════════════════════════ */
         .form-section-label {
             font-family: 'Syne', sans-serif;
             font-size: 12px;
@@ -417,8 +417,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               FORM CONTROLS
-                            ═══════════════════════════════════════════ */
+                                           FORM CONTROLS
+                                        ═══════════════════════════════════════════ */
         .reg-label {
             font-size: 12px;
             font-weight: 600;
@@ -498,8 +498,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               BUTTONS
-                            ═══════════════════════════════════════════ */
+                                           BUTTONS
+                                        ═══════════════════════════════════════════ */
         .btn-primary-reg {
             background: linear-gradient(135deg, var(--green) 0%, var(--forest-mid) 100%);
             color: #fff;
@@ -565,8 +565,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               STATUS BADGES
-                            ═══════════════════════════════════════════ */
+                                           STATUS BADGES
+                                        ═══════════════════════════════════════════ */
         .sbadge {
             display: inline-flex;
             align-items: center;
@@ -609,8 +609,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               TABLE
-                            ═══════════════════════════════════════════ */
+                                           TABLE
+                                        ═══════════════════════════════════════════ */
         .reg-table-wrap {
             border-radius: var(--radius-sm);
             overflow: hidden;
@@ -699,8 +699,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               PHOTO UPLOAD (keeping existing style)
-                            ═══════════════════════════════════════════ */
+                                           PHOTO UPLOAD (keeping existing style)
+                                        ═══════════════════════════════════════════ */
         .photo-upload-section {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: var(--radius);
@@ -876,8 +876,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               STEP 3 — FILTER BAR
-                            ═══════════════════════════════════════════ */
+                                           STEP 3 — FILTER BAR
+                                        ═══════════════════════════════════════════ */
         .filter-bar {
             background: var(--mint);
             border-radius: var(--radius-sm);
@@ -921,8 +921,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               EMPTY STATE
-                            ═══════════════════════════════════════════ */
+                                           EMPTY STATE
+                                        ═══════════════════════════════════════════ */
         .empty-state {
             text-align: center;
             padding: 50px 20px;
@@ -955,8 +955,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               SWAL Z-INDEX FIXES
-                            ═══════════════════════════════════════════ */
+                                           SWAL Z-INDEX FIXES
+                                        ═══════════════════════════════════════════ */
         .swal2-container {
             z-index: 9999 !important;
         }
@@ -982,8 +982,8 @@ use App\Http\Controllers\Helper;
         }
 
         /* ═══════════════════════════════════════════
-                               RESPONSIVE
-                            ═══════════════════════════════════════════ */
+                                           RESPONSIVE
+                                        ═══════════════════════════════════════════ */
         @media(max-width:768px) {
             .reg-hero {
                 padding: 24px 20px 20px;
@@ -1087,78 +1087,78 @@ use App\Http\Controllers\Helper;
         }
 
         /* Document preview styles */
-.document-preview-container {
-    position: relative;
-    display: inline-block;
-}
+        .document-preview-container {
+            position: relative;
+            display: inline-block;
+        }
 
-.document-preview {
-    width: 110px;
-    height: 130px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 10px;
-}
+        .document-preview {
+            width: 110px;
+            height: 130px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+        }
 
-.document-preview:hover {
-    transform: scale(1.03);
-    border-color: var(--green);
-}
+        .document-preview:hover {
+            transform: scale(1.03);
+            border-color: var(--green);
+        }
 
-.document-preview i {
-    font-size: 48px;
-    margin-bottom: 8px;
-}
+        .document-preview i {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
 
-.document-preview span {
-    font-size: 11px;
-    color: var(--slate);
-    word-break: break-all;
-    max-width: 90px;
-}
+        .document-preview span {
+            font-size: 11px;
+            color: var(--slate);
+            word-break: break-all;
+            max-width: 90px;
+        }
 
-.file-name {
-    background: var(--mint);
-    padding: 6px 12px;
-    border-radius: 8px;
-    display: inline-block;
-    font-size: 11px;
-}
+        .file-name {
+            background: var(--mint);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 11px;
+        }
 
-/* PDF specific */
-.document-preview.pdf i {
-    color: #dc2626;
-}
+        /* PDF specific */
+        .document-preview.pdf i {
+            color: #dc2626;
+        }
 
-/* Image specific */
-.document-preview.image {
-    padding: 0;
-    overflow: hidden;
-}
+        /* Image specific */
+        .document-preview.image {
+            padding: 0;
+            overflow: hidden;
+        }
 
-.document-preview.image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+        .document-preview.image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-/* Word document */
-.document-preview.word i {
-    color: #2b5797;
-}
+        /* Word document */
+        .document-preview.word i {
+            color: #2b5797;
+        }
 
-/* Excel document */
-.document-preview.excel i {
-    color: #217346;
-}
+        /* Excel document */
+        .document-preview.excel i {
+            color: #217346;
+        }
     </style>
 
     <div class="side-app" style="padding: 20px;">
@@ -1204,6 +1204,16 @@ use App\Http\Controllers\Helper;
                 <div class="stat-number" id="stat-approved">—</div>
                 <div class="stat-label">Approved & Enrolled</div>
             </div>
+            <div class="stat-card coral">
+                <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+                <div class="stat-number" id="stat-slots-remaining">—</div>
+                <div class="stat-label">Registration Slots Left</div>
+            </div>
+        </div>
+
+        {{-- Registration Status Banner (slots / period) --}}
+        <div id="regStatusBanner"
+            style="display:none; margin-bottom:18px; border-radius:12px; padding:14px 20px; font-size:13px; font-weight:600;">
         </div>
 
         {{-- ══════════════════════════════
@@ -1220,7 +1230,7 @@ use App\Http\Controllers\Helper;
             <button class="step-tab" onclick="switchStep(2, this)">
                 <div class="step-num">2</div>
                 <div class="step-info">
-                    <p class="step-title">Recent Registrations</p>
+                    <p class="step-title">Registered Students</p>
                     <p class="step-sub">View & manage records</p>
                 </div>
             </button>
@@ -1378,12 +1388,12 @@ use App\Http\Controllers\Helper;
         </div>
 
         {{-- ══════════════════════════════════════════════════════
-        STEP 2 — RECENT REGISTRATIONS
+        STEP 2 — ALL REGISTERED STUDENTS
         ══════════════════════════════════════════════════════ --}}
         <div class="step-panel" id="panel-2">
             <div class="reg-card">
                 <div class="reg-card-header">
-                    <h4><i class="fas fa-list-alt mr-2"></i>Recent Registrations</h4>
+                    <h4><i class="fas fa-list-alt mr-2"></i>All Registered Students</h4>
                     <span class="header-badge"><i class="fas fa-clock mr-1"></i>Step 2 of 3</span>
                 </div>
                 <div class="reg-card-body">
@@ -1484,42 +1494,44 @@ use App\Http\Controllers\Helper;
                             </table>
                         </div>
 
-{{-- Supporting Document Upload --}}
-<div class="photo-upload-section">
-    <span class="photo-upload-label">
-        <i class="fas fa-file-alt mr-2"></i>Attach Supporting Document / Cover File
-    </span>
-    <div class="d-flex align-items-center" style="gap:20px; flex-wrap:wrap;">
-        <div class="document-preview-container" style="position: relative;">
-            <div id="step3_doc_preview" class="document-preview">
-                <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
-                <span style="font-size: 12px; margin-top: 8px;">No file selected</span>
-            </div>
-        </div>
-        <div class="photo-actions" style="flex:1; min-width:200px;">
-            <div class="row no-gutters" style="gap:8px; flex-wrap:wrap;">
-                <div class="col" style="min-width:140px;">
-                    <div class="photo-upload-input">
-                        <input type="file" id="step3_doc_input" 
-                               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.txt">
-                        <div class="custom-file-upload"><i class="fas fa-upload mr-1"></i> Choose File</div>
-                    </div>
-                </div>
-                <div class="col" style="min-width:140px;">
-                    <button type="button" id="step3_remove_doc_btn" class="btn-remove-photo">
-                        <i class="fas fa-trash-alt mr-1"></i> Remove
-                    </button>
-                </div>
-            </div>
-            <div class="file-info">
-                <i class="fas fa-info-circle"></i>
-                <span>Supported: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, TXT — Max 5MB</span>
-            </div>
-            <div id="step3_file_name" class="file-name" style="font-size: 12px; color: var(--green); margin-top: 5px; display: none;"></div>
-            <div id="step3_upload_status" class="upload-status"></div>
-        </div>
-    </div>
-</div>
+                        {{-- Supporting Document Upload --}}
+                        <div class="photo-upload-section">
+                            <span class="photo-upload-label">
+                                <i class="fas fa-file-alt mr-2"></i>Attach Supporting Document / Cover File
+                            </span>
+                            <div class="d-flex align-items-center" style="gap:20px; flex-wrap:wrap;">
+                                <div class="document-preview-container" style="position: relative;">
+                                    <div id="step3_doc_preview" class="document-preview">
+                                        <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
+                                        <span style="font-size: 12px; margin-top: 8px;">No file selected</span>
+                                    </div>
+                                </div>
+                                <div class="photo-actions" style="flex:1; min-width:200px;">
+                                    <div class="row no-gutters" style="gap:8px; flex-wrap:wrap;">
+                                        <div class="col" style="min-width:140px;">
+                                            <div class="photo-upload-input">
+                                                <input type="file" id="step3_doc_input"
+                                                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.txt">
+                                                <div class="custom-file-upload"><i class="fas fa-upload mr-1"></i> Choose
+                                                    File</div>
+                                            </div>
+                                        </div>
+                                        <div class="col" style="min-width:140px;">
+                                            <button type="button" id="step3_remove_doc_btn" class="btn-remove-photo">
+                                                <i class="fas fa-trash-alt mr-1"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="file-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Supported: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, TXT — Max 5MB</span>
+                                    </div>
+                                    <div id="step3_file_name" class="file-name"
+                                        style="font-size: 12px; color: var(--green); margin-top: 5px; display: none;"></div>
+                                    <div id="step3_upload_status" class="upload-status"></div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="d-flex justify-content-end mt-4">
                             <button type="button" id="step3_submit_btn" class="btn-primary-reg" style="padding:13px 36px;">
@@ -1753,9 +1765,39 @@ use App\Http\Controllers\Helper;
                             animateNumber('stat-attached', attached);
                             animateNumber('stat-submitted', submitted);
                             animateNumber('stat-approved', approved);
+
+                            // ── Slot + registration period banner ──────────────
+                            const slot = response.slot || null;
+                            const globalOpen = response.global_open || false;
+                            const banner = $('#regStatusBanner');
+
+                            if (slot) {
+                                animateNumber('stat-slots-remaining', slot.slots_remaining);
+
+                                const effectiveOpen = globalOpen || slot.registration_open;
+
+                                if (slot.slots_remaining === 0) {
+                                    banner.css({ background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#991b1b' });
+                                    banner.html('<i class="fas fa-exclamation-triangle mr-2"></i><strong>All ' + slot.slots_allocated + ' allocated slots have been used.</strong> Contact the admin to request more slots.');
+                                } else if (effectiveOpen) {
+                                    banner.css({ background: '#f0fdf4', border: '1.5px solid #86efac', color: '#166534' });
+                                    const src = globalOpen ? 'Global registration is open' : 'Registration opened for your school by admin';
+                                    banner.html('<i class="fas fa-unlock-alt mr-2"></i>' + src + ' &mdash; <strong>' + slot.slots_remaining + '</strong> slot(s) remaining of <strong>' + slot.slots_allocated + '</strong> allocated.');
+                                } else {
+                                    banner.css({ background: '#fff7ed', border: '1.5px solid #fed7aa', color: '#9a3412' });
+                                    banner.html('<i class="fas fa-lock mr-2"></i>Registration is currently <strong>closed</strong>. Contact the admin to open registration for your school.');
+                                }
+                                banner.show();
+                            } else {
+                                $('#stat-slots-remaining').text('0');
+                                banner.css({ background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#991b1b' });
+                                banner.html('<i class="fas fa-exclamation-circle mr-2"></i>No registration slots have been allocated to your school yet. Please contact the admin.');
+                                banner.show();
+                            }
                         }
                     });
                 }
+
 
                 function animateNumber(id, target) {
                     const el = document.getElementById(id);
@@ -1810,47 +1852,54 @@ use App\Http\Controllers\Helper;
                                     else if (reg.status === 'Attached Image, Pending Submission') badge = '<span class="sbadge sbadge-teal"><i class="fas fa-image"></i> Image Attached</span>';
                                     else if (reg.status === 'Pending Admin Approval') badge = '<span class="sbadge sbadge-sky"><i class="fas fa-paper-plane"></i> Submitted</span>';
                                     else if (reg.status === 'Approved') badge = '<span class="sbadge sbadge-green"><i class="fas fa-check-circle"></i> Approved</span>';
+                                    else if (reg.status === 'Returned') badge = '<span class="sbadge sbadge-coral"><i class="fas fa-undo"></i> Returned \u2014 Edit & Resubmit</span>';
 
                                     html += `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td class="clickable-photo" style="cursor: pointer;" data-id="${reg.id}" data-student-id="${reg.student_id}">
-                                    <img src="/assets/student_photos/${reg.student_id}.jpg"
-                                         onerror="this.src='/assets/images/default-user.jpg';"
-                                         style="width:46px;height:58px;object-fit:cover;border-radius:8px;border:2px solid #e9ecef;">
-                                </td>
-                                <td><code style="font-size:12px;color:var(--forest);background:var(--mint);padding:3px 7px;border-radius:6px;">${reg.student_id}</code></td>
-                                <td>
-                                    <span style="font-weight:600;font-size:13px;">${reg.student_name}</span>
-                                    ${reg.student_name_ar ? `<br><small style="color:var(--slate);font-size:11px;">${reg.student_name_ar}</small>` : ''}
-                                </td>
-                                <td>${reg.class ?? '-'}</td>
-                                <td><span style="font-weight:600;">${reg.admission_year}</span></td>
-                                <td>${badge}</td>
-                                <td>${reg.date_of_birth ? reg.date_of_birth.split('-').reverse().join('/') : '-'}</td>
-                                <td>
-                                    <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
-                                        <button class="btn btn-sm btn-primary edit-student"
-                                                data-id="${reg.id}" 
-                                                data-student-id="${reg.student_id}"
-                                                style="border-radius:7px; white-space:nowrap;"
-                                                title="Edit">
-                                            <i class="fas fa-edit mr-1"></i> Edit
-                                        </button>
-                                        <button class="btn btn-sm btn-danger delete-student"
-                                                data-id="${reg.student_id}"
-                                                style="border-radius:7px; white-space:nowrap;"
-                                                title="Delete">
-                                            <i class="fas fa-trash mr-1"></i> Delete
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>`;
+                                                    <tr>
+                                                        <td>${index + 1}</td>
+                                                        <td class="clickable-photo" style="cursor: pointer;" data-id="${reg.id}" data-student-id="${reg.student_id}">
+                                                            <img src="/assets/student_photos/${reg.student_id}.jpg"
+                                                                 onerror="this.src='/assets/images/default-user.jpg';"
+                                                                 style="width:46px;height:58px;object-fit:cover;border-radius:8px;border:2px solid #e9ecef;">
+                                                        </td>
+                                                        <td><code style="font-size:12px;color:var(--forest);background:var(--mint);padding:3px 7px;border-radius:6px;">${reg.student_id}</code></td>
+                                                        <td>
+                                                            <span style="font-weight:600;font-size:13px;">${reg.student_name}</span>
+                                                            ${reg.student_name_ar ? `<br><small style="color:var(--slate);font-size:11px;">${reg.student_name_ar}</small>` : ''}
+                                                        </td>
+                                                        <td>${reg.class ?? '-'}</td>
+                                                        <td><span style="font-weight:600;">${reg.admission_year}</span></td>
+                                                        <td>${badge}</td>
+                                                        <td>${reg.date_of_birth ? reg.date_of_birth.split('-').reverse().join('/') : '-'}</td>
+                                                        <td>
+                                                            <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
+                                                                ${reg.is_locked
+                                            ? `<span style="font-size:12px; color:#16a34a; background:#dcfce7; border:1px solid #86efac; border-radius:20px; padding:4px 10px; font-weight:600; white-space:nowrap;">
+                                                                           <i class="fas fa-lock mr-1"></i>Locked
+                                                                       </span>`
+                                            : `<button class="btn btn-sm btn-primary edit-student"
+                                                                               data-id="${reg.id}"
+                                                                               data-student-id="${reg.student_id}"
+                                                                               style="border-radius:7px; white-space:nowrap;"
+                                                                               title="Edit">
+                                                                           <i class="fas fa-edit mr-1"></i> Edit
+                                                                       </button>
+                                                                       <button class="btn btn-sm btn-danger delete-student"
+                                                                               data-id="${reg.student_id}"
+                                                                               style="border-radius:7px; white-space:nowrap;"
+                                                                               title="Delete">
+                                                                           <i class="fas fa-trash mr-1"></i> Delete
+                                                                       </button>`
+                                        }
+                                                            </div>
+                                                        </td>
+
+                                                    </tr>`;
                                 });
                             } else {
                                 html = `<tr><td colspan="9" class="text-center text-muted py-5">
-                                                                        <i class="fas fa-inbox fa-2x d-block mb-2" style="color:#d1d5db;"></i>No registrations yet
-                                                                    </td></tr>`;
+                                                                                                <i class="fas fa-inbox fa-2x d-block mb-2" style="color:#d1d5db;"></i>No registrations yet
+                                                                                            </td></tr>`;
                             }
 
                             $('#registrationTableBody').html(html);
@@ -2172,18 +2221,18 @@ use App\Http\Controllers\Helper;
                             let html = '';
                             students.forEach((s, i) => {
                                 html += `<tr>
-                                                                        <td><input type="checkbox" class="step3-checkbox" value="${s.id}" data-student-id="${s.student_id}" style="width:16px;height:16px;cursor:pointer;"></td>
-                                                                        <td>${i + 1}</td>
-                                                                        <td><img src="/assets/student_photos/${s.student_id}.jpg"
-                                                                                 onerror="this.src='/assets/images/default-user.jpg';"
-                                                                                 style="width:46px;height:58px;object-fit:cover;border-radius:8px;border:2px solid #e9ecef;"></td>
-                                                                        <td><code style="font-size:12px;color:var(--forest);background:var(--mint);padding:3px 7px;border-radius:6px;">${s.student_id}</code></td>
-                                                                        <td><span style="font-weight:600;font-size:13px;">${s.student_name}</span>
-                                                                            ${s.student_name_ar ? `<br><small style="color:var(--slate);font-size:11px;">${s.student_name_ar}</small>` : ''}</td>
-                                                                        <td>${s.class ?? '-'}</td>
-                                                                        <td>${s.section ?? '-'}</td>
-                                                                        <td>${s.date_of_birth ? s.date_of_birth.split('-').reverse().join('/') : '-'}</td>
-                                                                    </tr>`;
+                                    <td><input type="checkbox" class="step3-checkbox" value="${s.id}" data-student-id="${s.student_id}" style="width:16px;height:16px;cursor:pointer;"></td>
+                                    <td>${i + 1}</td>
+                                    <td><img src="/assets/student_photos/${s.student_id}.jpg"
+                                                onerror="this.src='/assets/images/default-user.jpg';"
+                                                style="width:46px;height:58px;object-fit:cover;border-radius:8px;border:2px solid #e9ecef;"></td>
+                                    <td><code style="font-size:12px;color:var(--forest);background:var(--mint);padding:3px 7px;border-radius:6px;">${s.student_id}</code></td>
+                                    <td><span style="font-weight:600;font-size:13px;">${s.student_name}</span>
+                                        ${s.student_name_ar ? `<br><small style="color:var(--slate);font-size:11px;">${s.student_name_ar}</small>` : ''}</td>
+                                    <td>${s.class ?? '-'}</td>
+                                    <td>${s.section ?? '-'}</td>
+                                    <td>${s.date_of_birth ? s.date_of_birth.split('-').reverse().join('/') : '-'}</td>
+                                </tr>`;
                             });
 
                             $('#step3TableBody').html(html);
@@ -2206,228 +2255,185 @@ use App\Http\Controllers\Helper;
                     $('#step3_check_all').prop('checked', total === checked);
                 });
 
-// Function to get file icon and type
-function getFileIcon(fileType, fileName) {
-    const ext = fileName.split('.').pop().toLowerCase();
-    
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-        return { icon: 'fas fa-image', type: 'image', class: 'image' };
-    } else if (ext === 'pdf') {
-        return { icon: 'fas fa-file-pdf', type: 'pdf', class: 'pdf' };
-    } else if (['doc', 'docx'].includes(ext)) {
-        return { icon: 'fas fa-file-word', type: 'word', class: 'word' };
-    } else if (['xls', 'xlsx'].includes(ext)) {
-        return { icon: 'fas fa-file-excel', type: 'excel', class: 'excel' };
-    } else if (ext === 'txt') {
-        return { icon: 'fas fa-file-alt', type: 'text', class: 'text' };
-    } else {
-        return { icon: 'fas fa-file', type: 'generic', class: 'generic' };
-    }
-}
+                // Function to get file icon and type
+                function getFileIcon(fileType, fileName) {
+                    const ext = fileName.split('.').pop().toLowerCase();
 
-// Function to preview document
-function previewDocument(file) {
-    return new Promise((resolve, reject) => {
-        const fileType = getFileIcon(file.type, file.name);
-        const previewDiv = $('#step3_doc_preview');
-        
-        if (fileType.type === 'image') {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewDiv.html(`<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`);
-                previewDiv.removeClass().addClass(`document-preview ${fileType.class}`);
-                resolve();
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        } else {
-            // For non-image files, show icon and filename
-            previewDiv.html(`
-                <i class="${fileType.icon}" style="font-size: 48px;"></i>
-                <span>${file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name}</span>
-            `);
-            previewDiv.removeClass().addClass(`document-preview ${fileType.class}`);
-            resolve();
-        }
-    });
-}
+                    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                        return { icon: 'fas fa-image', type: 'image', class: 'image' };
+                    } else if (ext === 'pdf') {
+                        return { icon: 'fas fa-file-pdf', type: 'pdf', class: 'pdf' };
+                    } else if (['doc', 'docx'].includes(ext)) {
+                        return { icon: 'fas fa-file-word', type: 'word', class: 'word' };
+                    } else if (['xls', 'xlsx'].includes(ext)) {
+                        return { icon: 'fas fa-file-excel', type: 'excel', class: 'excel' };
+                    } else if (ext === 'txt') {
+                        return { icon: 'fas fa-file-alt', type: 'text', class: 'text' };
+                    } else {
+                        return { icon: 'fas fa-file', type: 'generic', class: 'generic' };
+                    }
+                }
 
-// Update file input change handler
-$('#step3_doc_input').on('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    // Check file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'Too Large', 
-            text: 'File size must be less than 5MB.', 
-            confirmButtonColor: '#287C44' 
-        });
-        $(this).val(''); 
-        return;
-    }
-    
-    // Show loading status
-    $('#step3_upload_status').removeClass('success error').addClass('loading')
-        .html('<i class="fas fa-spinner fa-spin"></i> Loading file...').show();
-    
-    // Preview the file
-    previewDocument(file).then(() => {
-        $('#step3_file_name').text(file.name).show();
-        $('#step3_upload_status').removeClass('loading error').addClass('success')
-            .html('<i class="fas fa-check-circle"></i> File loaded successfully!').show();
-        setTimeout(() => $('#step3_upload_status').fadeOut(), 3000);
-        step3DocFile = file;
-    }).catch(error => {
-        console.error('Preview error:', error);
-        $('#step3_upload_status').removeClass('loading success').addClass('error')
-            .html('<i class="fas fa-exclamation-circle"></i> Error loading file').show();
-        setTimeout(() => $('#step3_upload_status').fadeOut(), 3000);
-    });
-});
+                // Function to preview document
+                function previewDocument(file) {
+                    return new Promise((resolve, reject) => {
+                        const fileType = getFileIcon(file.type, file.name);
+                        const previewDiv = $('#step3_doc_preview');
 
-// Update remove button handler
-$('#step3_remove_doc_btn').on('click', function() {
-    $('#step3_doc_input').val('');
-    $('#step3_doc_preview').html(`
-        <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
-        <span style="font-size: 12px; margin-top: 8px;">No file selected</span>
-    `);
-    $('#step3_doc_preview').removeClass().addClass('document-preview');
-    $('#step3_file_name').hide().empty();
-    step3DocFile = null;
-    $('#step3_upload_status').hide().removeClass('success error loading').empty();
-});
+                        if (fileType.type === 'image') {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                previewDiv.html(`<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`);
+                                previewDiv.removeClass().addClass(`document-preview ${fileType.class}`);
+                                resolve();
+                            };
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        } else {
+                            // For non-image files, show icon and filename
+                            previewDiv.html(`
+                                        <i class="${fileType.icon}" style="font-size: 48px;"></i>
+                                        <span>${file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name}</span>
+                                    `);
+                            previewDiv.removeClass().addClass(`document-preview ${fileType.class}`);
+                            resolve();
+                        }
+                    });
+                }
 
-// Update submit button to validate file type more flexibly
-$('#step3_submit_btn').on('click', function() {
-    const checked = $('.step3-checkbox:checked');
-    if (checked.length === 0) {
-        Swal.fire({ icon: 'warning', title: 'None Selected', text: 'Select at least one student.', confirmButtonColor: '#287C44' }); 
-        return;
-    }
-    if (!step3DocFile) {
-        Swal.fire({ icon: 'warning', title: 'No Document', text: 'Please attach a supporting document.', confirmButtonColor: '#287C44' }); 
-        return;
-    }
-    
-    const ids = [];
-    checked.each(function() { ids.push($(this).val()); });
-    
-    // Show file info in confirmation
-    const fileSize = (step3DocFile.size / 1024).toFixed(2);
-    const fileSizeText = fileSize > 1024 ? (fileSize / 1024).toFixed(2) + ' MB' : fileSize + ' KB';
-    
-    Swal.fire({
-        title: 'Submit for Approval?',
-        html: `
-            <div style="text-align: left;">
-                <p>You are about to submit <b>${ids.length}</b> student(s) for admin approval.</p>
-                <p>Their status will change to <b>Pending Admin Approval</b>.</p>
-                <hr>
-                <p><strong>Attached Document:</strong></p>
-                <p style="font-size: 12px; color: var(--slate);">
-                    <i class="fas fa-file"></i> ${step3DocFile.name}<br>
-                    <i class="fas fa-database"></i> ${fileSizeText}
-                </p>
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#287C44', 
-        cancelButtonColor: '#dc2626',
-        confirmButtonText: 'Yes, Submit!'
-    }).then(result => {
-        if (!result.isConfirmed) return;
-        
-        Swal.fire({ title: 'Submitting…', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-        
-        const fd = new FormData();
-        fd.append('_token', '{{ csrf_token() }}');
-        fd.append('ids', JSON.stringify(ids));
-        fd.append('document', step3DocFile);
-        
-        $.ajax({
-            url: '{{ route("school.step3.submit") }}',
-            method: 'POST', 
-            data: fd, 
-            processData: false, 
-            contentType: false,
-            success: r => Swal.fire({ 
-                icon: 'success', 
-                title: 'Submitted!', 
-                text: r.message, 
-                confirmButtonColor: '#287C44' 
-            }).then(() => {
-                // Reset form
-                $('#step3_doc_input').val('');
-                $('#step3_doc_preview').html(`
-                    <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
-                    <span style="font-size: 12px; margin-top: 8px;">No file selected</span>
-                `);
-                $('#step3_doc_preview').removeClass().addClass('document-preview');
-                $('#step3_file_name').hide().empty();
-                step3DocFile = null;
-                $('#step3_upload_status').hide().removeClass('success error loading').empty();
-                
-                // Reload data
-                loadStep3Students($('#step3_year').val(), $('#step3_category').val());
-                loadRecentRegistrations();
-                loadAnalytics();
-            }),
-            error: xhr => Swal.fire({ 
-                icon: 'error', 
-                title: 'Error', 
-                text: xhr.responseJSON?.message || 'Failed to submit.', 
-                confirmButtonColor: '#dc2626' 
-            })
-        });
-    });
-});
+                // Update file input change handler
+                $('#step3_doc_input').on('change', function (e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
 
+                    // Check file size (5MB max)
+                    if (file.size > 5 * 1024 * 1024) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Too Large',
+                            text: 'File size must be less than 5MB.',
+                            confirmButtonColor: '#287C44'
+                        });
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Show loading status
+                    $('#step3_upload_status').removeClass('success error').addClass('loading')
+                        .html('<i class="fas fa-spinner fa-spin"></i> Loading file...').show();
+
+                    // Preview the file
+                    previewDocument(file).then(() => {
+                        $('#step3_file_name').text(file.name).show();
+                        $('#step3_upload_status').removeClass('loading error').addClass('success')
+                            .html('<i class="fas fa-check-circle"></i> File loaded successfully!').show();
+                        setTimeout(() => $('#step3_upload_status').fadeOut(), 3000);
+                        step3DocFile = file;
+                    }).catch(error => {
+                        console.error('Preview error:', error);
+                        $('#step3_upload_status').removeClass('loading success').addClass('error')
+                            .html('<i class="fas fa-exclamation-circle"></i> Error loading file').show();
+                        setTimeout(() => $('#step3_upload_status').fadeOut(), 3000);
+                    });
+                });
+
+                // Update remove button handler
+                $('#step3_remove_doc_btn').on('click', function () {
+                    $('#step3_doc_input').val('');
+                    $('#step3_doc_preview').html(`
+                                <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
+                                <span style="font-size: 12px; margin-top: 8px;">No file selected</span>
+                            `);
+                    $('#step3_doc_preview').removeClass().addClass('document-preview');
+                    $('#step3_file_name').hide().empty();
+                    step3DocFile = null;
+                    $('#step3_upload_status').hide().removeClass('success error loading').empty();
+                });
+
+                // Update submit button to validate file type more flexibly
                 $('#step3_submit_btn').on('click', function () {
                     const checked = $('.step3-checkbox:checked');
                     if (checked.length === 0) {
-                        Swal.fire({ icon: 'warning', title: 'None Selected', text: 'Select at least one student.', confirmButtonColor: '#287C44' }); return;
+                        Swal.fire({ icon: 'warning', title: 'None Selected', text: 'Select at least one student.', confirmButtonColor: '#287C44' });
+                        return;
                     }
-                    if (!step3DocFile) {
-                        Swal.fire({ icon: 'warning', title: 'No Document', text: 'Please attach a supporting document.', confirmButtonColor: '#287C44' }); return;
-                    }
+
                     const ids = [];
                     checked.each(function () { ids.push($(this).val()); });
 
+                    // Build confirmation HTML — doc info is optional
+                    let docHtml = step3DocFile
+                        ? (() => {
+                            const fileSize = (step3DocFile.size / 1024).toFixed(2);
+                            const fileSizeText = fileSize > 1024 ? (fileSize / 1024).toFixed(2) + ' MB' : fileSize + ' KB';
+                            return `<hr>
+                            <p><strong>Attached Document:</strong></p>
+                            <p style="font-size: 12px; color: var(--slate);">
+                                <i class="fas fa-file"></i> ${step3DocFile.name}<br>
+                                <i class="fas fa-database"></i> ${fileSizeText}
+                            </p>`;
+                        })()
+                        : `<hr><p style="font-size:12px;color:var(--slate);"><i class="fas fa-info-circle"></i> No supporting document attached (optional).</p>`;
+
                     Swal.fire({
                         title: 'Submit for Approval?',
-                        html: `You are about to submit <b>${ids.length}</b> student(s) for admin approval.<br>Their status will change to <b>Pending Admin Approval</b>.`,
+                        html: `
+                    <div style="text-align: left;">
+                        <p>You are about to submit <b>${ids.length}</b> student(s) for admin approval.</p>
+                        <p>Their status will change to <b>Pending Admin Approval</b>.</p>
+                        ${docHtml}
+                    </div>
+                `,
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonColor: '#287C44', cancelButtonColor: '#dc2626',
+                        confirmButtonColor: '#287C44',
+                        cancelButtonColor: '#dc2626',
                         confirmButtonText: 'Yes, Submit!'
                     }).then(result => {
                         if (!result.isConfirmed) return;
+
                         Swal.fire({ title: 'Submitting…', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
                         const fd = new FormData();
                         fd.append('_token', '{{ csrf_token() }}');
                         fd.append('ids', JSON.stringify(ids));
-                        fd.append('document', step3DocFile);
+                        if (step3DocFile) fd.append('document', step3DocFile); // only append if present
+
                         $.ajax({
                             url: '{{ route("school.step3.submit") }}',
-                            method: 'POST', data: fd, processData: false, contentType: false,
-                            success: r => Swal.fire({ icon: 'success', title: 'Submitted!', text: r.message, confirmButtonColor: '#287C44' }).then(() => {
+                            method: 'POST',
+                            data: fd,
+                            processData: false,
+                            contentType: false,
+                            success: r => Swal.fire({
+                                icon: 'success',
+                                title: 'Submitted!',
+                                text: r.message,
+                                confirmButtonColor: '#287C44'
+                            }).then(() => {
                                 $('#step3_doc_input').val('');
-                                $('#step3_doc_preview').attr('src', '/assets/images/default-user.jpg');
+                                $('#step3_doc_preview').html(`
+                            <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc2626;"></i>
+                            <span style="font-size: 12px; margin-top: 8px;">No file selected</span>
+                        `);
+                                $('#step3_doc_preview').removeClass().addClass('document-preview');
+                                $('#step3_file_name').hide().empty();
                                 step3DocFile = null;
                                 $('#step3_upload_status').hide().removeClass('success error loading').empty();
                                 loadStep3Students($('#step3_year').val(), $('#step3_category').val());
                                 loadRecentRegistrations();
                                 loadAnalytics();
                             }),
-                            error: xhr => Swal.fire({ icon: 'error', title: 'Error', text: xhr.responseJSON?.message || 'Failed to submit.', confirmButtonColor: '#dc2626' })
+                            error: xhr => Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: xhr.responseJSON?.message || 'Failed to submit.',
+                                confirmButtonColor: '#dc2626'
+                            })
                         });
                     });
                 });
+                // (duplicate step3_submit_btn handler removed)
 
                 // Open edit modal when clicking on photo column
                 $(document).on('click', '.clickable-photo', function () {

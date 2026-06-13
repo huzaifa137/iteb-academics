@@ -29,6 +29,8 @@ class StudentRegistration extends Model
         'district',
         'district_ar',
         'entry_date',
+        'submitted_at',
+        'is_locked',
         'status',
         'admin_remarks',
     ];
@@ -36,6 +38,8 @@ class StudentRegistration extends Model
     protected $casts = [
         'date_of_birth' => 'date:Y-m-d',
         'entry_date' => 'date:Y-m-d',
+        'submitted_at' => 'datetime',
+        'is_locked' => 'boolean',
     ];
 
     public function school()

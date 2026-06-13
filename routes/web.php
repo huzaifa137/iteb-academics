@@ -18,31 +18,6 @@ use App\Models\House;
 use App\Models\SchoolPassword;
 use Illuminate\Support\Facades\Hash;
 
-// Route::get('/show-sessions', function () {
-//     // Get all session data
-//     $allSessions = Session::all();
-
-//     dd($allSessions);
-// })->name('show.sessions');
-
-// Route::get('/set-admin-session', function () {
-//     session(['LoggedAdmin' => 1]);
-
-//     return redirect('/'); // or where
-// });
-
-// Route::get('/set-student-session', function () {
-//     session(['LoggedStudent' => 1]);
-
-//     return redirect('/');
-// });
-
-// Route::get('/set-school', function () {
-//     session(['LoggedSchool' => 2]);
-
-//     return redirect('/');
-// });
-
 
 Route::get('/generate-school-passwords', function () {
 
@@ -331,7 +306,7 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
                 Route::post('/update/{id}', 'updateStudentInformation')->name('students.update.info');
             });
         });
-    });
+});
 
 Route::controller(ExamController::class)->group(function () {
     Route::group(['middleware' => ['StudentAuth']], function () {
@@ -505,4 +480,25 @@ Route::controller(AcademicYearController::class)->group(function () {
     Route::post('/academic-years/update/{id}', 'update')->name('academic.years.update');
     Route::delete('/academic-years/delete/{id}', 'destroy')->name('academic.years.delete');
 
+});
+
+
+Route::prefix('admin')->controller(SchoolsController::class)->group(function () {
+
+    Route::get('/student-approvals', 'adminStudentApprovals');
+    Route::get('/student-approvals/{schoolPrefix}', 'adminSchoolApprovalDetail');
+    Route::post('/student-approvals/update-status', 'adminUpdateApprovalStatus');
+
+    // SLOT MANAGEMENT
+    Route::get('/school-slots/search', 'adminSearchSchoolsForSlots')->name('admin.school.slots.search');
+    Route::post('/school-slots/assign', 'adminAssignSlots')->name('admin.school.slots.assign');
+    Route::post('/school-slots/toggle', 'adminToggleSchoolRegistration')->name('admin.school.slots.toggle');
+    Route::get('/school-slots/history', 'adminSlotHistory')->name('admin.school.slots.history');
+
+    // REGISTRATION PERIOD
+    Route::post('/registration-period', 'adminSaveRegistrationPeriod')->name('admin.registration.period.save');
+    Route::put('/registration-period/{id}', 'adminUpdateRegistrationPeriod')->name('admin.registration.period.update');
+    Route::delete('/registration-period/{id}', 'adminDeleteRegistrationPeriod')->name('admin.registration.period.delete');
+
+    Route::post('/admin/student-registrations/toggle-lock', 'adminToggleStudentLock')->name('admin.student.toggle.lock');
 });
