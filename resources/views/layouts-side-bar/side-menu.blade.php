@@ -65,6 +65,14 @@ use App\Helpers\PermissionHelper;
                 </a>
             </li>
 
+            {{-- ── NEW: School Recognition Certificates ── --}}
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('school.recognition.index') }}">
+                    <i class="fas fa-certificate fa-2x mr-3"></i>
+                    Recognition Certificates
+                </a>
+            </li>
+
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('admin.student.approvals') }}">
                     <i class="fas fa-user-check fa-2x mr-3"></i>
@@ -89,11 +97,19 @@ use App\Helpers\PermissionHelper;
                 </a>
             </li>
 
-            <!-- Add this new link -->
+            <!-- Register Student -->
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('school.register.student') }}">
                     <i class="fas fa-user-plus fa-2x mr-3"></i>
                     Register Student
+                </a>
+            </li>
+
+            {{-- ── NEW: School's own Recognition Certificate ── --}}
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('school.recognition.view') }}">
+                    <i class="fas fa-certificate fa-2x mr-3"></i>
+                    Recognition Certificate
                 </a>
             </li>
         @endif
@@ -123,13 +139,11 @@ use App\Helpers\PermissionHelper;
     }
 </style>
 
-{{-- Scripts (common) --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(document).ready(function () {
-        // Check localStorage for sidebar state and apply it
         const sidebarState = localStorage.getItem('sidebar-state');
 
         if (sidebarState === 'closed') {
@@ -138,7 +152,6 @@ use App\Helpers\PermissionHelper;
             $('body').removeClass('sidenav-toggled');
         }
 
-        // Watch for sidebar toggle clicks
         $(document).on('click', '[data-toggle="sidebar"]', function () {
             setTimeout(function () {
                 if ($('body').hasClass('sidenav-toggled')) {
@@ -149,14 +162,12 @@ use App\Helpers\PermissionHelper;
             }, 100);
         });
 
-        // Help & Support toggle
         $('#helpSupportToggle').on('click', function (e) {
             e.preventDefault();
             $(this).parent('.slide').toggleClass('active');
         });
     });
 
-    // Logout handler
     document.getElementById('logoutMenu').addEventListener('click', function (event) {
         event.preventDefault();
 

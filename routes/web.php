@@ -13,6 +13,8 @@ use App\Http\Controllers\GradingController;
 use App\Http\Controllers\PasslipAndCertificatesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\SchoolRecognitionCertificateController;
+
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -502,3 +504,22 @@ Route::prefix('admin')->controller(SchoolsController::class)->group(function () 
 
     Route::post('/admin/student-registrations/toggle-lock', 'adminToggleStudentLock')->name('admin.student.toggle.lock');
 });
+
+
+Route::prefix('school-recognition')
+    ->controller(SchoolRecognitionCertificateController::class)
+    ->name('school.recognition.')
+    ->group(function () {
+        Route::get('/',              'index')->name('index');
+        Route::get('/issue',         'create')->name('create');
+        Route::post('/store',        'store')->name('store');
+        Route::get('/view/{id}',     'show')->name('show');
+        Route::post('/revoke/{id}',  'revoke')->name('revoke');
+        Route::delete('/delete/{id}','destroy')->name('destroy');
+    });
+ 
+Route::get('/school/recognition-certificate',
+    [SchoolRecognitionCertificateController::class, 'schoolView'])
+    ->name('school.recognition.view')
+    ->middleware('SchoolAuth');
+ 
