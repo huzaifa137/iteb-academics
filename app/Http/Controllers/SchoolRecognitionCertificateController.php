@@ -44,37 +44,120 @@ class SchoolRecognitionCertificateController extends Controller
     {
         $validated = $request->validate([
             'house_number' => 'required|string|exists:houses,Number',
-            'issued_date'  => 'required|date',
-            'issued_by'    => 'nullable|string|max:150',
-            'notes'        => 'nullable|string',
+            'issued_date' => 'required|date',
+            'issued_by' => 'nullable|string|max:150',
+            'notes' => 'nullable|string',
         ]);
 
-        // Check if the school already has an active certificate
-        $existing = SchoolRecognitionCertificate::where('house_number', $validated['house_number'])
-            ->where('status', 'active')
-            ->first();
-
-        if ($existing) {
-            return back()->withErrors([
-                'house_number' => 'This school already has an active recognition certificate (No. ' . $existing->certificate_number . '). Revoke it first before issuing a new one.',
-            ])->withInput();
-        }
-
-        // Auto-generate certificate number: ITEB-RC-{house_number}-{year}
+        // Auto-generate certificate number
         $year = date('Y', strtotime($validated['issued_date']));
         $certNumber = 'ITEB-RC-' . strtoupper($validated['house_number']) . '-' . $year;
 
-        SchoolRecognitionCertificate::create([
-            'house_number'       => $validated['house_number'],
-            'certificate_number' => $certNumber,
-            'issued_date'        => $validated['issued_date'],
-            'issued_by'          => $validated['issued_by'] ?? 'Executive Secretary (ITEBU)',
-            'status'             => 'active',
-            'notes'              => $validated['notes'] ?? null,
-        ]);
+        // Check for existing certificate
+        $existingCertificate = SchoolRecognitionCertificate::where('certificate_number', $certNumber)->first();
 
-        return redirect()->route('school.recognition.index')
-            ->with('success', 'Recognition certificate issued successfully for school ' . $validated['house_number'] . '.');
+        if ($existingCertificate) {
+            if ($existingCertificate->status === 'active') {
+                return back()->withInput()->with([
+                    'alert' => [
+                        'type' => 'error',
+                        'title' => 'Active Certificate Exists!',
+                        'message' => 'School <strong>' . $validated['house_number'] . '</strong> already has an active certificate.<br><br>
+                        <strong>Certificate No:</strong> ' . $existingCertificate->certificate_number . '<br>
+                        <strong>Issue Date:</strong> ' . date('d-m-Y', strtotime($existingCertificate->issued_date)) . '<br><br>
+                        Please revoke the existing certificate first before issuing a new one.',
+                        'icon' => 'warning',
+                    ]
+                ]);
+            } elseif ($existingCertificate->status === 'revoked') {
+                return back()->withInput()->with([
+                    'alert' => [
+                        'type' => 'question',
+                        'title' => 'Certificate Already Exists',
+                        'message' => 'A certificate for school <strong>' . $validated['house_number'] . '</strong> already exists but is currently <strong style="color: #856404;">REVOKED</strong>.<br><br>
+                <strong>Certificate Number:</strong> ' . $existingCertificate->certificate_number . '<br>
+                <strong>Original Issue Date:</strong> ' . date('d-m-Y', strtotime($existingCertificate->issued_date)) . '<br><br>
+                Would you like to <strong>reactivate</strong> this existing certificate instead of creating a new one?',
+                        'icon' => 'question',
+                        'showCancelButton' => true,
+                        'confirmButtonText' => 'Yes, Reactivate',
+                        'cancelButtonText' => 'No, Cancel',
+                        'certificateId' => $existingCertificate->id, // Pass the ID
+                    ]
+                ]);
+            }
+        }
+
+        // Check for existing active certificate
+        $existingActive = SchoolRecognitionCertificate::where('house_number', $validated['house_number'])
+            ->where('status', 'active')
+            ->first();
+
+        if ($existingActive) {
+            return back()->withInput()->with([
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Active Certificate Exists!',
+                    'message' => 'School <strong>' . $validated['house_number'] . '</strong> already has an active certificate.<br><br>
+                    <strong>Certificate No:</strong> ' . $existingActive->certificate_number . '<br>
+                    <strong>Issue Date:</strong> ' . date('d-m-Y', strtotime($existingActive->issued_date)) . '<br><br>
+                    Please revoke the existing certificate first before issuing a new one.',
+                    'icon' => 'warning',
+                ]
+            ]);
+        }
+
+        // Create new certificate
+        try {
+            SchoolRecognitionCertificate::create([
+                'house_number' => $validated['house_number'],
+                'certificate_number' => $certNumber,
+                'issued_date' => $validated['issued_date'],
+                'issued_by' => $validated['issued_by'] ?? 'Executive Secretary (ITEBU)',
+                'status' => 'active',
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            return redirect()->route('school.recognition.index')
+                ->with('success', 'Recognition certificate issued successfully for school ' . $validated['house_number'] . '. Certificate Number: ' . $certNumber);
+
+        } catch (\Exception $e) {
+            return back()->withInput()->with([
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Error!',
+                    'message' => 'Unable to issue certificate. ' . $e->getMessage(),
+                    'icon' => 'error',
+                ]
+            ]);
+        }
+    }
+
+    public function reactivate($id)
+    {
+        $certificate = SchoolRecognitionCertificate::findOrFail($id);
+
+        // Check if school already has an active certificate
+        $existingActive = SchoolRecognitionCertificate::where('house_number', $certificate->house_number)
+            ->where('status', 'active')
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($existingActive) {
+            return back()->with([
+                'swal_error' => true,
+                'swal_title' => 'Cannot Re-activate!',
+                'swal_text' => 'This school already has an active certificate (<b>' . $existingActive->certificate_number . '</b>).<br><br>Revoke the active one first before re-activating this certificate.',
+                'swal_icon' => 'warning',
+            ]);
+        }
+
+        $certificate->update(['status' => 'active']);
+
+        return back()->with(
+            'success',
+            'Certificate <b>' . $certificate->certificate_number . '</b> has been re-activated successfully.'
+        );
     }
 
     /**
@@ -134,7 +217,7 @@ class SchoolRecognitionCertificateController extends Controller
         if (!$cert) {
             return view('Certificates.school-recognition.school-not-issued', [
                 'schoolNumber' => $schoolNumber,
-                'schoolName'   => session('LoggedSchoolName'),
+                'schoolName' => session('LoggedSchoolName'),
             ]);
         }
 
@@ -150,7 +233,7 @@ class SchoolRecognitionCertificateController extends Controller
      */
     private function renderCertificate(SchoolRecognitionCertificate $cert)
     {
-        $bismillahPath   = public_path('assets/basmallah.png');
+        $bismillahPath = public_path('assets/basmallah.png');
         $bismillahBase64 = '';
         if (file_exists($bismillahPath)) {
             $bismillahBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($bismillahPath));
@@ -162,7 +245,7 @@ class SchoolRecognitionCertificateController extends Controller
         $schoolNameAr = $house->House_AR ?? $house->House;
         $schoolNameEn = $house->House;
         $schoolNumber = $house->Number;
-        $location     = $house->Location ?? 'Uganda';
+        $location = $house->Location ?? 'Uganda';
 
         return view('Certificates.school-recognition.certificate', compact(
             'cert',

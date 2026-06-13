@@ -8,10 +8,6 @@
 
         <div class="page-header">
             <h4 class="page-title">School Recognition Certificates</h4>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url('/student/dashboard') }}">Home</a></li>
-                <li class="breadcrumb-item active">Recognition Certificates</li>
-            </ol>
         </div>
 
         <div class="row">
@@ -31,7 +27,7 @@
 
                         @if(session('success'))
                             <div class="alert alert-success mx-3 mt-3 mb-0" style="border-radius: 10px;">
-                                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                                <i class="fas fa-check-circle mr-2"></i>{!! session('success') !!}
                             </div>
                         @endif
 
@@ -46,16 +42,16 @@
                         @else
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0" style="font-size: 0.92rem;">
-                                    <thead style="background: #f5f7fa;">
+                                    <thead style="background-color: #0d4b1f; color: #FFF;">
                                         <tr>
-                                            <th class="pl-4">#</th>
-                                            <th>Certificate No.</th>
-                                            <th>School (House)</th>
-                                            <th>School Code</th>
-                                            <th>Location</th>
-                                            <th>Issued Date</th>
-                                            <th>Status</th>
-                                            <th class="text-center">Actions</th>
+                                            <th class="pl-4" style="color: #FFF;">#</th>
+                                            <th style="color: #FFF;">Certificate No.</th>
+                                            <th style="color: #FFF;">School (House)</th>
+                                            <th style="color: #FFF;">School Code</th>
+                                            <th style="color: #FFF;">Location</th>
+                                            <th style="color: #FFF;">Issued Date</th>
+                                            <th style="color: #FFF;">Status</th>
+                                            <th class="text-center" style="color: #FFF;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,6 +101,13 @@
                                                             style="border-radius: 6px;">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
+                                                    @else
+                                                        <button
+                                                            onclick="confirmReactivate({{ $cert->id }}, '{{ $cert->certificate_number }}')"
+                                                            class="btn btn-sm btn-outline-success mr-1" title="Re-activate"
+                                                            style="border-radius: 6px;">
+                                                            <i class="fas fa-redo-alt"></i>
+                                                        </button>
                                                     @endif
 
                                                     <button
@@ -117,6 +120,11 @@
                                                     {{-- Hidden forms --}}
                                                     <form id="revoke-form-{{ $cert->id }}"
                                                         action="{{ route('school.recognition.revoke', $cert->id) }}" method="POST"
+                                                        class="d-none">
+                                                        @csrf
+                                                    </form>
+                                                    <form id="reactivate-form-{{ $cert->id }}"
+                                                        action="{{ route('school.recognition.reactivate', $cert->id) }}" method="POST"
                                                         class="d-none">
                                                         @csrf
                                                     </form>
@@ -137,44 +145,83 @@
                 </div>
             </div>
         </div>
+                        </div>
+            </div>
+        </div>
 
     </div>
-    </div>
-    </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmRevoke(id, certNo) {
-            Swal.fire({
-                title: 'Revoke Certificate?',
-                html: `Are you sure you want to revoke certificate <b>${certNo}</b>?<br>The school will lose access to download it.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e6a817',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Revoke',
-            }).then(result => {
-                if (result.isConfirmed) {
-                    document.getElementById('revoke-form-' + id).submit();
-                }
-            });
-        }
-
-        function confirmDelete(id, certNo) {
-            Swal.fire({
-                title: 'Delete Record?',
-                html: `This will permanently delete certificate <b>${certNo}</b> and cannot be undone.`,
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Delete',
-            }).then(result => {
-                if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
-                }
-            });
-        }
-    </script>
 @endsection
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmRevoke(id, certNo) {
+        Swal.fire({
+            title: 'Revoke Certificate?',
+            html: `Are you sure you want to revoke certificate <b>${certNo}</b>?<br><small class="text-muted">The school will lose access to download it.</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e6a817',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Revoke',
+        }).then(result => {
+            if (result.isConfirmed) {
+                document.getElementById('revoke-form-' + id).submit();
+            }
+        });
+    }
+
+    function confirmReactivate(id, certNo) {
+        Swal.fire({
+            title: 'Re-activate Certificate?',
+            html: `Are you sure you want to <b>re-activate</b> certificate <b>${certNo}</b>?<br><small class="text-muted">This will restore the school's access to download it.</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-redo-alt mr-1"></i> Yes, Re-activate',
+        }).then(result => {
+            if (result.isConfirmed) {
+                document.getElementById('reactivate-form-' + id).submit();
+            }
+        });
+    }
+
+    function confirmDelete(id, certNo) {
+        Swal.fire({
+            title: 'Delete Record?',
+            html: `This will <b>permanently delete</b> certificate <b>${certNo}</b> and cannot be undone.`,
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Delete',
+        }).then(result => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    }
+
+    // Handle SweetAlert from redirect (for duplicate/error scenarios)
+    @if(session('swal_error'))
+        Swal.fire({
+            title: '{!! session('swal_title') !!}',
+            html: '{!! session('swal_text') !!}',
+            icon: '{!! session('swal_icon') !!}',
+            confirmButtonColor: '#0d4b1f',
+            confirmButtonText: '{!! session('swal_confirm_text', 'OK') !!}',
+            @if(session('swal_confirm_url'))
+            showCancelButton: true,
+            cancelButtonText: 'Close',
+            cancelButtonColor: '#6c757d',
+            @endif
+        }).then((result) => {
+            @if(session('swal_confirm_url'))
+            if (result.isConfirmed) {
+                window.location.href = '{{ session('swal_confirm_url') }}';
+            }
+            @endif
+        });
+    @endif
+</script>

@@ -516,6 +516,7 @@ Route::prefix('school-recognition')
         Route::get('/view/{id}',     'show')->name('show');
         Route::post('/revoke/{id}',  'revoke')->name('revoke');
         Route::delete('/delete/{id}','destroy')->name('destroy');
+        Route::post('/{id}/reactivate', 'reactivate')->name('reactivate');
     });
  
 Route::get('/school/recognition-certificate',

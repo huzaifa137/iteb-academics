@@ -4,37 +4,36 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 @section('content')
-<div class="side-app">
+    <div class="side-app">
 
-    <div class="page-header">
-        <h4 class="page-title">Recognition Certificate</h4>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('/school/dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Recognition Certificate</li>
-        </ol>
-    </div>
+        <div class="page-header">
+            <h4 class="page-title">Recognition Certificate</h4>
+        </div>
 
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 18px; padding: 2.5rem 2rem;">
-                <div style="font-size: 4rem; color: #c8a96e; margin-bottom: 1rem;">
-                    <i class="fas fa-certificate"></i>
-                </div>
-                <h4 class="font-weight-bold text-dark">Certificate Not Yet Issued</h4>
-                <p class="text-muted mt-2">
-                    Your school (<strong>{{ $schoolName ?? $schoolNumber }}</strong>) does not yet have a
-                    Recognition Certificate issued by ITEBU.
-                    <br>Please contact the ITEBU secretariat to have your certificate issued.
-                </p>
-                <div class="mt-3">
-                    <a href="{{ url('/school/dashboard') }}" class="btn btn-outline-secondary"
-                        style="border-radius: 10px;">
-                        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
-                    </a>
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm text-center" style="border-radius: 18px; padding: 2.5rem 2rem;">
+                    <div style="font-size: 4rem; color: #0d4b1f; margin-bottom: 1rem;">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h4 class="font-weight-bold text-dark">Certificate Not Yet Issued</h4>
+                    <p class="text-muted mt-2">
+                        Your school (<strong>{{ $schoolName ?? $schoolNumber }}</strong>) does not yet have a
+                        Recognition Certificate issued by ITEBU.
+                        <br>Please contact the ITEBU secretariat to have your certificate issued.
+                    </p>
+                    <div class="mt-3">
+                        <a href="{{ url('/school/dashboard') }}" class="btn btn-outline-secondary"
+                            style="border-radius: 10px;">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
+    </div>
 
-</div>
+    </div>
 @endsection
