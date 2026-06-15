@@ -14,7 +14,7 @@ use App\Http\Controllers\PasslipAndCertificatesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\SchoolRecognitionCertificateController;
-
+use App\Http\Controllers\HouseController;
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -532,3 +532,5 @@ Route::get('/school/recognition-certificate',
     ->name('school.recognition.view')
     ->middleware('SchoolAuth');
  
+Route::get('houses/create', [HouseController::class, 'create'])->name('houses.create');
+Route::post('houses/store', [HouseController::class, 'store'])->name('houses.store');
