@@ -21,6 +21,14 @@ use App\Models\SchoolPassword;
 use Illuminate\Support\Facades\Hash;
 
 
+// Route::get('/generated-hashed-password', function () {
+//   $password =  Hash::make('xumg4646ES@');
+
+//     return $password;
+    
+// })->name('coming.soon');
+
+
 Route::get('/generate-school-passwords', function () {
 
     function generateSecurePassword($length = 5)
