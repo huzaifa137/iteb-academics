@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Hash;
 //   $password =  Hash::make('xumg4646ES@');
 
 //     return $password;
-    
+
 // })->name('coming.soon');
 
 
@@ -518,19 +518,21 @@ Route::prefix('school-recognition')
     ->controller(SchoolRecognitionCertificateController::class)
     ->name('school.recognition.')
     ->group(function () {
-        Route::get('/',              'index')->name('index');
-        Route::get('/issue',         'create')->name('create');
-        Route::post('/store',        'store')->name('store');
-        Route::get('/view/{id}',     'show')->name('show');
-        Route::post('/revoke/{id}',  'revoke')->name('revoke');
-        Route::delete('/delete/{id}','destroy')->name('destroy');
+        Route::get('/', 'index')->name('index');
+        Route::get('/issue', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/view/{id}', 'show')->name('show');
+        Route::post('/revoke/{id}', 'revoke')->name('revoke');
+        Route::delete('/delete/{id}', 'destroy')->name('destroy');
         Route::post('/{id}/reactivate', 'reactivate')->name('reactivate');
     });
- 
-Route::get('/school/recognition-certificate',
-    [SchoolRecognitionCertificateController::class, 'schoolView'])
+
+Route::get(
+    '/school/recognition-certificate',
+    [SchoolRecognitionCertificateController::class, 'schoolView']
+)
     ->name('school.recognition.view')
     ->middleware('SchoolAuth');
- 
+
 Route::get('houses/create', [HouseController::class, 'create'])->name('houses.create');
 Route::post('houses/store', [HouseController::class, 'store'])->name('houses.store');
