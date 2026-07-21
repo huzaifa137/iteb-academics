@@ -502,12 +502,14 @@ Route::prefix('admin')->controller(SchoolsController::class)->group(function () 
     // SLOT MANAGEMENT
     Route::get('/school-slots/search', 'adminSearchSchoolsForSlots')->name('admin.school.slots.search');
     Route::post('/school-slots/assign', 'adminAssignSlots')->name('admin.school.slots.assign');
+    Route::post('/school-slots/edit', 'adminEditSlots')->name('admin.school.slots.edit');
     Route::post('/school-slots/toggle', 'adminToggleSchoolRegistration')->name('admin.school.slots.toggle');
     Route::get('/school-slots/history', 'adminSlotHistory')->name('admin.school.slots.history');
 
     // REGISTRATION PERIOD
     Route::post('/registration-period', 'adminSaveRegistrationPeriod')->name('admin.registration.period.save');
     Route::put('/registration-period/{id}', 'adminUpdateRegistrationPeriod')->name('admin.registration.period.update');
+    Route::post('/registration-period/{id}/status', 'adminSetRegistrationPeriodStatus')->name('admin.registration.period.status');
     Route::delete('/registration-period/{id}', 'adminDeleteRegistrationPeriod')->name('admin.registration.period.delete');
 
     Route::post('/admin/student-registrations/toggle-lock', 'adminToggleStudentLock')->name('admin.student.toggle.lock');

@@ -1,105 +1,107 @@
 <?php
 use App\Http\Controllers\Helper;
-use App\Http\Controllers\Controller;
-$controller = new Controller();
 ?>
 @extends('layouts-side-bar.master')
+
 @section('css')
-    <!---jvectormap css-->
     <link href="{{ URL::asset('assets/plugins/jvectormap/jqvmap.css') }}" rel="stylesheet" />
-    <!-- Data table css -->
     <link href="{{ URL::asset('assets/plugins/datatable/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
-    <!--Daterangepicker css-->
     <link href="{{ URL::asset('assets/plugins/bootstrap-daterangepicker/daterangepicker.css') }}" rel="stylesheet" />
 @endsection
 
 @section('content')
-    <div class="container mt-5">
+
+    <div class="side-app">
+
         <div class="row">
-            <div class="col-lg-12 col-xl-12 col-md-12 col-sm-12">
-                <div class="card bg-primary">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0 text-white">Edit School Information</h4>
-                        <a href="{{ route('school.allSchools') }}" class="btn text-white" style="background-color: #287C44;">
-                            <i class="fas fa-school me-2"></i> All Schools
+            <div class="col-lg-12 col-xl-12 col-md-10 col-sm-12 mx-auto">
+                <div class="card shadow-sm" style="border-top: 4px solid #0d4b1f; border-radius: 10px;">
+
+                    {{-- Card Header --}}
+                    <div class="card-header d-flex justify-content-between align-items-center"
+                        style="background-color: #0d4b1f; border-radius: 6px 6px 0 0;">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="background: rgba(255,255,255,0.15); border-radius: 8px; width:38px; height:38px;
+                                        display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-school text-white" style="font-size:16px;"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h5 class="mb-0 text-white fw-semibold">&nbsp; Edit School Information</h5>
+                                <small class="text-white-50" style="font-size:11px;">&nbsp; &nbsp;Update the details
+                                    below</small>
+                            </div>
+                        </div>
+                        <a href="{{ route('school.allSchools') }}" class="btn btn-sm text-white"
+                            style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius:6px;">
+                            <i class="fas fa-list me-1"></i> All Schools
                         </a>
                     </div>
-                    <div class="card-body bg-light">
-                        <form id="updateSchoolForm">
-                            <div class="row">
-                                <input type="hidden" name="school_id" value="{{ $school_id }}">
-                                <div class="col-lg-6 col-md-12">
-                                    <div class="form-group">
-                                        <label class="form-label">School Type</label>
-                                        <?php
-                                        echo Helper::DropMasterData(config('constants.options.SCHOOL_TYPE'), $school->school_type, 'school_type');
-                                        ?>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="example-email">Email</label>
-                                        <input type="email" id="example-email" name="email" class="form-control"
-                                            placeholder="Email" value="{{ $school->email }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Gender</label>
-                                        <?php
-                                        echo Helper::DropMasterData(config('constants.options.SCHOOL_GENDER'), $school->gender, 'gender');
-                                        ?>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Regional Level</label>
-                                        <?php
-                                        echo Helper::DropMasterData(config('constants.options.REGIONAL_LEVEL'), $school->regional_level, 'regional_level');
-                                        ?>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">School Ownership</label>
-                                        <?php
-                                        echo Helper::DropMasterData(config('constants.options.SCHOOL_OWNERSHIP'), $school->school_ownership, 'school_ownership', 1);
-                                        ?>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Boarding Status</label>
-                                        <?php
-                                        echo Helper::DropMasterData(config('constants.options.SCHOOL_GENDER'), $school->boarding_status, 'boarding_status', 1);
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-12">
-                                    <div class="form-group">
-                                        <label class="form-label">School Name</label>
-                                        <input class="form-control" type="text" name="name"
-                                            value="{{ $school->name }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">School Products</label>
-                                        <?php
-                                        echo Helper::DropMasterData(config('constants.options.SCHOOL_PRODUCTS'), $school->school_product, 'school_product', 1);
-                                        ?>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Registration Code</label>
-                                        <input class="form-control" type="search" name="registration_code"
-                                            value="{{ $school->registration_code }}" disabled>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Contact Phone Number</label>
-                                        <input class="form-control" type="tel" name="phone"
-                                            value="{{ $school->phone }}">
-                                    </div>
-                                    <div class="form-group mb-0">
-                                        <label class="form-label">Population</label>
-                                        <?php
-                                        echo Helper::DropMasterDataAsc(config('constants.options.SCHOOL_POPULATION'), $school->population, 'population', 1);
-                                        ?>
-                                    </div>
+
+                    {{-- Card Body --}}
+                    <div class="card-body" style="background:#f8faf9; border-radius: 0 0 10px 10px; padding: 28px 32px;">
+
+                        <form id="updateSchoolForm" method="POST" action="{{ route('update.school') }}">
+                            @csrf
+                            <input type="hidden" name="school_id" value="{{ $school_id }}">
+
+                            {{-- School Name --}}
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-semibold" style="color:#2d3748; font-size:13px;">
+                                    School Name <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background:#0d4b1f; border-color:#0d4b1f;">
+                                        <i class="fas fa-school text-white" style="font-size:13px;"></i>
+                                    </span>
+                                    <input type="text" name="House" id="House" class="form-control"
+                                        value="{{ old('House', $school->House) }}" required
+                                        style="border-left: none; font-size:14px;">
                                 </div>
                             </div>
-                            <div class="mt-4 text-left">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane"></i> Update Information
+
+                            {{-- School Name Arabic --}}
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-semibold" style="color:#2d3748; font-size:13px;">
+                                    School Name Arabic <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background:#0d4b1f; border-color:#0d4b1f;">
+                                        <i class="fas fa-school text-white" style="font-size:13px;"></i>
+                                    </span>
+                                    <input type="text" name="House_AR" id="House_AR" class="form-control"
+                                        value="{{ old('House_AR', $school->House_AR) }}" required
+                                        style="border-left: none; font-size:14px;">
+                                </div>
+                            </div>
+
+                            {{-- Location --}}
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-semibold" style="color:#2d3748; font-size:13px;">
+                                    Location <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background:#0d4b1f; border-color:#0d4b1f;">
+                                        <i class="fas fa-map-marker-alt text-white" style="font-size:13px;"></i>
+                                    </span>
+                                    <input type="text" name="Location" id="Location" class="form-control"
+                                        value="{{ old('Location', $school->Location) }}" required
+                                        style="border-left: none; font-size:14px;">
+                                </div>
+                            </div>
+
+                            <hr style="border-color:#d4eadb; margin: 20px 0;">
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ route('school.allSchools') }}" class="btn btn-outline-secondary"
+                                    style="font-size:13px; border-radius:6px; padding: 8px 20px;">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </a> &nbsp; &nbsp;
+                                <button type="submit" id="submitBtn" class="btn text-white" style="background:#0d4b1f; font-size:13px; border-radius:6px;
+                                           padding: 8px 24px; min-width:120px;">
+                                    <i class="fas fa-paper-plane me-2"></i> Update School
                                 </button>
                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -107,82 +109,99 @@ $controller = new Controller();
         </div>
     </div>
     </div>
-
+    </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#updateSchoolForm').on('submit', function(e) {
+        $(document).ready(function () {
+            $('#updateSchoolForm').on('submit', function (e) {
                 e.preventDefault();
 
-                let isValid = true;
                 let $form = $(this);
-                let $submitBtn = $form.find('button[type="submit"]');
+                let $btn = $('#submitBtn');
+                let isValid = true;
 
-                $form.find('.form-control, select').removeClass('is-invalid');
+                $form.find('.form-control').removeClass('is-invalid');
+                $form.find('.invalid-feedback').remove();
 
-                $form.find('input, select').each(function() {
-                    if (!$(this).val().trim()) {
-                        $(this).addClass('is-invalid');
-
-                        if ($(this).next('.invalid-feedback').length === 0) {
-                            $(this).after(
-                                '<div class="invalid-feedback">This field is required.</div>');
-                        }
-
+                ['House', 'House_AR', 'Location'].forEach(function (field) {
+                    let $input = $form.find('[name="' + field + '"]');
+                    if (!$input.val() || $input.val().trim() === '') {
+                        $input.addClass('is-invalid');
+                        $input.after('<div class="invalid-feedback">This field is required.</div>');
                         isValid = false;
                     }
                 });
 
                 if (!isValid) {
                     Swal.fire({
-                        icon: 'error',
+                        icon: 'warning',
                         title: 'Incomplete Form',
-                        text: 'Please fill in all required fields before submitting.'
+                        text: 'Please fill in all required fields.',
+                        confirmButtonColor: '#0d4b1f'
                     });
                     return;
                 }
 
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: "You are about to update the school data.",
+                    text: "You are about to update this school's information.",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, submit it!',
+                    confirmButtonColor: '#0d4b1f',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, update it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-
-                        $submitBtn.prop('disabled', true);
-                        const originalBtnHtml = $submitBtn.html();
-                        $submitBtn.html('Updating...<i class="fas fa-spinner fa-spin"></i>');
+                        let originalHtml = $btn.html();
+                        $btn.prop('disabled', true).html('Updating… <i class="fas fa-spinner fa-spin ms-1"></i>');
 
                         $.ajax({
-                            url: '{{ route('update.school') }}',
+                            url: $form.attr('action'),
                             method: 'POST',
                             data: $form.serialize(),
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            success: function(response) {
-                                Swal.fire(
-                                    'Success!',
-                                    'School has been updated successfully.',
-                                    'success'
-                                );
-                                $form[0].reset();
+                            success: function (response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Updated!',
+                                    text: response.message || 'School has been updated successfully.',
+                                    confirmButtonColor: '#0d4b1f'
+                                }).then(function () {
+                                    window.location.href = '{{ route("school.allSchools") }}';
+                                });
                             },
-                            error: function(data) {
-                                $('body').html(data.responseText);
+                            error: function (xhr) {
+                                if (xhr.status === 422) {
+                                    let errors = xhr.responseJSON.errors;
+                                    $.each(errors, function (field, messages) {
+                                        let $field = $form.find('[name="' + field + '"]');
+                                        $field.addClass('is-invalid');
+                                        $field.after('<div class="invalid-feedback">' + messages[0] + '</div>');
+                                    });
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Validation Error',
+                                        text: 'Please correct the highlighted fields.',
+                                        confirmButtonColor: '#0d4b1f'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Something went wrong. Please try again.',
+                                        confirmButtonColor: '#0d4b1f'
+                                    });
+                                }
                             },
-                            complete: function() {
-                                $submitBtn.prop('disabled', false).html(
-                                    originalBtnHtml);
+                            complete: function () {
+                                $btn.prop('disabled', false).html(originalHtml);
                             }
                         });
                     }
@@ -190,49 +209,4 @@ $controller = new Controller();
             });
         });
     </script>
-@endsection
-@section('js')
-    <!-- c3.js Charts js-->
-    <script src="{{ URL::asset('assets/plugins/charts-c3/d3.v5.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/charts-c3/c3-chart.js') }}"></script>
-    <script src="{{ URL::asset('assets/js/charts.js') }}"></script>
-
-    <!-- ECharts js -->
-    <script src="{{ URL::asset('assets/plugins/echarts/echarts.js') }}"></script>
-    <!-- Peitychart js-->
-    <script src="{{ URL::asset('assets/plugins/peitychart/jquery.peity.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/peitychart/peitychart.init.js') }}"></script>
-    <!-- Apexchart js-->
-    <script src="{{ URL::asset('assets/js/apexcharts.js') }}"></script>
-    <!--Moment js-->
-    <script src="{{ URL::asset('assets/plugins/moment/moment.js') }}"></script>
-    <!-- Daterangepicker js-->
-    <script src="{{ URL::asset('assets/plugins/bootstrap-daterangepicker/daterangepicker.js') }}"></script>
-    <script src="{{ URL::asset('assets/js/daterange.js') }}"></script>
-    <!---jvectormap js-->
-    <script src="{{ URL::asset('assets/plugins/jvectormap/jquery.vmap.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/jvectormap/jquery.vmap.world.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/jvectormap/jquery.vmap.sampledata.js') }}"></script>
-    <!-- Index js-->
-    <script src="{{ URL::asset('assets/js/index1.js') }}"></script>
-    <!-- Data tables js-->
-    <script src="{{ URL::asset('assets/plugins/datatable/js/jquery.dataTables.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.bootstrap4.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.bootstrap4.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/pdfmake.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/vfs_fonts.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/datatable/responsive.bootstrap4.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/js/datatables.js') }}"></script>
-    <!--Counters -->
-    <script src="{{ URL::asset('assets/plugins/counters/counterup.min.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/counters/waypoints.min.js') }}"></script>
-    <!--Chart js -->
-    <script src="{{ URL::asset('assets/plugins/chart/chart.bundle.js') }}"></script>
-    <script src="{{ URL::asset('assets/plugins/chart/utils.js') }}"></script>
 @endsection

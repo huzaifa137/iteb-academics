@@ -70,6 +70,7 @@ use App\Http\Controllers\Helper; // Keep if Helper::recordMdname is still used o
                             @endphp
 
                             @forelse ($schools as $key => $school)
+                            
                                 <tr>
                                     <td class="fw-bold" style="width: 1px;">{{ $key + 1 }}</td>
                                     <td class="fw-bold" style="text-align: left;">{{ $school->House }}</td>
@@ -91,42 +92,18 @@ use App\Http\Controllers\Helper; // Keep if Helper::recordMdname is still used o
                                     <td>
                                         <div class="d-flex align-items-center">
 
-                                            <a href="{{ url('profile.individual.school', $school->id) }}"
-                                                class="btn btn-sm btn-outline-info disabled" title="View School Profile"
-                                                style="margin-right:6px;">
-                                                <i class="fas fa-university"></i>
-                                            </a>
-
-                                            {{-- <a href="{{ route('school.term-dates', $school->id) }}" class="btn btn-sm"
-                                                title="Select Date"
-                                                style="margin-right:6px; color:#e83e8c; border:1px solid #e83e8c; background-color:transparent;">
-                                                <i class="fas fa-calendar-alt"></i>
-                                            </a> --}}
-
-                                            {{-- <a href="{{ route('individual.school.teachers', $school->id) }}"
-                                                class="btn btn-sm" title="Teachers"
-                                                style="margin-right:6px; color:#fd7e14; border:1px solid #fd7e14; background-color:transparent;">
-                                                <i class="fas fa-chalkboard-teacher"></i>
-                                            </a> --}}
-
                                             <a href="javascript:void(0);"
-                                                class="btn btn-sm btn-outline-secondary btn-change-school-status disabled"
-                                                data-id="{{ $school->id }}" data-status="{{ $school->school_status }}"
-                                                title="Change Status" style="margin-right:6px;">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </a>
-
-                                            <a href="javascript:void(0);"
-                                                class="btn btn-sm btn-outline-primary btn-edit disabled"
-                                                data-id="{{ $school->id }}"
-                                                data-edit-url="{{ url('edit.school', $school->id) }}" title="Edit"
+                                                class="btn btn-sm btn-outline-primary btn-edit"
+                                                data-id="{{ $school->ID }}"
+                                                data-edit-url="{{ route('edit.school', $school->ID) }}"
+                                                title="Edit"
                                                 style="margin-right:6px;">
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
                                             <a href="javascript:void(0);"
-                                                class="btn btn-sm btn-outline-danger btn-delete disabled"
-                                                data-id="{{ $school->id }}" title="Delete">
+                                                class="btn btn-sm btn-outline-danger btn-delete"
+                                                data-id="{{ $school->ID }}" title="Delete">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
 

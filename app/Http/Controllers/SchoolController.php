@@ -162,44 +162,34 @@ class SchoolController extends Controller
 
     public function editSchool($id)
     {
-        $school = School::findOrFail($id);
+        $school = House::findOrFail($id);
         $school_id = $id;
 
         return view('School.edit-school', compact(['school', 'school_id']));
     }
 
-    public function updateSchool(Request $request)
-    {
-        $school = School::findOrFail($request->school_id);
+   public function updateSchool(Request $request)
+{
+    $house = House::findOrFail($request->school_id);
 
-        $validated = $request->validate([
-            'school_type' => 'required|string|max:255',
-            'email' => 'required|email',
-            'gender' => 'required|string|max:50',
-            'regional_level' => 'required|string|max:100',
-            'school_ownership' => 'required|string|max:100',
-            'boarding_status' => 'required|string|max:100',
-            'name' => 'required|string|max:255',
-            'school_product' => 'required',
-            'registration_code' => 'required|string|max:50',
-            'phone' => 'required|string|max:20',
-            'population' => 'required|string',
-        ]);
+    $validated = $request->validate([
+        'House'    => 'required|string|max:255|unique:houses,House,' . $house->ID . ',ID',
+        'House_AR' => 'required',
+        'Location' => 'required|string|max:100',
+    ]);
 
-        $school->update($validated);
+    $house->update([
+        'House'    => strtoupper(trim($validated['House'])),
+        'House_AR' => $validated['House_AR'],
+        'Location' => $validated['Location'],
+    ]);
 
-        UpdateTracker::create([
-            'item_id' => $request->school_id,
-            'item_category' => 'School Information Updated',
-            'updated_by' => session('LoggedStudent'),
-            'date_updated_on' => now(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'School Information updated successfully.',
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => "School '{$house->House}' has been updated successfully.",
+        'house'   => $house,
+    ]);
+}
 
     public function deleteSchool(School $schoolId)
     {

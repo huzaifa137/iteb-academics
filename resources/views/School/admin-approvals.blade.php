@@ -312,6 +312,31 @@
         .dot-closed {
             background: #ef4444;
         }
+
+        /* Ensure SweetAlert2 always renders above Bootstrap modals/backdrops */
+        .swal2-container {
+            z-index: 20000 !important;
+        }
+
+        .period-closed-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .period-archived-badge {
+            background: #f1f5f9;
+            color: var(--slate);
+            border: 1px solid #e2e8f0;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+        }
     </style>
 
     <div class="side-app">
@@ -480,6 +505,45 @@
                 </div>
             </div>
 
+            {{-- Edit Slots Modal (adjust the total allocation directly, up or down) --}}
+            <div class="modal fade" id="editSlotsModal" tabindex="-1">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background:#0d4b1f; color:#fff;">
+                            <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>Edit Slot Allocation</h5>
+                            <button type="button" class="close text-white"
+                                data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong id="editSchoolName"></strong></p>
+                            <input type="hidden" id="editSchoolId">
+                            <input type="hidden" id="editYear">
+                            <div class="mb-3">
+                                <label class="font-weight-600" style="font-size:13px;">Current Allocation</label>
+                                <div id="editCurrentSlotInfo" class="mt-1" style="font-size:13px; color:var(--slate);"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="font-weight-600" style="font-size:13px;">New Total Slots <span
+                                        style="color:var(--coral);">*</span></label>
+                                <input type="number" id="editSlotsTotal" class="form-control-sm2 mt-1" placeholder="e.g. 25"
+                                    min="0" max="5000">
+                                <small class="text-muted">This replaces the current total (not added on top). Cannot be set below slots already used.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="font-weight-600" style="font-size:13px;">Reason (optional)</label>
+                                <input type="text" id="editSlotReason" class="form-control-sm2 mt-1"
+                                    placeholder="e.g. Correcting earlier allocation error">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-green" id="confirmEditSlots"><i class="fas fa-save mr-1"></i>Save
+                                Changes</button>
+                            <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- History Modal --}}
             <div class="modal fade" id="slotHistoryModal" tabindex="-1">
                 <div class="modal-dialog">
@@ -524,30 +588,11 @@
                         @endif
                     </div>
                     @if($globalPeriod)
-<div class="d-flex align-items-center" style="gap:10px;">
-    <span style="font-size:12px; color:var(--slate);">
-        {{ $globalPeriod->is_active ? 'Click to close' : 'Click to open' }}
-    </span>
-    {{-- Toggle switch --}}
-    <label style="position:relative; display:inline-block; width:52px; height:28px; margin:0; cursor:pointer;">
-        <input type="checkbox" id="globalPeriodToggle"
-            data-id="{{ $globalPeriod->id }}"
-            {{ $globalPeriod->is_active ? 'checked' : '' }}
-            style="opacity:0; width:0; height:0;">
-        <span style="
-            position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
-            background:{{ $globalPeriod->is_active ? '#22c55e' : '#e2e8f0' }};
-            border-radius:28px; transition:.3s;
-        ">
-            <span style="
-                position:absolute; content:''; height:20px; width:20px;
-                left:{{ $globalPeriod->is_active ? '28px' : '4px' }};
-                bottom:4px; background:white; border-radius:50%; transition:.3s;
-                display:block;
-            "></span>
-        </span>
-    </label>
-</div>
+                        <div class="d-flex align-items-center" style="gap:10px;">
+                            <button class="btn-danger2 btn-close-period" data-id="{{ $globalPeriod->id }}">
+                                <i class="fas fa-lock mr-1"></i>Close Registration
+                            </button>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -588,8 +633,64 @@
             {{-- All Periods Table --}}
             <div class="period-card">
                 <h5 class="mb-3" style="color:var(--forest);"><i class="fas fa-list mr-2"></i>All Registration Periods</h5>
+                <small class="text-muted d-block mb-2">Every period ever created stays listed here. Closing a period never deletes it - you can re-activate any year/period again at any time.</small>
                 <div id="periodsTableWrap">
-                    <div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+                    @if($allPeriods->isEmpty())
+                        <div class="text-center py-4 text-muted"><i class="fas fa-calendar-times fa-2x mb-2"></i><br>No registration periods configured yet.</div>
+                    @else
+                        <div class="table-responsive">
+                        <table class="table table-sm table-bordered" style="font-size:13px;">
+                            <thead style="background:#0d4b1f; color:#fff;">
+                                <tr><th>Name</th><th>Year</th><th>Opens</th><th>Closes</th><th>Status</th><th style="min-width:230px;">Action</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach($allPeriods as $p)
+                                    <tr>
+                                        <td>{{ $p->name ?? '—' }}</td>
+                                        <td>{{ $p->admission_year }}</td>
+                                        <td>{{ $p->opens_at ? \Carbon\Carbon::parse($p->opens_at)->format('d M Y H:i') : '—' }}</td>
+                                        <td>{{ $p->closes_at ? \Carbon\Carbon::parse($p->closes_at)->format('d M Y H:i') : '—' }}</td>
+                                        <td>
+                                            @if($p->status === 'active')
+                                                <span class="period-active-badge">ACTIVE</span>
+                                            @elseif($p->status === 'archived')
+                                                <span class="period-archived-badge">Archived</span>
+                                            @else
+                                                <span class="period-closed-badge">Closed</span>
+                                            @endif
+                                        </td>
+                                        <td style="white-space:nowrap;">
+                                            @if($p->status !== 'active')
+                                                <button class="btn-outline-green btn-activate-period mr-1"
+                                                    data-id="{{ $p->id }}" data-name="{{ $p->name ?? ('Year ' . $p->admission_year) }}"
+                                                    style="color:#16a34a;border-color:#16a34a;">
+                                                    <i class="fas fa-play mr-1"></i>Activate
+                                                </button>
+                                            @else
+                                                <button class="btn-danger2 btn-close-period-row mr-1" data-id="{{ $p->id }}" data-name="{{ $p->name ?? ('Year ' . $p->admission_year) }}">
+                                                    <i class="fas fa-lock mr-1"></i>Close
+                                                </button>
+                                            @endif
+                                            <button class="btn-outline-green btn-edit-period mr-1"
+                                                data-id="{{ $p->id }}"
+                                                data-name="{{ $p->name ?? '' }}"
+                                                data-year="{{ $p->admission_year }}"
+                                                data-opens="{{ $p->opens_at }}"
+                                                data-closes="{{ $p->closes_at }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            @if($p->status !== 'active')
+                                                <button class="btn-danger2 btn-delete-period" data-id="{{ $p->id }}" data-name="{{ $p->name ?? ('Year ' . $p->admission_year) }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -647,7 +748,6 @@
         $('.tab-pane').removeClass('active');
         $(this).addClass('active');
         $('#' + $(this).data('tab')).addClass('active');
-        if ($(this).data('tab') === 'tab-period') loadPeriods();
     });
 
     // ── Slot search ───────────────────────────────────────────────────────────────
@@ -704,6 +804,11 @@
                                     data-id="${s.ID}" data-name="${s.House}" data-number="${s.Number}"
                                     data-alloc="${alloc}" data-used="${used}" data-rem="${rem}" data-year="${res.year}">
                                     <i class="fas fa-plus mr-1"></i>Add Slots
+                                </button>
+                                <button class="btn-outline-green btn-edit-slots"
+                                    data-id="${s.ID}" data-name="${s.House}" data-number="${s.Number}"
+                                    data-alloc="${alloc}" data-used="${used}" data-rem="${rem}" data-year="${res.year}">
+                                    <i class="fas fa-edit mr-1"></i>Edit
                                 </button>
                                 <button class="btn-outline-green btn-view-history" data-id="${s.ID}" data-year="${res.year}" data-name="${s.House}">
                                     <i class="fas fa-history mr-1"></i>History
@@ -774,18 +879,95 @@
         const slots = parseInt($('#slotsToAdd').val());
         if (!slots || slots < 1) { Swal.fire('Error', 'Enter a valid number of slots (min 1)', 'error'); return; }
 
-        $.post('{{ route("admin.school.slots.assign") }}', {
-            _token: '{{ csrf_token() }}',
-            school_id: $('#assignSchoolId').val(),
-            admission_year: $('#assignYear').val(),
-            slots,
-            reason: $('#slotReason').val()
-        }, function (res) {
-            $('#assignSlotsModal').modal('hide');
-            Swal.fire({ icon: 'success', title: 'Slots Assigned', text: res.message, confirmButtonColor: '#287C44' });
-            searchSchools(currentSearchPage);
-        }).fail(function (xhr) {
-            Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong', 'error');
+        const schoolName = $('#assignSchoolName').text();
+        const reason = $('#slotReason').val();
+
+        Swal.fire({
+            title: 'Assign these slots?',
+            html: `Add <strong>${slots}</strong> slot(s) to <strong>${schoolName}</strong>?${reason ? `<br><small class="text-muted">Reason: ${reason}</small>` : ''}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#287C44',
+            confirmButtonText: 'Yes, assign',
+            cancelButtonText: 'Cancel'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Assigning slots…',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            $.post('{{ route("admin.school.slots.assign") }}', {
+                _token: '{{ csrf_token() }}',
+                school_id: $('#assignSchoolId').val(),
+                admission_year: $('#assignYear').val(),
+                slots,
+                reason
+            }, function (res) {
+                $('#assignSlotsModal').modal('hide');
+                Swal.fire({ icon: 'success', title: 'Slots Assigned', text: res.message, confirmButtonColor: '#287C44' });
+                searchSchools(currentSearchPage);
+            }).fail(function (xhr) {
+                Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong', 'error');
+            });
+        });
+    });
+
+    // ── Edit Slots modal ──────────────────────────────────────────────────────────
+    $(document).on('click', '.btn-edit-slots', function () {
+        const d = $(this).data();
+        $('#editSchoolId').val(d.id);
+        $('#editYear').val(d.year);
+        $('#editSchoolName').text(d.name + ' [' + d.number + ']');
+        $('#editCurrentSlotInfo').html(`Allocated: <strong>${d.alloc}</strong> &bull; Used: <strong>${d.used}</strong> &bull; Remaining: <strong>${d.rem}</strong>`);
+        $('#editSlotsTotal').val(d.alloc);
+        $('#editSlotReason').val('');
+        $('#editSlotsModal').modal('show');
+    });
+
+    $('#confirmEditSlots').on('click', function () {
+        const newTotal = parseInt($('#editSlotsTotal').val());
+        if (isNaN(newTotal) || newTotal < 0) { Swal.fire('Error', 'Enter a valid total (0 or more)', 'error'); return; }
+
+        const schoolName = $('#editSchoolName').text();
+        const reason = $('#editSlotReason').val();
+
+        Swal.fire({
+            title: 'Update slot allocation?',
+            html: `Set total allocation for <strong>${schoolName}</strong> to <strong>${newTotal}</strong>?${reason ? `<br><small class="text-muted">Reason: ${reason}</small>` : ''}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0d4b1f',
+            confirmButtonText: 'Yes, update',
+            cancelButtonText: 'Cancel'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Updating allocation…',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            $.post('{{ route("admin.school.slots.edit") }}', {
+                _token: '{{ csrf_token() }}',
+                school_id: $('#editSchoolId').val(),
+                admission_year: $('#editYear').val(),
+                slots_allocated: newTotal,
+                reason
+            }, function (res) {
+                $('#editSlotsModal').modal('hide');
+                Swal.fire({ icon: 'success', title: 'Allocation Updated', text: res.message, confirmButtonColor: '#287C44' });
+                searchSchools(currentSearchPage);
+            }).fail(function (xhr) {
+                Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong', 'error');
+            });
         });
     });
 
@@ -823,9 +1005,12 @@
             }
             let h = '';
             res.history.forEach((row, i) => {
+                const added = parseInt(row.slots_added);
+                const sign = added > 0 ? '+' : '';
+                const color = added > 0 ? '#16a34a' : (added < 0 ? '#dc2626' : '#64748b');
                 h += `<div style="padding:12px 16px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <strong>+${row.slots_added} slots</strong> → Total: ${row.total_after}
+                        <strong style="color:${color};">${sign}${added} slots</strong> → Total: ${row.total_after}
                         ${row.reason ? `<br><small class="text-muted">${row.reason}</small>` : ''}
                     </div>
                     <small class="text-muted">${row.created_at}</small>
@@ -835,26 +1020,24 @@
         });
     });
 
-    // ── Registration Period Tab ───────────────────────────────────────────────────
-    function loadPeriods() { }
-
     // ── Create Period ─────────────────────────────────────────────────────────────
     $('#createPeriodBtn').on('click', function () {
         const year = parseInt($('#newPeriodYear').val());
         if (!year) { Swal.fire('Error', 'Admission year is required', 'error'); return; }
 
-        const $btn = $(this);
-        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Saving…');
-
         Swal.fire({
             title: 'Activate this registration period?',
-            text: 'This will deactivate any currently active period.',
+            text: 'This will automatically close any currently active period.',
             icon: 'question', showCancelButton: true, confirmButtonColor: '#0d4b1f',
+            confirmButtonText: 'Yes, save & activate'
         }).then(r => {
-            if (!r.isConfirmed) {
-                $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Save & Activate Period');
-                return;
-            }
+            if (!r.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Saving period…', allowOutsideClick: false, allowEscapeKey: false,
+                showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            });
+
             $.ajax({
                 url: '{{ route("admin.registration.period.save") }}',
                 method: 'POST',
@@ -870,48 +1053,62 @@
                     Swal.fire('Success', res.message || 'Period saved & activated!', 'success')
                         .then(() => location.reload());
                 },
-                error: function (data) { $('body').html(data.responseText); },
-                complete: function () {
-                    $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Save & Activate Period');
+                error: function (xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'Failed to save period', 'error');
                 }
             });
         });
     });
 
-    // ── Close Period button ───────────────────────────────────────────────────────
-    $('#closePeriodBtn').on('click', function () {
+    // ── Close Registration (banner button) ────────────────────────────────────────
+    $(document).on('click', '.btn-close-period, .btn-close-period-row', function () {
         const id = $(this).data('id');
+        const name = $(this).data('name') || 'this period';
         Swal.fire({
             title: 'Close global registration?',
-            text: 'Schools will no longer be able to register students globally.',
+            html: `Schools will no longer be able to register students under <strong>${name}</strong>. This does not delete the period - you can re-activate it later.`,
             icon: 'warning', showCancelButton: true,
             confirmButtonColor: '#dc2626', confirmButtonText: 'Yes, close it'
         }).then(r => {
             if (!r.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Closing…', allowOutsideClick: false, allowEscapeKey: false,
+                showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            });
+
             $.ajax({
-                url: `{{ url('/admin/registration-period') }}/${id}`,
-                method: 'PUT',
-                data: { _token: '{{ csrf_token() }}', is_active: 0 },
-                success: () => location.reload(),
+                url: `{{ url('/admin/registration-period') }}/${id}/status`,
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}', status: 'closed' },
+                success: res => Swal.fire('Closed', res.message, 'success').then(() => location.reload()),
                 error: xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Failed', 'error')
             });
         });
     });
 
-    // ── Open Period button ────────────────────────────────────────────────────────
-    $('#openPeriodBtn').on('click', function () {
+    // ── Activate a previous/closed period ─────────────────────────────────────────
+    $(document).on('click', '.btn-activate-period', function () {
         const id = $(this).data('id');
+        const name = $(this).data('name') || 'this period';
         Swal.fire({
-            title: 'Open global registration?',
+            title: 'Activate this registration period?',
+            html: `<strong>${name}</strong> will become the active period. Any currently active period will be closed automatically.`,
             icon: 'question', showCancelButton: true, confirmButtonColor: '#0d4b1f',
-            confirmButtonText: 'Yes, open it'
+            confirmButtonText: 'Yes, activate'
         }).then(r => {
             if (!r.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Activating…', allowOutsideClick: false, allowEscapeKey: false,
+                showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            });
+
             $.ajax({
-                url: `{{ url('/admin/registration-period') }}/${id}`,
-                method: 'PUT',
-                data: { _token: '{{ csrf_token() }}', is_active: 1 },
-                success: () => location.reload(),
+                url: `{{ url('/admin/registration-period') }}/${id}/status`,
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}', status: 'active' },
+                success: res => Swal.fire('Activated', res.message, 'success').then(() => location.reload()),
                 error: xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Failed', 'error')
             });
         });
@@ -936,121 +1133,69 @@
     // ── Edit Period form submit ───────────────────────────────────────────────────
     $('#editPeriodForm').on('submit', function (e) {
         e.preventDefault();
-        const id   = $('#editPeriodId').val();
-        const $btn = $('#editPeriodSaveBtn');
-        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Saving…');
-
-        $.ajax({
-            url: `{{ url('/admin/registration-period') }}/${id}`,
-            method: 'PUT',
-            data: {
-                _token: '{{ csrf_token() }}',
-                name: $('#editPeriodName').val(),
-                admission_year: $('#editPeriodYear').val(),
-                opens_at: $('#editPeriodOpens').val() || null,
-                closes_at: $('#editPeriodCloses').val() || null,
-                is_active: 1,
-            },
-            success: function (res) {
-                $('#editPeriodModal').modal('hide');
-                Swal.fire('Updated', res.message || 'Period updated!', 'success')
-                    .then(() => location.reload());
-            },
-            error: function (xhr) {
-                Swal.fire('Error', xhr.responseJSON?.message || 'Failed to update', 'error');
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Save Changes');
-            }
-        });
-    });
-
-    // ── Render periods table ──────────────────────────────────────────────────────
-    $('#periodsTableWrap').html(`
-        @if($globalPeriod)
-            <table class="table table-sm table-bordered" style="font-size:13px;">
-                <thead style="background:#0d4b1f; color:#fff;">
-                    <tr><th>Name</th><th>Year</th><th>Opens</th><th>Closes</th><th>Status</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ $globalPeriod->name ?? '—' }}</td>
-                        <td>{{ $globalPeriod->admission_year }}</td>
-                        <td>{{ $globalPeriod->opens_at ? \Carbon\Carbon::parse($globalPeriod->opens_at)->format('d M Y H:i') : '—' }}</td>
-                        <td>{{ $globalPeriod->closes_at ? \Carbon\Carbon::parse($globalPeriod->closes_at)->format('d M Y H:i') : '—' }}</td>
-                        <td>
-                            @if($globalPeriod->is_active)
-                                <span class="period-active-badge">ACTIVE</span>
-                            @else
-                                <span class="period-inactive-badge">Inactive</span>
-                            @endif
-                        </td>
-                        <td style="white-space:nowrap;">
-                            <button class="btn-outline-green btn-edit-period mr-1"
-                                data-id="{{ $globalPeriod->id }}"
-                                data-name="{{ $globalPeriod->name ?? '' }}"
-                                data-year="{{ $globalPeriod->admission_year }}"
-                                data-opens="{{ $globalPeriod->opens_at }}"
-                                data-closes="{{ $globalPeriod->closes_at }}">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn-danger2 btn-delete-period" data-id="{{ $globalPeriod->id }}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        @else
-            <div class="text-center py-4 text-muted"><i class="fas fa-calendar-times fa-2x mb-2"></i><br>No registration periods configured yet.</div>
-        @endif
-    `);
-
-    // ── Delete period ─────────────────────────────────────────────────────────────
-    $(document).on('click', '.btn-delete-period', function () {
-        const id = $(this).data('id');
-        Swal.fire({ title: 'Delete this period?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626' })
-            .then(r => {
-                if (!r.isConfirmed) return;
-                $.ajax({
-                    url: `{{ url('/admin/registration-period') }}/${id}`,
-                    method: 'DELETE',
-                    data: { _token: '{{ csrf_token() }}' },
-                    success: () => location.reload()
-                });
-            });
-    });
-
-    // ── Global period toggle switch ───────────────────────────────────────────────
-    $('#globalPeriodToggle').on('change', function () {
-        const id       = $(this).data('id');
-        const isActive = $(this).is(':checked') ? 1 : 0;
-        const action   = isActive ? 'open' : 'close';
+        const id = $('#editPeriodId').val();
 
         Swal.fire({
-            title: `${isActive ? 'Open' : 'Close'} global registration?`,
-            text: isActive
-                ? 'Schools will be able to register students globally.'
-                : 'Schools will no longer be able to register students globally.',
-            icon: 'question', showCancelButton: true,
-            confirmButtonColor: isActive ? '#0d4b1f' : '#dc2626',
-            confirmButtonText: `Yes, ${action} it`
+            title: 'Save changes to this period?',
+            icon: 'question', showCancelButton: true, confirmButtonColor: '#0d4b1f',
+            confirmButtonText: 'Yes, save'
         }).then(r => {
-            if (!r.isConfirmed) {
-                $(this).prop('checked', !$(this).is(':checked'));
-                return;
-            }
+            if (!r.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Saving…', allowOutsideClick: false, allowEscapeKey: false,
+                showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            });
+
             $.ajax({
                 url: `{{ url('/admin/registration-period') }}/${id}`,
                 method: 'PUT',
-                data: { _token: '{{ csrf_token() }}', is_active: isActive },
-                success: () => location.reload(),
-                error: xhr => {
-                    $(this).prop('checked', !$(this).is(':checked'));
-                    Swal.fire('Error', xhr.responseJSON?.message || 'Failed', 'error');
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    name: $('#editPeriodName').val(),
+                    admission_year: $('#editPeriodYear').val(),
+                    opens_at: $('#editPeriodOpens').val() || null,
+                    closes_at: $('#editPeriodCloses').val() || null,
+                    is_active: 1,
+                },
+                success: function (res) {
+                    $('#editPeriodModal').modal('hide');
+                    Swal.fire('Updated', res.message || 'Period updated!', 'success')
+                        .then(() => location.reload());
+                },
+                error: function (xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'Failed to update', 'error');
                 }
             });
         });
     });
+
+    // ── Delete period (permanent - only available for non-active periods) ────────
+    $(document).on('click', '.btn-delete-period', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name') || 'this period';
+        Swal.fire({
+            title: 'Permanently delete this period?',
+            html: `This removes <strong>${name}</strong> completely and cannot be undone. Consider using "Close" instead if you may need it again.`,
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, delete permanently'
+        }).then(r => {
+            if (!r.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Deleting…', allowOutsideClick: false, allowEscapeKey: false,
+                showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            });
+
+            $.ajax({
+                url: `{{ url('/admin/registration-period') }}/${id}`,
+                method: 'DELETE',
+                data: { _token: '{{ csrf_token() }}' },
+                success: res => Swal.fire('Deleted', res.message || 'Period deleted.', 'success').then(() => location.reload()),
+                error: xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Failed to delete', 'error')
+            });
+        });
+    });
 </script>
+
 @endsection

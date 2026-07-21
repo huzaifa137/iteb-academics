@@ -1352,12 +1352,18 @@ class SchoolsController extends Controller
         $activeYear = AcademicYear::where('status', 'Active')->first();
         $allSchools = House::orderBy('House')->get();
 
+        // All periods (any status) so records never "disappear" once closed - admin can always
+        // see and re-activate a previous year/period from this list.
+        $allPeriods = RegistrationPeriod::orderByDesc('admission_year')->orderByDesc('created_at')->get();
+
+        
         return view('School.admin-approvals', compact(
             'schools',
             'globalPeriod',
             'globalOpen',
             'activeYear',
-            'allSchools'
+            'allSchools',
+            'allPeriods'
         ));
     }
 
@@ -1535,6 +1541,64 @@ class SchoolsController extends Controller
         ]);
     }
 
+    public function adminEditSlots(Request $request)
+    {
+        $request->validate([
+            'school_id' => 'required',
+            'admission_year' => 'required|integer',
+            'slots_allocated' => 'required|integer|min:0|max:5000',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $adminId = session('LoggedAdmin') ?? session('LoggedStudent');
+
+        $slot = SchoolRegistrationSlot::firstOrCreate(
+            ['school_id' => $request->school_id, 'admission_year' => (int) $request->admission_year],
+            ['slots_allocated' => 0, 'slots_used' => 0, 'registration_open' => true, 'allocated_by' => $adminId]
+        );
+
+        $slot->syncUsed();
+
+        $newTotal = (int) $request->slots_allocated;
+
+        if ($newTotal < $slot->slots_used) {
+            return response()->json([
+                'message' => "Cannot set allocation below the {$slot->slots_used} slot(s) already used by this school.",
+            ], 422);
+        }
+
+        $diff = $newTotal - $slot->slots_allocated;
+
+        if ($diff === 0) {
+            return response()->json([
+                'message' => 'No change - allocation is already ' . $newTotal . '.',
+                'slots_allocated' => $slot->slots_allocated,
+                'slots_used' => $slot->slots_used,
+                'slots_remaining' => $slot->slotsRemaining(),
+            ]);
+        }
+
+        $slot->slots_allocated = $newTotal;
+        $slot->allocated_by = $adminId;
+        $slot->save();
+
+        SchoolSlotHistory::create([
+            'school_id' => $request->school_id,
+            'admission_year' => (int) $request->admission_year,
+            'slots_added' => $diff,
+            'total_after' => $slot->slots_allocated,
+            'reason' => $request->reason ?: 'Manual edit of allocation',
+            'added_by' => $adminId,
+        ]);
+
+        return response()->json([
+            'message' => 'Slot allocation updated to ' . $newTotal . ' successfully.',
+            'slots_allocated' => $slot->slots_allocated,
+            'slots_used' => $slot->slots_used,
+            'slots_remaining' => $slot->slotsRemaining(),
+        ]);
+    }
+
     public function adminToggleSchoolRegistration(Request $request)
     {
         $request->validate([
@@ -1592,7 +1656,8 @@ class SchoolsController extends Controller
 
         try {
             if ($request->is_active) {
-                RegistrationPeriod::where('is_active', true)->update(['is_active' => false]);
+                RegistrationPeriod::where('status', RegistrationPeriod::STATUS_ACTIVE)
+                    ->update(['status' => RegistrationPeriod::STATUS_CLOSED, 'is_active' => false]);
             }
 
             $period = RegistrationPeriod::create([
@@ -1601,6 +1666,7 @@ class SchoolsController extends Controller
                 'opens_at' => $request->opens_at ?: null,
                 'closes_at' => $request->closes_at ?: null,
                 'is_active' => (bool) $request->is_active,
+                'status' => $request->is_active ? RegistrationPeriod::STATUS_ACTIVE : RegistrationPeriod::STATUS_CLOSED,
                 'created_by' => $adminId,
             ]);
 
@@ -1629,7 +1695,8 @@ class SchoolsController extends Controller
         $period = RegistrationPeriod::findOrFail($id);
 
         if ($request->is_active && !$period->is_active) {
-            RegistrationPeriod::where('is_active', true)->update(['is_active' => false]);
+            RegistrationPeriod::where('status', RegistrationPeriod::STATUS_ACTIVE)
+                ->update(['status' => RegistrationPeriod::STATUS_CLOSED, 'is_active' => false]);
         }
 
         $period->update([
@@ -1638,15 +1705,55 @@ class SchoolsController extends Controller
             'opens_at' => $request->opens_at ?: null,
             'closes_at' => $request->closes_at ?: null,
             'is_active' => (bool) $request->is_active,
+            'status' => $request->is_active ? RegistrationPeriod::STATUS_ACTIVE : RegistrationPeriod::STATUS_CLOSED,
         ]);
 
         return response()->json(['message' => 'Period updated.', 'period' => $period]);
     }
 
+    /**
+     * Change a period's status without ever deleting it, so it always stays visible
+     * in "All Registration Periods" and can be re-activated later.
+     * Accepts: active | closed | archived
+     */
+    public function adminSetRegistrationPeriodStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:active,closed,archived',
+        ]);
+
+        $period = RegistrationPeriod::findOrFail($id);
+
+        switch ($request->status) {
+            case RegistrationPeriod::STATUS_ACTIVE:
+                $period->activate();
+                $message = 'Registration period activated. Any other active period was automatically closed.';
+                break;
+            case RegistrationPeriod::STATUS_ARCHIVED:
+                $period->archive();
+                $message = 'Registration period archived.';
+                break;
+            default:
+                $period->close();
+                $message = 'Registration period closed. It stays in the list and can be re-activated any time.';
+                break;
+        }
+
+        return response()->json(['message' => $message, 'period' => $period->fresh()]);
+    }
+
     public function adminDeleteRegistrationPeriod($id)
     {
-        RegistrationPeriod::findOrFail($id)->delete();
-        return response()->json(['message' => 'Period deleted.']);
+        $period = RegistrationPeriod::findOrFail($id);
+
+        if ($period->status === RegistrationPeriod::STATUS_ACTIVE) {
+            return response()->json([
+                'message' => 'This period is currently active. Close it first before deleting.',
+            ], 422);
+        }
+
+        $period->delete();
+        return response()->json(['message' => 'Period permanently deleted.']);
     }
 
     // Admin: Toggle lock status on a single student registration
