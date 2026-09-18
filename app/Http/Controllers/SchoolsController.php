@@ -1330,9 +1330,12 @@ class SchoolsController extends Controller
             return response()->json(['registrations' => []], 200);
         }
 
+        // NOTE: submitted_at was added in a later migration with no backfill, so
+        // registrations submitted before that migration ran have submitted_at = NULL.
+        // We key off status (the real signal of "already submitted") instead of
+        // requiring submitted_at, so those existing/legacy records still show up.
         $query = StudentRegistration::where('school_id', $schoolId)
-            ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned'])
-            ->whereNotNull('submitted_at');
+            ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned']);
 
         if ($request->filled('year')) {
             $query->where('admission_year', $request->year);
@@ -1346,7 +1349,9 @@ class SchoolsController extends Controller
             $query->where('status', $request->status);
         }
 
-        $registrations = $query->orderBy('submitted_at', 'desc')->get();
+        $registrations = $query
+            ->orderByRaw('COALESCE(submitted_at, created_at) desc')
+            ->get();
 
         return response()->json(['registrations' => $registrations]);
     }
@@ -1362,7 +1367,7 @@ class SchoolsController extends Controller
 
         $registration = StudentRegistration::where('id', $id)
             ->where('school_id', $schoolId)
-            ->whereNotNull('submitted_at')
+            ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned'])
             ->first();
 
         if (!$registration) {
@@ -1391,7 +1396,7 @@ class SchoolsController extends Controller
 
         $registrations = StudentRegistration::whereIn('id', $ids)
             ->where('school_id', $schoolId)
-            ->whereNotNull('submitted_at')
+            ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned'])
             ->orderBy('student_name')
             ->get();
 
