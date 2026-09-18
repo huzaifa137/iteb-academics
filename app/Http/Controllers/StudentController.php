@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Exports\StudentsExamExport;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Mail;
 use App\Models\AcademicYear;
 use App\Models\School;
@@ -500,6 +501,72 @@ class StudentController extends Controller
             'houses',
             'years'
         ));
+    }
+
+    // Export the (optionally filtered) All Students list as a PDF
+    public function exportAllStudentsPDF(Request $request)
+    {
+        $studentsQuery = StudentBasic::with('house');
+
+        $houseName = null;
+        if ($request->filled('house_id')) {
+            $selectedHouse = House::find($request->house_id);
+            if ($selectedHouse) {
+                $studentsQuery->where('House', $selectedHouse->House);
+                $houseName = $selectedHouse->House;
+            }
+        }
+
+        if ($request->filled('year')) {
+            $studentsQuery->where('Student_ID', 'LIKE', '%-' . $request->year);
+        }
+
+        if ($request->filled('type')) {
+            $type = $request->type;
+            if ($type === 'idaad') {
+                $studentsQuery->where('Student_ID', 'LIKE', '%-ID-%');
+            } elseif ($type === 'thanawi') {
+                $studentsQuery->where('Student_ID', 'LIKE', '%-TH-%');
+            }
+        }
+
+        $students = $studentsQuery->orderBy('Student_ID', 'asc')->get();
+
+        try {
+            $data = [
+                'students' => $students,
+                'houseName' => $houseName,
+                'year' => $request->year,
+                'type' => $request->type,
+                'generated_at' => now()->format('d-m-Y H:i'),
+            ];
+
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $pdf = Pdf::loadView('student.pdf.all-students', $data);
+            $pdf->setPaper('A4', 'landscape');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'isJavascriptEnabled' => false,
+            ]);
+
+            $fileName = 'all_students_' . date('Y-m-d_His') . '.pdf';
+
+            return response($pdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Content-Length' => strlen($pdf->output()),
+                'Cache-Control' => 'private, max-age=0, must-revalidate',
+                'Pragma' => 'public',
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+        }
     }
 
     public function exportStudents($schoolId, $type)

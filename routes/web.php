@@ -293,6 +293,7 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
                 Route::get('/search', 'searchStudent')->name('students.individual.search');
                 // Route::get('/all-students', 'allStudents')->name('students.all.students');
                 Route::get('/all-students', 'allStudentsInformation')->name('students.all.students');
+                Route::get('/all-students/export/pdf', 'exportAllStudentsPDF')->name('students.all.students.export.pdf');
                 Route::get('/search/ajax', 'searchAjax')->name('students.search.ajax');
 
                 Route::get('/export/{schoolId}/{type}', 'exportStudents')->name('students.export');
@@ -465,6 +466,11 @@ Route::controller(SchoolsController::class)->group(function () {
 
             Route::get('/school/step3/students', 'step3Students')->name('school.step3.students');
             Route::post('/school/step3/submit', 'step3Submit')->name('school.step3.submit');
+
+            Route::get('/submitted-students', 'schoolSubmittedStudents')->name('school.submitted.students');
+            Route::get('/submitted-students/data', 'getSubmittedStudents')->name('school.submitted.students.data');
+            Route::get('/submitted-students/{id}/pdf', 'downloadSubmittedStudentPDF')->name('school.submitted.student.pdf');
+            Route::post('/submitted-students/pdf', 'downloadSubmittedStudentsPDF')->name('school.submitted.students.pdf');
 
         });
     });

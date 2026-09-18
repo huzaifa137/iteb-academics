@@ -1301,6 +1301,149 @@ class SchoolsController extends Controller
     }
 
 
+    // Method to show the school's own submitted students (read-only — no re-registration)
+    public function schoolSubmittedStudents()
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return redirect()->route('School.login')->with('error', 'Please login first');
+        }
+
+        $school = House::find($schoolId);
+
+        if (!$school) {
+            return redirect()->back()->with('error', 'School not found');
+        }
+
+        $years = Helper::academicYears();
+
+        return view('School.submitted-students', compact('school', 'years'));
+    }
+
+    // Method to fetch (as JSON) the students this school has already submitted to admin
+    public function getSubmittedStudents(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['registrations' => []], 200);
+        }
+
+        $query = StudentRegistration::where('school_id', $schoolId)
+            ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned'])
+            ->whereNotNull('submitted_at');
+
+        if ($request->filled('year')) {
+            $query->where('admission_year', $request->year);
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $registrations = $query->orderBy('submitted_at', 'desc')->get();
+
+        return response()->json(['registrations' => $registrations]);
+    }
+
+    // Method to download a PDF information sheet for one submitted student
+    public function downloadSubmittedStudentPDF($id)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return redirect()->route('School.login')->with('error', 'Please login first');
+        }
+
+        $registration = StudentRegistration::where('id', $id)
+            ->where('school_id', $schoolId)
+            ->whereNotNull('submitted_at')
+            ->first();
+
+        if (!$registration) {
+            return response()->json(['message' => 'Submitted registration not found'], 404);
+        }
+
+        $school = House::find($schoolId);
+
+        return $this->buildSubmittedStudentsPdf(collect([$registration]), $school, $registration->student_id . '.pdf');
+    }
+
+    // Method to download a single PDF containing several selected submitted students
+    public function downloadSubmittedStudentsPDF(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $ids = json_decode($request->ids, true);
+
+        if (empty($ids)) {
+            return response()->json(['message' => 'No students selected.'], 422);
+        }
+
+        $registrations = StudentRegistration::whereIn('id', $ids)
+            ->where('school_id', $schoolId)
+            ->whereNotNull('submitted_at')
+            ->orderBy('student_name')
+            ->get();
+
+        if ($registrations->isEmpty()) {
+            return response()->json(['message' => 'No matching submitted students found.'], 404);
+        }
+
+        $school = House::find($schoolId);
+
+        return $this->buildSubmittedStudentsPdf($registrations, $school, 'submitted_students_' . date('Y-m-d_His') . '.pdf');
+    }
+
+    // Shared PDF builder used by the single and bulk submitted-student downloads above
+    private function buildSubmittedStudentsPdf($registrations, $school, $filename)
+    {
+        try {
+            $data = [
+                'students' => $registrations,
+                'school' => $school,
+                'generated_at' => now()->format('d-m-Y H:i'),
+            ];
+
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $pdf = Pdf::loadView('School.pdf.submitted-students', $data);
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'isJavascriptEnabled' => false,
+            ]);
+
+            return response($pdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Content-Length' => strlen($pdf->output()),
+                'Cache-Control' => 'private, max-age=0, must-revalidate',
+                'Pragma' => 'public',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Submitted Students PDF Error: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to generate PDF: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function adminStudentApprovals()
     {
         $allRegistrations = StudentRegistration::select('school_id', 'admission_year')

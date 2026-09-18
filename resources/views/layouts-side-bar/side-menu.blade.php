@@ -105,6 +105,14 @@ use App\Helpers\PermissionHelper;
                 </a>
             </li>
 
+            <!-- Submitted Students -->
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('school.submitted.students') }}">
+                    <i class="fas fa-file-alt fa-2x mr-3"></i>
+                    Submitted Students
+                </a>
+            </li>
+
             {{-- ── NEW: School's own Recognition Certificate ── --}}
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('school.recognition.view') }}">

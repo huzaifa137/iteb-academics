@@ -89,6 +89,15 @@ use App\Http\Controllers\Helper;
                                 </div>
 
                             </div>
+
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <a href="{{ route('students.all.students.export.pdf', request()->query()) }}"
+                                        class="btn btn-sm" style="background-color: #287C44; color: #fff;" target="_blank">
+                                        <i class="fas fa-file-pdf me-1"></i> Export PDF
+                                    </a>
+                                </div>
+                            </div>
                         </form>
 
                         <!-- Students Table -->
