@@ -62,7 +62,7 @@ class SchoolController extends Controller
 
     public function allSchools()
     {
-        $schools = House::orderBy('id','Desc')->paginate(30);
+        $schools = House::orderBy('id','Desc')->paginate(1000);
 
         return view('School.all-schools', compact('schools'));
     }

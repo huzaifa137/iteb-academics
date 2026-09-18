@@ -482,6 +482,7 @@ Route::controller(SchoolsController::class)->group(function () {
             Route::get('/admin/student-approvals', 'adminStudentApprovals')->name('admin.student.approvals');
             Route::get('/admin/student-approvals/{schoolPrefix}', 'adminSchoolApprovalDetail')->name('admin.student.approvals.detail');
             Route::post('/admin/student-approvals/update-status', 'adminUpdateApprovalStatus')->name('admin.update.approval.status');
+            Route::post('/admin/student-approvals/approve-all', 'adminApproveAllPending')->name('admin.approve.all.pending');
 
         });
     });
@@ -504,6 +505,7 @@ Route::prefix('admin')->controller(SchoolsController::class)->group(function () 
     Route::get('/student-approvals', 'adminStudentApprovals');
     Route::get('/student-approvals/{schoolPrefix}', 'adminSchoolApprovalDetail');
     Route::post('/student-approvals/update-status', 'adminUpdateApprovalStatus');
+    Route::post('/student-approvals/approve-all', 'adminApproveAllPending');
 
     // SLOT MANAGEMENT
     Route::get('/school-slots/search', 'adminSearchSchoolsForSlots')->name('admin.school.slots.search');

@@ -1121,6 +1121,38 @@ class SchoolsController extends Controller
                 'district_ar' => $validated['district_ar'] ?? null,
             ]);
 
+            // If this student has already been approved and exists in students_basic,
+            // sync the updated registration data back so the admin side stays in sync.
+            $existsInMain = DB::table('students_basic')
+                ->where('Student_ID', $registration->student_id)
+                ->exists();
+
+            if ($existsInMain) {
+                $category = $validated['category'];
+                $class    = $category === 'ID' ? 'Senior Four' : 'Senior Six';
+                $classAR  = $category === 'ID' ? 'الإعدادية' : 'الثانوي';
+
+                DB::table('students_basic')
+                    ->where('Student_ID', $registration->student_id)
+                    ->update([
+                        'Student_Name'        => $validated['student_name'],
+                        'Student_Name_AR'     => $validated['student_name_ar'] ?? null,
+                        'Date_of_Birth'       => $validated['date_of_birth'] ?? null,
+                        'Date_of_Birth_AR'    => Helper::toArabicDate($validated['date_of_birth'] ?? null),
+                        'StudentSex'          => $validated['student_sex'],
+                        'StudentsNationality' => $validated['student_nationality'] ?? null,
+                        'StudentsCitizenship' => Helper::toArabicLettersCountriesAndWordsPackage($validated['student_nationality'] ?? null),
+                        'admnyr'              => $validated['admission_year'],
+                        'Section'             => $validated['section'] ?? 'Day',
+                        'Class'               => $class,
+                        'Class_AR'            => $classAR,
+                        'Birth_Place'         => $validated['birth_place'] ?? null,
+                        'Birth_Place_AR'      => $validated['birth_place_ar'] ?? null,
+                        'District'            => $validated['district'] ?? null,
+                        'District_AR'         => $validated['district_ar'] ?? null,
+                    ]);
+            }
+
             return response()->json([
                 'message' => 'Student registration updated successfully!'
             ]);
@@ -1567,23 +1599,25 @@ class SchoolsController extends Controller
                 $classAR = $category === 'ID' ? 'الإعدادية' : 'الثانوي';
 
                 DB::table('students_basic')->insert([
-                    'Student_ID' => $reg->student_id,
-                    'Student_Name' => $reg->student_name,
-                    'Student_Name_AR' => $reg->student_name_ar,
-                    'Date_of_Birth' => $reg->date_of_birth,
-                    'StudentSex' => $reg->student_sex,
+                    'Student_ID'          => $reg->student_id,
+                    'Student_Name'        => $reg->student_name,
+                    'Student_Name_AR'     => $reg->student_name_ar,
+                    'Date_of_Birth'       => $reg->date_of_birth,
+                    'Date_of_Birth_AR'    => Helper::toArabicDate($reg->date_of_birth),
+                    'StudentSex'          => $reg->student_sex,
                     'StudentsNationality' => $reg->student_nationality,
-                    'House' => $reg->house,
-                    'admnyr' => $reg->admission_year,
-                    'EntryDate' => now(),
-                    'Section' => $reg->section ?? 'Day',
-                    'Class' => $class,
-                    'Class_AR' => $classAR,
-                    'state' => 'Active',
-                    'Birth_Place' => $reg->birth_place,
-                    'Birth_Place_AR' => $reg->birth_place_ar,
-                    'District' => $reg->district,
-                    'District_AR' => $reg->district_ar,
+                    'StudentsCitizenship' => Helper::toArabicLettersCountriesAndWordsPackage($reg->student_nationality),
+                    'House'               => $reg->house,
+                    'admnyr'              => $reg->admission_year,
+                    'EntryDate'           => now(),
+                    'Section'             => $reg->section ?? 'Day',
+                    'Class'               => $class,
+                    'Class_AR'            => $classAR,
+                    'state'               => 'Active',
+                    'Birth_Place'         => $reg->birth_place,
+                    'Birth_Place_AR'      => $reg->birth_place_ar,
+                    'District'            => $reg->district,
+                    'District_AR'         => $reg->district_ar,
                 ]);
 
                 // DB::table('class_allocations')->insert([

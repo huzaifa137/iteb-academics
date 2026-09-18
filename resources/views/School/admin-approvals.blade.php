@@ -44,6 +44,22 @@
             border-color: var(--forest);
         }
 
+        .tab-btn-approve-all {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+        }
+
+        .tab-btn-approve-all:hover:not(:disabled) {
+            background: var(--forest);
+            border-color: var(--forest);
+        }
+
+        .tab-btn-approve-all:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
         .tab-pane {
             display: none;
         }
@@ -373,6 +389,11 @@
             <button class="tab-btn" data-tab="tab-slots"><i class="fas fa-ticket-alt mr-1"></i> Manage Slots</button>
             <button class="tab-btn" data-tab="tab-period"><i class="fas fa-calendar-alt mr-1"></i> Registration
                 Period</button>
+            @php $totalPending = collect($schools)->sum('pending_count'); @endphp
+            <button type="button" id="approveAllPendingBtn" class="tab-btn tab-btn-approve-all"
+                data-pending="{{ $totalPending }}" {{ $totalPending < 1 ? 'disabled' : '' }}>
+                <i class="fas fa-check-double mr-1"></i> Approve all Pending
+            </button>
         </div>
 
         {{-- ═══════════════════════ TAB 1: SCHOOLS OVERVIEW ═══════════════════════ --}}
@@ -743,11 +764,48 @@
 
    <script>
     // ── Tab switching ─────────────────────────────────────────────────────────────
-    $(document).on('click', '.tab-btn', function () {
-        $('.tab-btn').removeClass('active');
+    $(document).on('click', '.tab-btn[data-tab]', function () {
+        $('.tab-btn[data-tab]').removeClass('active');
         $('.tab-pane').removeClass('active');
         $(this).addClass('active');
         $('#' + $(this).data('tab')).addClass('active');
+    });
+
+    // ── Approve all pending (all schools) ─────────────────────────────────────────
+    $('#approveAllPendingBtn').on('click', function () {
+        const pending = parseInt($(this).data('pending'), 10) || 0;
+        if (pending < 1) {
+            Swal.fire({ icon: 'info', title: 'Nothing to approve', text: 'There are no pending students.', confirmButtonColor: '#287C44' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Approve all ' + pending + ' pending student(s)?',
+            text: 'Every student awaiting approval, in all schools, will be approved and added to the main students database.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#287C44',
+            confirmButtonText: 'Yes, Approve All'
+        }).then(r => {
+            if (!r.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Approving...', text: 'Please wait, this may take a moment.',
+                allowOutsideClick: false, allowEscapeKey: false,
+                showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            });
+
+            $.post('{{ route("admin.approve.all.pending") }}', {
+                _token: '{{ csrf_token() }}'
+            }, function (res) {
+                let msg = res.message;
+                if (res.errors && res.errors.length) msg += '\n\nFailed (' + res.errors.length + '):\n' + res.errors.join('\n');
+                Swal.fire({
+                    icon: (res.errors && res.errors.length) ? 'warning' : 'success',
+                    title: 'Done', text: msg, confirmButtonColor: '#287C44'
+                }).then(() => location.reload());
+            }).fail(xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong', 'error'));
+        });
     });
 
     // ── Slot search ───────────────────────────────────────────────────────────────
