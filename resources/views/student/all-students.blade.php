@@ -11,14 +11,20 @@ use App\Http\Controllers\Helper;
                     <div class="card-header  text-white d-flex justify-content-between align-items-center"
                         style="background-color: #253F2D;">
                         <h3 class="card-title">All Students</h3>
-                        <a href="{{ route('students.add.new.student') }}" class="btn btn-sm" style="background-color: #287C44;">
-                            <span
-                                class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center me-1"
-                                style="width: 20px; height: 20px;">
-                                <i class="fas fa-plus" style="font-size: 12px;"></i>
-                            </span>
-                            <span class="text-white">Add Student</span>
-                        </a>
+                        <div class="d-flex" style="gap: 0.5rem;">
+                            <a href="{{ route('students.attendance-sheet') }}" class="btn btn-sm text-white"
+                                style="background-color: #287C44;">
+                                <i class="fas fa-clipboard-list"></i> Attendance Sheet
+                            </a>
+                            <a href="{{ route('students.add.new.student') }}" class="btn btn-sm" style="background-color: #287C44;">
+                                <span
+                                    class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center me-1"
+                                    style="width: 20px; height: 20px;">
+                                    <i class="fas fa-plus" style="font-size: 12px;"></i>
+                                </span>
+                                <span class="text-white">Add Student</span>
+                            </a>
+                        </div>
                     </div>
 
                     <div class="card-body">
