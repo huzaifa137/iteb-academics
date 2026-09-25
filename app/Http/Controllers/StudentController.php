@@ -569,6 +569,112 @@ class StudentController extends Controller
         }
     }
 
+    // Show the Attendance Sheet filter/preview page (per school, year, category)
+    public function attendanceSheet(Request $request)
+    {
+        $houses = House::orderBy('House')->get();
+        $years = Helper::academicYears();
+
+        $students = collect();
+        $selectedHouse = null;
+
+        if ($request->filled('house_id') && $request->filled('year') && $request->filled('type')) {
+            $selectedHouse = House::find($request->house_id);
+
+            if ($selectedHouse) {
+                $students = $this->attendanceSheetStudentsQuery($selectedHouse, $request->year, $request->type)
+                    ->orderBy('Student_ID', 'asc')
+                    ->get();
+            }
+        }
+
+        return view('student.attendance-sheet', compact(
+            'houses',
+            'years',
+            'students',
+            'selectedHouse'
+        ));
+    }
+
+    // Export the Attendance Sheet for a single school/year/category as a PDF
+    public function exportAttendanceSheetPDF(Request $request)
+    {
+        $request->validate([
+            'house_id' => 'required|exists:houses,ID',
+            'year' => 'required',
+            'type' => 'required|in:idaad,thanawi',
+        ]);
+
+        $house = House::findOrFail($request->house_id);
+        $type = $request->type;
+
+        $students = $this->attendanceSheetStudentsQuery($house, $request->year, $type)
+            ->orderBy('Student_ID', 'asc')
+            ->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'No students found for the selected school, year and category.');
+        }
+
+        try {
+            $logoPath = public_path('asset/images/logo.png');
+            $logoData = File::exists($logoPath)
+                ? 'data:image/png;base64,' . base64_encode(File::get($logoPath))
+                : null;
+
+            $data = [
+                'house' => $house,
+                'students' => $students,
+                'year' => $request->year,
+                'type' => $type,
+                'stage' => $type === 'idaad' ? 'الإعدادية' : 'الثانوية',
+                'subject' => $request->filled('subject') ? $request->subject : 'القرآن وعلومه',
+                'paper' => $request->filled('paper') ? $request->paper : 'التلاوة والتجويد',
+                'examDate' => $request->filled('exam_date') ? $request->exam_date : '',
+                'startTime' => $request->filled('start_time') ? $request->start_time : '',
+                'endTime' => $request->filled('end_time') ? $request->end_time : '',
+                'logoData' => $logoData,
+                'generated_at' => now()->format('d-m-Y H:i'),
+            ];
+
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $pdf = Pdf::loadView('student.pdf.attendance-sheet', $data);
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'isJavascriptEnabled' => false,
+            ]);
+
+            $cleanHouseName = str_replace(' ', '_', $house->House);
+            $fileName = 'attendance_sheet_' . $house->Number . '_' . $type . '_' . $request->year . '_' . $cleanHouseName . '.pdf';
+
+            return response($pdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Content-Length' => strlen($pdf->output()),
+                'Cache-Control' => 'private, max-age=0, must-revalidate',
+                'Pragma' => 'public',
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to generate attendance sheet PDF: ' . $e->getMessage());
+        }
+    }
+
+    // Shared filter logic for the Attendance Sheet: same school/year/category
+    // filters as the All Students list, scoped to one school (House) at a time.
+    private function attendanceSheetStudentsQuery(House $house, $year, $type)
+    {
+        return StudentBasic::where('House', $house->House)
+            ->where('Student_ID', 'LIKE', '%-' . $year)
+            ->where('Student_ID', 'LIKE', $type === 'idaad' ? '%-ID-%' : '%-TH-%');
+    }
+
     public function exportStudents($schoolId, $type)
     {
         $activeYear = Helper::active_year();

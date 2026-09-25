@@ -191,14 +191,18 @@ class SchoolController extends Controller
     ]);
 }
 
-    public function deleteSchool(School $schoolId)
+    public function deleteSchool($schoolId)
     {
         try {
 
-            $schoolId->delete();
+            $school = House::findOrFail($schoolId);
+            $school->delete();
 
             return response()->json(['success' => true]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'School not found'], 404);
         } catch (\Exception $e) {
+            \Log::error('Delete school failed: ' . $e->getMessage());
             return response()->json(['error' => 'Delete failed'], 500);
         }
     }
