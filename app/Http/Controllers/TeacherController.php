@@ -131,7 +131,7 @@ class TeacherController extends Controller
             ->where('id', $id)
             ->first();
 
-        return view('Users.update-user-info', compact('teacher'));
+        return view('users.update-user-info', compact('teacher'));
     }
 
     public function storeUpdatedTeacherProfile(Request $request, Teacher $teacher)
