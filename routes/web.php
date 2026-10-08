@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\SchoolRecognitionCertificateController;
 use App\Http\Controllers\HouseController;
+use App\Http\Controllers\ExaminationCardController;
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -283,6 +284,14 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
         Route::post('/update-user-information', 'updateUserInformation')->name('users.update.information');
         Route::post('/users/{id}/change-status', 'changeStatus');
     });
+
+    Route::controller(ExaminationCardController::class)
+        ->prefix('students')
+        ->middleware('StudentAuth')
+        ->group(function () {
+            Route::get('/examination-cards', 'index')->name('students.examination-cards');
+            Route::get('/examination-cards/print', 'print')->name('students.examination-cards.print');
+        });
 
     Route::controller(StudentController::class)
         ->prefix('students')

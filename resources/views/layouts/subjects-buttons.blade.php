@@ -43,4 +43,10 @@
             <i class="fas fa-clipboard-list me-2"></i> Attendance Sheet
         </a>
     </div>
+
+    <div class="col-12 col-sm-3 mb-2">
+        <a href="{{ route('students.examination-cards') }}" class="btn btn-white text-dark w-100">
+            <i class="fas fa-id-card me-2"></i> Examination Cards
+        </a>
+    </div>
 </div>
