@@ -113,6 +113,14 @@ use App\Helpers\PermissionHelper;
                 </a>
             </li>
 
+            <!-- School Album -->
+            <li class="slide">
+                <a class="side-menu__item" href="{{ route('school.album') }}">
+                    <i class="fas fa-images fa-2x mr-3"></i>
+                    School Album
+                </a>
+            </li>
+
             {{-- ── NEW: School's own Recognition Certificate ── --}}
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('school.recognition.view') }}">

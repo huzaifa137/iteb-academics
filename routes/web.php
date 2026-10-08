@@ -16,6 +16,7 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\SchoolRecognitionCertificateController;
 use App\Http\Controllers\HouseController;
 use App\Http\Controllers\ExaminationCardController;
+use App\Http\Controllers\SchoolAlbumController;
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -291,6 +292,24 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
         ->group(function () {
             Route::get('/examination-cards', 'index')->name('students.examination-cards');
             Route::get('/examination-cards/print', 'print')->name('students.examination-cards.print');
+        });
+
+    // School Album (admin: any school)
+    Route::controller(SchoolAlbumController::class)
+        ->prefix('students')
+        ->middleware('StudentAuth')
+        ->group(function () {
+            Route::get('/school-album', 'adminIndex')->name('students.school-album');
+            Route::get('/school-album/print', 'adminPrint')->name('students.school-album.print');
+        });
+
+    // School Album (school portal: own school only, taken from the session)
+    Route::controller(SchoolAlbumController::class)
+        ->prefix('school')
+        ->middleware('SchoolAuth')
+        ->group(function () {
+            Route::get('/album', 'schoolIndex')->name('school.album');
+            Route::get('/album/print', 'schoolPrint')->name('school.album.print');
         });
 
     Route::controller(StudentController::class)

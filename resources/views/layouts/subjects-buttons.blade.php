@@ -49,4 +49,10 @@
             <i class="fas fa-id-card me-2"></i> Examination Cards
         </a>
     </div>
+
+    <div class="col-12 col-sm-3 mb-2">
+        <a href="{{ route('students.school-album') }}" class="btn btn-white text-dark w-100">
+            <i class="fas fa-images me-2"></i> School Album
+        </a>
+    </div>
 </div>
