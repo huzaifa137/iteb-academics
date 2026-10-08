@@ -473,6 +473,7 @@ Route::controller(SchoolsController::class)->group(function () {
             Route::get('/submitted-students/data', 'getSubmittedStudents')->name('school.submitted.students.data');
             Route::get('/submitted-students/{id}/pdf', 'downloadSubmittedStudentPDF')->name('school.submitted.student.pdf');
             Route::post('/submitted-students/pdf', 'downloadSubmittedStudentsPDF')->name('school.submitted.students.pdf');
+            Route::get('/school-students/export/pdf', 'exportSchoolStudentsPDF')->name('school.students.export.pdf');
 
         });
     });

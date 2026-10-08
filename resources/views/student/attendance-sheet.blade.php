@@ -161,6 +161,9 @@
             </div>
         </div>
     </div>
+     </div>
+        </div>
+    </div>
 
     <script>
         document.getElementById('exportPdfBtn').addEventListener('click', function () {

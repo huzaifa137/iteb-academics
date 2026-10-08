@@ -127,9 +127,10 @@
                             <div class="form-group">
                                 <label>Admission Year</label>
                                 <select id="subs_year" class="form-control">
-                                    <option value="">All Years</option>
+                                    {{-- No "All Years" option: schools can have thousands of past students, so the
+                                         page always loads one year at a time, starting with the first in the list. --}}
                                     @foreach($years as $y)
-                                        <option value="{{ $y->year_en }}">{{ $y->year_en }}</option>
+                                        <option value="{{ $y->year_en }}" @if($loop->first) selected @endif>{{ $y->year_en }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -154,6 +155,13 @@
                                 <button id="subs_filter_btn" class="btn btn-sm"
                                     style="background:var(--forest); color:#fff;">
                                     <i class="fas fa-filter mr-1"></i>Apply Filters
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <button id="subs_list_pdf_btn" type="button" class="btn btn-sm text-white"
+                                    style="background:var(--green);"
+                                    title="Download your school's student list for the selected year and category (any year, including past years)">
+                                    <i class="fas fa-file-pdf mr-1"></i>Download Student List PDF
                                 </button>
                             </div>
                         </div>
@@ -270,8 +278,10 @@
 
                     let html = '';
                     subsRegistrations.forEach(function (r, i) {
+                        const checkbox = r.legacy ? '' : `<input type="checkbox" class="subs-checkbox" value="${r.id}">`;
+                        const pdfBtn = r.legacy ? '' : `<a class="btn btn-sm text-white subs-pdf-btn" style="background:var(--green);" href="/school/submitted-students/${r.id}/pdf" title="Download PDF"><i class="fas fa-file-pdf"></i></a>`;
                         html += `<tr>
-                        <td><input type="checkbox" class="subs-checkbox" value="${r.id}"></td>
+                        <td>${checkbox}</td>
                         <td>${i + 1}</td>
                         <td><img src="/assets/student_photos/${r.student_id}.jpg" onerror="this.src='/assets/images/default-user.jpg';" style="width:38px;height:48px;object-fit:cover;border-radius:6px;border:2px solid #e9ecef;"></td>
                         <td><code>${r.student_id}</code></td>
@@ -283,7 +293,7 @@
                         <td>${r.submitted_at ? r.submitted_at.replace('T', ' ').substring(0, 16) : '—'}</td>
                         <td style="white-space:nowrap;">
                             <button class="btn btn-sm btn-info subs-view-btn" data-index="${i}" title="View Details"><i class="fas fa-eye"></i></button>
-                            <a class="btn btn-sm text-white subs-pdf-btn" style="background:var(--green);" href="/school/submitted-students/${r.id}/pdf" title="Download PDF"><i class="fas fa-file-pdf"></i></a>
+                            ${pdfBtn}
                         </td>
                     </tr>`;
                     });
@@ -301,6 +311,18 @@
             }
 
             $('#subs_filter_btn').on('click', loadSubmittedStudents);
+
+            // Full student list PDF (same format as the admin export) for any year,
+            // including past years that were never submitted through this portal.
+            $('#subs_list_pdf_btn').on('click', function () {
+                const params = new URLSearchParams();
+                const year = $('#subs_year').val();
+                const category = $('#subs_category').val();
+                if (year) params.set('year', year);
+                if (category) params.set('type', category === 'ID' ? 'idaad' : 'thanawi');
+                const qs = params.toString();
+                window.location.href = '{{ route("school.students.export.pdf") }}' + (qs ? '?' + qs : '');
+            });
 
             $('#subs_check_all').on('change', function () {
                 $('.subs-checkbox').prop('checked', $(this).is(':checked'));
@@ -323,7 +345,7 @@
                 $('#subs_modal_student_id').text(r.student_id);
                 $('#subs_modal_photo').attr('src', '/assets/student_photos/' + r.student_id + '.jpg')
                     .off('error').on('error', function () { this.src = '/assets/images/default-user.jpg'; });
-                $('#subs_modal_pdf_link').attr('href', '/school/submitted-students/' + r.id + '/pdf');
+                $('#subs_modal_pdf_link').attr('href', '/school/submitted-students/' + r.id + '/pdf').toggle(!r.legacy);
 
                 const fields = [
                     ['Category', r.category === 'ID' ? 'Idaad' : 'Thanawi'],

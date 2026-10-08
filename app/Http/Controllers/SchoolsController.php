@@ -1353,7 +1353,78 @@ class SchoolsController extends Controller
             ->orderByRaw('COALESCE(submitted_at, created_at) desc')
             ->get();
 
-        return response()->json(['registrations' => $registrations]);
+        // Students from past years (e.g. 2025) were never registered through this
+        // portal, so they only exist in the main students database - the same
+        // source the admin "All Students" page reads. Show this school's students
+        // from there too (as read-only "Approved" rows), skipping anyone already
+        // listed above. They count as Approved, so hide them when filtering for
+        // Pending or Returned.
+        $legacy = collect();
+        $school = House::find($schoolId);
+
+        if ($school && (!$request->filled('status') || $request->status === 'Approved')) {
+            $legacyQuery = StudentBasic::where('House', $school->House)
+                ->whereNotIn('Student_ID', $registrations->pluck('student_id')->all());
+
+            if ($request->filled('year')) {
+                $legacyQuery->where('Student_ID', 'LIKE', '%-' . $request->year);
+            }
+
+            if ($request->filled('category')) {
+                $legacyQuery->where('Student_ID', 'LIKE', $request->category === 'ID' ? '%-ID-%' : '%-TH-%');
+            }
+
+            $legacy = $legacyQuery->orderBy('Student_ID', 'desc')->get()->map(function ($s) {
+                return [
+                    'id' => null,
+                    'legacy' => true,
+                    'student_id' => $s->Student_ID,
+                    'student_name' => $s->Student_Name,
+                    'student_name_ar' => $s->Student_Name_AR,
+                    'category' => str_contains($s->Student_ID, '-TH-') ? 'TH' : 'ID',
+                    'class' => $s->Class,
+                    'section' => $s->Section,
+                    'admission_year' => $s->admnyr,
+                    'student_sex' => $s->StudentSex,
+                    'date_of_birth' => $s->Date_of_Birth,
+                    'student_nationality' => $s->StudentsNationality,
+                    'birth_place' => $s->Birth_Place,
+                    'district' => $s->District,
+                    'status' => 'Approved',
+                    'submitted_at' => null,
+                ];
+            });
+        }
+
+        return response()->json([
+            'registrations' => $registrations->toBase()->concat($legacy)->values(),
+        ]);
+    }
+
+    // Download the school's own student list (any year, incl. past years) as a PDF.
+    // This delegates to the admin "All Students" export so the PDF is identical,
+    // but house_id is always forced to the logged-in school so a school can never
+    // export another school's students.
+    public function exportSchoolStudentsPDF(Request $request)
+    {
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return redirect()->route('School.login')->with('error', 'Please login first');
+        }
+
+        if (!House::find($schoolId)) {
+            return redirect()->back()->with('error', 'School not found');
+        }
+
+        $request->validate([
+            'year' => 'nullable|digits:4',
+            'type' => 'nullable|in:idaad,thanawi',
+        ]);
+
+        $request->merge(['house_id' => $schoolId]);
+
+        return app(StudentController::class)->exportAllStudentsPDF($request);
     }
 
     // Method to download a PDF information sheet for one submitted student
@@ -1559,8 +1630,15 @@ class SchoolsController extends Controller
 
         foreach ($registrations as $reg) {
             if ($action === 'Approved') {
-                $this->approveRegistrationRecord($reg);
-                $approved++;
+                try {
+                    DB::transaction(function () use ($reg) {
+                        $this->approveRegistrationRecord($reg);
+                    });
+                    $approved++;
+                } catch (\Throwable $e) {
+                    Log::error('Approve failed for ' . $reg->student_id . ': ' . $e->getMessage());
+                    $errors[] = $reg->student_id . ': ' . $this->approvalFailureReason($e);
+                }
 
             } else {
                 $reg->status = 'Returned';
@@ -1618,6 +1696,19 @@ class SchoolsController extends Controller
     }
 
     /**
+     * Short, human-readable reason an approval failed (e.g. the database's
+     * "Data too long for column 'House'" instead of a generic message).
+     */
+    private function approvalFailureReason(\Throwable $e): string
+    {
+        $reason = ($e instanceof \Illuminate\Database\QueryException && isset($e->errorInfo[2]))
+            ? $e->errorInfo[2]
+            : $e->getMessage();
+
+        return \Illuminate\Support\Str::limit(trim($reason), 160);
+    }
+
+    /**
      * Approve every registration still "Pending Admin Approval", across all schools.
      */
     public function adminApproveAllPending()
@@ -1636,7 +1727,7 @@ class SchoolsController extends Controller
                         $approved++;
                     } catch (\Throwable $e) {
                         Log::error('Approve all pending failed for ' . $reg->student_id . ': ' . $e->getMessage());
-                        $errors[] = $reg->student_id . ': could not be approved';
+                        $errors[] = $reg->student_id . ': ' . $this->approvalFailureReason($e);
                     }
                 }
             });

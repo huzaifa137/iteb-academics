@@ -321,10 +321,10 @@ class SchoolController extends Controller
 
     public function addAcademicYear()
     {
-
-        $academicYears = AcademicYear::orderBy('id', 'desc')->get();
-
-        return view('AcademicYear.add-year', compact(['academicYears']));
+        // The old AcademicYear.add-year page was removed when the Academic Years
+        // module moved to AcademicYearController (year_en / year_ar / status).
+        // Keep /add-academic-year working for the header and Term Dates links.
+        return redirect()->route('academic.years');
     }
 
     public function storeYear(Request $request)

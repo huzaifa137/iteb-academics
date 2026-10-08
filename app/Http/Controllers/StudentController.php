@@ -636,20 +636,13 @@ class StudentController extends Controller
         'generated_at' => now()->format('d-m-Y H:i'),
     ];
 
-    $pdf = Pdf::loadView('student.pdf.attendance-sheet', $data);
-    $pdf->setPaper('A4', 'portrait');
-    $pdf->setOptions([
-        'defaultFont' => 'sans-serif',
-        'isRemoteEnabled' => true,
-        'isHtml5ParserEnabled' => true,
-        'isPhpEnabled' => false,
-        'isJavascriptEnabled' => false,
-    ]);
-
     $cleanHouseName = str_replace(' ', '_', $house->House);
-    $fileName = 'attendance_sheet_' . $house->Number . '_' . $type . '_' . $request->year . '_' . $cleanHouseName . '.pdf';
+    $data['fileName'] = 'attendance_sheet_' . $house->Number . '_' . $type . '_' . $request->year . '_' . $cleanHouseName . '.pdf';
 
-    return $pdf->download($fileName);
+    // Rendered as an HTML page and converted to PDF in the browser (html2pdf), the same
+    // way the pass slip is. dompdf cannot join/shape Arabic letters, so its output had
+    // disconnected, mis-ordered Arabic text.
+    return view('student.attendance-sheet-print', $data);
 }
 
     // Shared filter logic for the Attendance Sheet: same school/year/category
