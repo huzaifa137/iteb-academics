@@ -110,7 +110,33 @@
 
         @media print {
             #toolbar { display: none !important; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            html, body {
+                width: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Fit the printable width instead of a hard 210mm: if the print dialog adds even a few mm
+               of margin, a fixed 210mm sheet overflows and loses the closing (left) border in RTL. */
+            #sheets { width: 100%; margin: 0; }
+
+            .sheet-page {
+                width: 100%;
+                height: auto;
+                min-height: 0;
+                overflow: visible;
+                break-after: page;
+                page-break-after: always;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .sheet-page:last-child { break-after: auto; page-break-after: auto; }
+
+            table.masthead, table.info, table.roster, table.footer, .sheet-title { width: 100%; }
         }
     </style>
 </head>

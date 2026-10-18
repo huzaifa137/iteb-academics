@@ -198,6 +198,32 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
+    // html2canvas draws every word with a left-to-right canvas, so an Arabic word that ends in ":"
+    // (e.g. "المادة:") gets its colon drawn on the wrong side (":المادة"). Putting each colon in its
+    // own element makes html2canvas place it at the position the browser laid out (left of the word).
+    function splitArabicColons(doc) {
+        const re = /(?<=[\u0600-\u06FF]):/;
+        const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+
+        nodes.forEach(function (node) {
+            const tag = node.parentNode ? node.parentNode.nodeName : '';
+            if (tag === 'SCRIPT' || tag === 'STYLE' || !re.test(node.nodeValue)) return;
+
+            const frag = doc.createDocumentFragment();
+            node.nodeValue.split(re).forEach(function (part, i) {
+                if (i > 0) {
+                    const colon = doc.createElement('span');
+                    colon.textContent = ':';
+                    frag.appendChild(colon);
+                }
+                if (part !== '') frag.appendChild(doc.createTextNode(part));
+            });
+            node.parentNode.replaceChild(frag, node);
+        });
+    }
+
     function buildPdf() {
         const status = document.getElementById('status');
         status.textContent = 'Preparing PDF… it will download automatically.';
@@ -206,7 +232,7 @@
             margin: 0,
             filename: @json($fileName),
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 3, useCORS: true },
+            html2canvas: { scale: 3, useCORS: true, scrollX: 0, scrollY: 0, onclone: function (doc) { splitArabicColons(doc); } },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['css', 'legacy'] }
         };
