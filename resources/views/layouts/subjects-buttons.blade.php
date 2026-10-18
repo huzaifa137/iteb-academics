@@ -45,6 +45,12 @@
     </div>
 
     <div class="col-12 col-sm-3 mb-2">
+        <a href="{{ route('students.timetable') }}" class="btn btn-white text-dark w-100">
+            <i class="fas fa-calendar-alt me-2"></i> Exam Timetable
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-3 mb-2">
         <a href="{{ route('students.examination-cards') }}" class="btn btn-white text-dark w-100">
             <i class="fas fa-id-card me-2"></i> Examination Cards
         </a>

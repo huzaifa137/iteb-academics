@@ -39,10 +39,18 @@ use App\Helpers\PermissionHelper;
             </li>
 
             <li class="slide">
+                <a class="side-menu__item" href="{{ route('students.timetable') }}">
+                    <i class="fas fa-calendar-alt fa-2x mr-3"></i>
+                    Timetable
+                </a>
+            </li>
+
+            <li class="slide">
                 <a class="side-menu__item" href="{{ route('academic.years') }}">
                     <i class="fas fa-clock fa-2x mr-3"></i> Academic Years
                 </a>
             </li>
+
 
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('/enter-marks') }}">

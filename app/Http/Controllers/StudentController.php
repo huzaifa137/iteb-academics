@@ -621,17 +621,23 @@ class StudentController extends Controller
         ? 'data:image/png;base64,' . base64_encode(File::get($logoPath))
         : null;
 
+    // Exam details: anything typed on the form wins; otherwise take it from the chosen timetable entry.
+    $entry = $request->filled('timetable_id') ? \App\Models\ExamTimetable::find($request->timetable_id) : null;
+    $hasExamDetails = $entry || $request->filled('subject');
+
     $data = [
         'house' => $house,
         'students' => $students,
         'year' => $request->year,
         'type' => $type,
         'stage' => $type === 'idaad' ? 'الإعدادية' : 'الثانوية',
-        'subject' => $request->filled('subject') ? $request->subject : 'القرآن وعلومه',
-        'paper' => $request->filled('paper') ? $request->paper : 'التلاوة والتجويد',
-        'examDate' => $request->filled('exam_date') ? $request->exam_date : '',
-        'startTime' => $request->filled('start_time') ? $request->start_time : '',
-        'endTime' => $request->filled('end_time') ? $request->end_time : '',
+        'subject' => $request->filled('subject') ? $request->subject : ($entry->subject_ar ?? 'القرآن وعلومه'),
+        'paper' => $hasExamDetails
+            ? ($request->filled('paper') ? $request->paper : ($entry->paper_ar ?? ''))
+            : 'التلاوة والتجويد',
+        'examDate' => $request->filled('exam_date') ? $request->exam_date : ($entry ? $entry->exam_date->format('d/m/Y') : ''),
+        'startTime' => $request->filled('start_time') ? $request->start_time : ($entry->start_hm ?? ''),
+        'endTime' => $request->filled('end_time') ? $request->end_time : ($entry->end_hm ?? ''),
         'logoData' => $logoData,
         'generated_at' => now()->format('d-m-Y H:i'),
     ];

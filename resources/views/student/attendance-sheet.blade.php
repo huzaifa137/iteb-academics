@@ -4,15 +4,20 @@
         <div class="row">
             <div class="col-12">
                 <div class="card mt-5">
-
-                    <div class="card-header text-white d-flex justify-content-between align-items-center"
-                        style="background-color: #253F2D;">
-                        <h3 class="card-title">Attendance Sheet</h3>
-                        <a href="{{ url('students/all-students') }}" class="btn btn-sm text-white"
-                            style="background-color: #287C44;">
-                            <i class="fas fa-users"></i> All Students
-                        </a>
-                    </div>
+<div class="card-header text-white d-flex justify-content-between align-items-center"
+    style="background-color: #253F2D;">
+    <h3 class="card-title mb-0">Attendance Sheet</h3>
+    <div class="d-flex align-items-center" style="gap: 0.5rem;">
+        <a href="{{ url('students/all-students') }}" class="btn btn-sm text-white"
+            style="background-color: #287C44;">
+            <i class="fas fa-users"></i> All Students
+        </a>
+        <a href="{{ url('students/all-students') }}" class="btn btn-sm text-white"
+            style="background-color: #2b7641;">
+            <i class="fas fa-calendar-alt"></i> Timetable
+        </a>
+    </div>
+</div>
 
                     <div class="card-body">
                         <!-- Filter Form -->
@@ -76,7 +81,24 @@
 
                             <hr>
 
-                            <!-- Optional exam paper details, used on the printed sheet only -->
+                            <!-- Timetable: pick an entry and the exam details below fill in automatically -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-md-8">
+                                    <label for="timetable_id" class="form-label">
+                                        Exam Timetable Entry
+                                        <a href="{{ route('students.timetable') }}" class="small ms-2" target="_blank">
+                                            (manage timetable)
+                                        </a>
+                                    </label>
+                                    <select name="timetable_id" id="timetable_id" class="form-control"
+                                        data-selected="{{ request('timetable_id') }}">
+                                        <option value="">-- Select School/Year/Category first --</option>
+                                    </select>
+                                    <small id="timetableHint" class="text-muted"></small>
+                                </div>
+                            </div>
+
+                            <!-- Exam paper details, filled from the timetable (still editable) -->
                             <div class="row g-3">
                                 <div class="col-12 col-md-3">
                                     <label for="subject" class="form-label">Subject (Arabic)</label>
@@ -166,6 +188,79 @@
     </div>
 
     <script>
+        // Runs on window "load": the layout loads jQuery again in the footer and initialises select2
+        // on that copy, so the change handlers must be bound after everything has loaded.
+        window.addEventListener('load', function () {
+            var yearEl = document.getElementById('year');
+            var typeEl = document.getElementById('type');
+            var ttEl = document.getElementById('timetable_id');
+            var hintEl = document.getElementById('timetableHint');
+            var entries = {};
+
+            function setVal(id, v) { document.getElementById(id).value = v || ''; }
+
+            function loadTimetable(selectedId) {
+                entries = {};
+                ttEl.innerHTML = '';
+
+                if (!yearEl.value || !typeEl.value) {
+                    ttEl.innerHTML = '<option value="">-- Select Year and Category first --</option>';
+                    hintEl.textContent = '';
+                    return;
+                }
+
+                fetch('{{ route('students.timetable.options') }}?year=' + encodeURIComponent(yearEl.value) +
+                        '&category=' + encodeURIComponent(typeEl.value), {
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(function (r) {
+                        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+                        return r.json();
+                    })
+                    .then(function (list) {
+                        var first = document.createElement('option');
+                        first.value = '';
+                        first.textContent = '-- Select timetable entry (or type details below) --';
+                        ttEl.appendChild(first);
+
+                        list.forEach(function (e) {
+                            entries[e.id] = e;
+                            var o = document.createElement('option');
+                            o.value = e.id;
+                            o.textContent = e.label;
+                            ttEl.appendChild(o);
+                        });
+
+                        hintEl.textContent = list.length ? '' : 'No timetable entries for this year/category yet.';
+                        if (selectedId && entries[selectedId]) { ttEl.value = selectedId; }
+                    })
+                    .catch(function (err) { hintEl.textContent = 'Could not load the timetable (' + err.message + ').'; });
+            }
+
+            function fillFromEntry() {
+                var e = entries[ttEl.value];
+                if (!e) { return; }
+                setVal('subject', e.subject_ar);
+                setVal('paper', e.paper_ar);
+                setVal('exam_date', e.exam_date);
+                setVal('start_time', e.start_time);
+                setVal('end_time', e.end_time);
+            }
+
+            ttEl.addEventListener('change', fillFromEntry);
+
+            // select2 triggers its change event through jQuery, so listen through jQuery as well
+            var $ = window.jQuery;
+            if ($) {
+                $('#year, #type').on('change', function () { loadTimetable(''); });
+            }
+            yearEl.addEventListener('change', function () { loadTimetable(''); });
+            typeEl.addEventListener('change', function () { loadTimetable(''); });
+
+            loadTimetable(ttEl.getAttribute('data-selected'));
+        });
+
         document.getElementById('exportPdfBtn').addEventListener('click', function () {
             var houseId = document.getElementById('house_id').value;
             var year = document.getElementById('year').value;

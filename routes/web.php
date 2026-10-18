@@ -17,6 +17,7 @@ use App\Http\Controllers\SchoolRecognitionCertificateController;
 use App\Http\Controllers\HouseController;
 use App\Http\Controllers\ExaminationCardController;
 use App\Http\Controllers\SchoolAlbumController;
+use App\Http\Controllers\ExamTimetableController;
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -292,6 +293,19 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
         ->group(function () {
             Route::get('/examination-cards', 'index')->name('students.examination-cards');
             Route::get('/examination-cards/print', 'print')->name('students.examination-cards.print');
+        });
+
+    // Exam Timetable (CRUD) — feeds the Attendance Sheet
+    Route::controller(ExamTimetableController::class)
+        ->prefix('students')
+        ->middleware('StudentAuth')
+        ->group(function () {
+            Route::get('/timetable', 'index')->name('students.timetable');
+            Route::get('/timetable/options', 'options')->name('students.timetable.options');
+            Route::post('/timetable/store', 'store')->name('students.timetable.store');
+            Route::post('/timetable/update/{id}', 'update')->name('students.timetable.update');
+            Route::delete('/timetable/delete/{id}', 'destroy')->name('students.timetable.delete');
+            Route::post('/timetable/import-sample', 'importSample')->name('students.timetable.import-sample');
         });
 
     // School Album (admin: any school)

@@ -151,7 +151,9 @@
                     </td>
                     <td>
                         <b>المادة:</b> {{ $subject }}<br>
-                        <b>الورقة:</b> {{ $paper }}<br>
+                        @if ($paper)
+                            <b>الورقة:</b> {{ $paper }}<br>
+                        @endif
                         <b>الزمن:</b> <span dir="ltr">{{ $timeText }}</span>
                     </td>
                 </tr>
