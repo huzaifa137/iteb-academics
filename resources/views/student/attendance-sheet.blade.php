@@ -133,6 +133,12 @@
                                         style="background-color: #287C44; color: #fff;">
                                         <i class="fas fa-file-pdf me-1"></i> Export PDF
                                     </button>
+                                    <button type="button" id="exportAllSchoolsBtn" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-school me-1"></i> All Schools &ndash; Selected Subject
+                                    </button>
+                                    <button type="button" id="exportAllSubjectsBtn" class="btn btn-sm btn-outline-dark">
+                                        <i class="fas fa-layer-group me-1"></i> All Schools &ndash; All Subjects
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -260,6 +266,30 @@
 
             loadTimetable(ttEl.getAttribute('data-selected'));
         });
+
+        // Bulk export: every school, for the selected timetable subject or for all subjects.
+        function openBulkExport(allSubjects) {
+            var year = document.getElementById('year').value;
+            var type = document.getElementById('type').value;
+            var tt = document.getElementById('timetable_id').value;
+
+            if (!year || !type) {
+                alert('Please select a Year and Category first.');
+                return;
+            }
+            if (!allSubjects && !tt) {
+                alert('Please select an Exam Timetable Entry first (or use "All Schools - All Subjects").');
+                return;
+            }
+
+            var params = new URLSearchParams({ year: year, type: type });
+            if (!allSubjects) { params.set('timetable_id', tt); }
+
+            window.open('{{ route('students.attendance-sheet.export.bulk') }}?' + params.toString(), '_blank');
+        }
+
+        document.getElementById('exportAllSchoolsBtn').addEventListener('click', function () { openBulkExport(false); });
+        document.getElementById('exportAllSubjectsBtn').addEventListener('click', function () { openBulkExport(true); });
 
         document.getElementById('exportPdfBtn').addEventListener('click', function () {
             var houseId = document.getElementById('house_id').value;
