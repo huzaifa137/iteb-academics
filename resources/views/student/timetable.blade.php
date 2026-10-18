@@ -19,6 +19,9 @@
                     <button type="button" id="importSampleBtn" class="btn btn-sm btn-light mr-1">
                         <i class="fas fa-file-import"></i> Import printed timetable
                     </button>
+                    <button type="button" id="exportBtn" class="btn btn-sm btn-light mr-1">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
                     <button type="button" id="addBtn" class="btn btn-sm text-white" style="background-color:#287C44;">
                         <i class="fas fa-plus"></i> Add Entry
                     </button>
@@ -26,6 +29,10 @@
             </div>
 
             <div class="card-body bg-light">
+
+                @if (session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                @endif
 
                 <form method="GET" action="{{ route('students.timetable') }}" class="mb-4">
                     <div class="row align-items-end">
@@ -51,7 +58,7 @@
                         <div class="col-md-4 d-flex align-items-end flex-nowrap gap-2" style="gap: .5rem;">
     <button type="submit" class="btn btn-primary text-nowrap"><i class="fas fa-filter"></i> Filter</button>
     <a href="{{ route('students.timetable') }}" class="btn btn-secondary text-nowrap"><i class="fas fa-undo"></i> Reset</a>
-    <a href="{{ route('students.attendance-sheet') }}" class="btn btn-outline-success text-nowrap">
+    <a href="{{ route('students.attendance-sheet') }}" class="btn btn-success text-nowrap">
         <i class="fas fa-clipboard-list"></i> Attendance Sheet
     </a>
 </div>
@@ -190,6 +197,19 @@
                 }
                 return 'Something went wrong';
             }
+
+            $('#exportBtn').on('click', function () {
+                var year = $('select[name=year]').first().val();
+                var category = $('select[name=category]').first().val();
+
+                if (!year) {
+                    Swal.fire({ icon: 'info', title: 'Select a year', text: 'Choose the Year in the filter before exporting.' });
+                    return;
+                }
+
+                window.open('{{ route('students.timetable.export') }}?year=' + encodeURIComponent(year) +
+                    '&category=' + encodeURIComponent(category || ''), '_blank');
+            });
 
             $('#addBtn').on('click', function () {
                 $('#entryModalTitle').text('Add Timetable Entry');

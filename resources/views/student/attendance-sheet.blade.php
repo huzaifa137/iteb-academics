@@ -12,7 +12,7 @@
             style="background-color: #287C44;">
             <i class="fas fa-users"></i> All Students
         </a>
-        <a href="{{ url('students/all-students') }}" class="btn btn-sm text-white"
+        <a href="{{ route('students.timetable') }}" class="btn btn-sm text-white"
             style="background-color: #2b7641;">
             <i class="fas fa-calendar-alt"></i> Timetable
         </a>

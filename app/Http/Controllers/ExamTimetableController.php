@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\ExamTimetable;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class ExamTimetableController extends Controller
 {
@@ -122,6 +124,114 @@ class ExamTimetableController extends Controller
         }
 
         return response()->json(['message' => "{$added} timetable entries imported."]);
+    }
+
+    /** Printable timetable (grid like the paper one), turned into a PDF in the browser. */
+    public function export(Request $request)
+    {
+        $request->validate([
+            'year'     => 'required|string|max:50',
+            'category' => 'nullable|in:idaad,thanawi',
+        ]);
+
+        $query = ExamTimetable::where('year', $request->year);
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $entries = $query->orderBy('exam_date')->orderBy('start_time')->get();
+
+        if ($entries->isEmpty()) {
+            return redirect()
+                ->route('students.timetable', $request->only(['year', 'category']))
+                ->with('error', 'No timetable entries found for the selected year/category.');
+        }
+
+        $logoPath = public_path('asset/images/logo.png');
+        $logoData = File::exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(File::get($logoPath))
+            : null;
+
+        $category = $request->category;
+        $stage = $category === 'idaad' ? 'الإعدادية' : ($category === 'thanawi' ? 'الثانوية' : 'الإعدادية والثانوية');
+
+        $fileName = 'exam_timetable_' . str_replace(' ', '_', $request->year) . ($category ? '_' . $category : '') . '.pdf';
+
+        return view('student.timetable-print', [
+            'year'     => $request->year,
+            'stage'    => $stage,
+            'dayRows'  => $this->buildGrid($entries),
+            'logoData' => $logoData,
+            'fileName' => $fileName,
+        ]);
+    }
+
+    /**
+     * Turn entries into one row per exam day with three time slots (morning 1, morning 2, afternoon).
+     * A slot whose real times differ from the standard slot times gets its own time label,
+     * like Monday on the paper timetable.
+     */
+    private function buildGrid($entries): array
+    {
+        $standard = ['A' => ['09:00', '11:00'], 'B' => ['11:00', '13:00'], 'C' => ['14:00', '16:00']];
+        $fmt = fn ($hm) => Carbon::createFromFormat('H:i', $hm)->format('h:i a');
+        $toAr = fn ($v) => Helper::toArabicNumberDate($v);
+
+        $rows = [];
+
+        foreach ($entries->groupBy(fn ($e) => $e->exam_date->format('Y-m-d')) as $dayEntries) {
+            $first = $dayEntries->first();
+
+            $slots = ['A' => [], 'B' => [], 'C' => []];
+
+            foreach ($dayEntries as $e) {
+                $mins = ((int) substr($e->start_hm, 0, 2)) * 60 + (int) substr($e->start_hm, 3, 2);
+                $key = $mins < 660 ? 'A' : ($mins < 840 ? 'B' : 'C');
+                $slots[$key][] = $e;
+            }
+
+            $grid = [];
+
+            foreach ($slots as $key => $list) {
+                $byRange = [];
+
+                // Idaad (ع) first, then Thanawi (ث), like the paper timetable
+                usort($list, fn ($a, $b) => [$a->category === 'idaad' ? 0 : 1, $a->id] <=> [$b->category === 'idaad' ? 0 : 1, $b->id]);
+
+                foreach ($list as $e) {
+                    $range = $e->start_hm . '|' . $e->end_hm;
+                    $byRange[$range]['start'] = $e->start_hm;
+                    $byRange[$range]['end'] = $e->end_hm;
+
+                    $line = $e->subject_ar
+                        . ($e->paper_ar ? ' (' . $e->paper_ar . ')' : '')
+                        . ' (' . ($e->class_level ? $toAr($e->class_level) . '/' : '')
+                        . ($e->category === 'idaad' ? 'ع' : 'ث') . ')';
+
+                    $byRange[$range]['lines'][] = $line;
+                }
+
+                $groups = [];
+                foreach ($byRange as $g) {
+                    $isStandard = $g['start'] === $standard[$key][0] && $g['end'] === $standard[$key][1];
+                    $groups[] = [
+                        'time'  => $isStandard ? null : [$fmt($g['start']), $fmt($g['end'])],
+                        'lines' => $g['lines'],
+                    ];
+                }
+
+                $grid[$key] = $groups;
+            }
+
+            $rows[] = [
+                'dayAr' => 'يوم ' . ExamTimetable::DAYS_AR[$first->exam_date->dayOfWeek],
+                'date'  => Helper::toArabicNumberDateReversed($first->exam_date->format('d/m/Y')),
+                'slots' => $grid,
+            ];
+        }
+
+        return $rows;
     }
 
     private function validated(Request $request): array

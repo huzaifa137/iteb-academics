@@ -302,6 +302,7 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
         ->group(function () {
             Route::get('/timetable', 'index')->name('students.timetable');
             Route::get('/timetable/options', 'options')->name('students.timetable.options');
+            Route::get('/timetable/export', 'export')->name('students.timetable.export');
             Route::post('/timetable/store', 'store')->name('students.timetable.store');
             Route::post('/timetable/update/{id}', 'update')->name('students.timetable.update');
             Route::delete('/timetable/delete/{id}', 'destroy')->name('students.timetable.delete');

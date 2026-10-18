@@ -613,7 +613,14 @@ class StudentController extends Controller
         ->get();
 
     if ($students->isEmpty()) {
-        return back()->with('error', 'No students found for the selected school, year and category.');
+        // Send the person back to the attendance sheet WITH everything they had filled in,
+        // so the school/year/category, timetable entry and exam details are not lost.
+        return redirect()
+            ->route('students.attendance-sheet', $request->only([
+                'house_id', 'year', 'type', 'timetable_id',
+                'subject', 'paper', 'exam_date', 'start_time', 'end_time',
+            ]))
+            ->with('error', 'No students found for the selected school, year and category.');
     }
 
     $logoPath = public_path('asset/images/logo.png');
