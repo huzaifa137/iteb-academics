@@ -76,6 +76,22 @@
             cursor: not-allowed;
         }
 
+        .tab-btn-export-ready {
+            background: #fff;
+            color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .tab-btn-export-ready:hover:not(:disabled) {
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+        .tab-btn-export-ready:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
         .bs-table { width: 100%; font-size: 13px; border-collapse: collapse; margin-top: 10px; text-align: left; }
         .bs-table th, .bs-table td { padding: 6px 8px; border-bottom: 1px solid #e9ecef; }
         .bs-table th { background: #f6f8f7; font-weight: 700; }
@@ -464,6 +480,10 @@
             <button type="button" id="bulkSubmitReadyBtn" class="tab-btn tab-btn-submit-ready"
                 title="Send every student whose details are filled and photo attached to the approval queue">
                 <i class="fas fa-paper-plane mr-1"></i> Submit Ready Students
+            </button>
+            <button type="button" id="exportReadyPdfBtn" class="tab-btn tab-btn-export-ready"
+                title="Download a PDF listing every student that is ready to be submitted, school by school">
+                <i class="fas fa-file-pdf mr-1"></i> Export Ready Students (PDF)
             </button>
             <button type="button" id="approveAllPendingBtn" class="tab-btn tab-btn-approve-all"
                 data-pending="{{ $totalPending }}" {{ $totalPending < 1 ? 'disabled' : '' }}>
@@ -888,6 +908,40 @@
         return $('<div>').text(v == null ? '' : v).html();
     }
 
+    // ── Export ready students to PDF (read-only, changes nothing) ────────────────
+    function bsExportReadyPdf(strict) {
+        const url = '{{ route("admin.export.ready.pdf") }}' + '?strict=' + (strict ? 1 : 0);
+
+        Swal.fire({
+            title: 'Generating PDF...', text: 'Please wait, this may take a moment for many students.',
+            allowOutsideClick: false, allowEscapeKey: false,
+            showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+        });
+
+        fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(async resp => {
+                if (!resp.ok) {
+                    let msg = 'Could not generate the PDF';
+                    try { msg = (await resp.json()).message || msg; } catch (e) {}
+                    throw new Error(msg);
+                }
+                return resp.blob();
+            })
+            .then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'ready_students_' + new Date().toISOString().slice(0, 10) + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+                Swal.fire({ icon: 'success', title: 'PDF ready', text: 'Your download has started.', timer: 1800, showConfirmButton: false });
+            })
+            .catch(err => Swal.fire('Error', err.message || 'Could not generate the PDF', 'error'));
+    }
+
+    $('#exportReadyPdfBtn').on('click', function () { bsExportReadyPdf(true); });
+
     $('#bulkSubmitReadyBtn').on('click', function () {
         const url = '{{ route("admin.bulk.submit") }}';
 
@@ -946,8 +1000,16 @@
     showCancelButton: true,
     confirmButtonColor: '#287C44',
     confirmButtonText: 'Yes, Submit Them',
-    preConfirm: () => ({ lenient: $('#bsLenient').is(':checked') })
+    showDenyButton: true,
+    denyButtonText: '<i class="fas fa-file-pdf"></i> Export PDF',
+    denyButtonColor: '#1d4ed8',
+    preConfirm: () => ({ lenient: $('#bsLenient').is(':checked') }),
+    preDeny: () => ({ lenient: $('#bsLenient').is(':checked') })
 }).then(r => {
+                if (r.isDenied) {
+                    bsExportReadyPdf(!r.value.lenient);
+                    return;
+                }
                 if (!r.isConfirmed) return;
 
                 Swal.fire({

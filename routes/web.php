@@ -530,6 +530,7 @@ Route::controller(SchoolsController::class)->group(function () {
             // NOTE: keep fixed-path routes above the {schoolPrefix} wildcard
             Route::match(['get', 'post'], '/admin/student-approvals/sync-photo-status', 'adminSyncPhotoStatuses')->name('admin.sync.photo.status');
             Route::match(['get', 'post'], '/admin/student-approvals/bulk-submit', 'adminBulkSubmitReady')->name('admin.bulk.submit');
+            Route::get('/admin/student-approvals/export-ready-pdf', 'adminExportReadyStudentsPDF')->name('admin.export.ready.pdf');
             Route::get('/admin/student-approvals/{schoolPrefix}', 'adminSchoolApprovalDetail')->name('admin.student.approvals.detail');
             Route::post('/admin/student-approvals/update-status', 'adminUpdateApprovalStatus')->name('admin.update.approval.status');
             Route::post('/admin/student-approvals/approve-all', 'adminApproveAllPending')->name('admin.approve.all.pending');

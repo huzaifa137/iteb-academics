@@ -2107,6 +2107,200 @@ class SchoolsController extends Controller
     }
 
     // =========================================================
+    // EXPORT "READY" STUDENTS TO PDF
+    // =========================================================
+
+    /**
+     * Download a PDF of exactly what "Submit Ready Students" would send to the approval queue
+     * (details filled + photo on disk), grouped per school, followed by the students that would
+     * be left with their schools and the reason. READ-ONLY: nothing is changed in the database.
+     *
+     * Same optional filters as adminBulkSubmitReady: school_id, admission_year, category, strict=0
+     *
+     *   GET /school/admin/student-approvals/export-ready-pdf
+     */
+    public function adminExportReadyStudentsPDF(Request $request)
+    {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '1024M');
+
+        try {
+            $strict = $request->has('strict') ? $request->boolean('strict') : true;
+            $required = self::BULK_SUBMIT_CORE_FIELDS + ($strict ? self::BULK_SUBMIT_PROFILE_FIELDS : []);
+
+            $schoolNames = [];
+            $schools = [];      // school_id => summary counters
+            $ready = [];        // school_id => [student rows]
+            $notReady = [];     // student rows that will stay with their school
+            $readyBySchoolYear = [];
+            $totals = ['scanned' => 0, 'ready' => 0, 'incomplete' => 0, 'no_photo' => 0];
+
+            $nameOf = function ($sid) use (&$schoolNames) {
+                return $schoolNames[$sid] ??= (Helper::schoolNameByID($sid) ?: $sid);
+            };
+
+            StudentRegistration::query()
+                ->select([
+                    'id', 'school_id', 'category', 'admission_year', 'student_id', 'student_name',
+                    'student_sex', 'date_of_birth', 'student_nationality', 'birth_place',
+                    'district', 'class', 'section', 'status',
+                ])
+                ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+                ->when($request->filled('admission_year'), fn($q) => $q->where('admission_year', (int) $request->admission_year))
+                ->when($request->filled('category'), fn($q) => $q->where('category', trim($request->category)))
+                ->whereIn('status', ['Pending Photo Submission', 'Attached Image, Pending Submission'])
+                ->chunkById(500, function ($rows) use (&$schools, &$ready, &$notReady, &$totals, &$readyBySchoolYear, $required, $nameOf) {
+                    foreach ($rows as $reg) {
+                        $totals['scanned']++;
+                        $sid = (string) $reg->school_id;
+
+                        $schools[$sid] ??= [
+                            'school_id' => $sid,
+                            'school_name' => $nameOf($sid),
+                            'ready' => 0, 'incomplete' => 0, 'no_photo' => 0,
+                        ];
+
+                        $row = [
+                            'student_id' => $reg->student_id,
+                            'name' => $reg->student_name,
+                            'sex' => $reg->student_sex,
+                            'category' => $reg->category === 'ID' ? 'Idaad' : 'Thanawi',
+                            'dob' => $reg->date_of_birth ? $reg->date_of_birth->format('d/m/Y') : null,
+                            'nationality' => $reg->student_nationality,
+                            'birth_place' => $reg->birth_place,
+                            'district' => $reg->district,
+                            'class' => $reg->class,
+                            'section' => $reg->section,
+                            'year' => $reg->admission_year,
+                        ];
+
+                        $missing = [];
+                        foreach ($required as $field => $label) {
+                            if (trim((string) $reg->{$field}) === '') {
+                                $missing[] = $label;
+                            }
+                        }
+
+                        if ($missing) {
+                            $schools[$sid]['incomplete']++;
+                            $totals['incomplete']++;
+                            $notReady[] = $row + ['school' => $schools[$sid]['school_name'], 'reason' => 'Missing: ' . implode(', ', $missing)];
+                            continue;
+                        }
+
+                        if (!$this->registrationPhotoExists($reg->student_id)) {
+                            $schools[$sid]['no_photo']++;
+                            $totals['no_photo']++;
+                            $notReady[] = $row + ['school' => $schools[$sid]['school_name'], 'reason' => 'No photo attached'];
+                            continue;
+                        }
+
+                        $schools[$sid]['ready']++;
+                        $totals['ready']++;
+                        $ready[$sid][] = $row;
+                        $yr = (int) $reg->admission_year;
+                        $readyBySchoolYear[$sid][$yr] = ($readyBySchoolYear[$sid][$yr] ?? 0) + 1;
+                    }
+                });
+
+            // ── Slot overview (same numbers as the Submit Ready Students preview) ────────
+            $slotYear = $request->filled('admission_year')
+                ? (int) $request->admission_year
+                : (int) (AcademicYear::where('status', 'Active')->value('year_en')
+                    ?: SchoolRegistrationSlot::max('admission_year'));
+
+            $slotRows = SchoolRegistrationSlot::where('admission_year', $slotYear)
+                ->where('slots_allocated', '>', 0)
+                ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+                ->get()
+                ->keyBy(fn($r) => (string) $r->school_id);
+
+            $sentBySchool = StudentRegistration::where('admission_year', $slotYear)
+                ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned'])
+                ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+                ->selectRaw('school_id, COUNT(*) as c')
+                ->groupBy('school_id')
+                ->pluck('c', 'school_id');
+
+            foreach ($slotRows as $sid => $slotRow) {
+                $schools[$sid] ??= [
+                    'school_id' => (string) $sid,
+                    'school_name' => $nameOf((string) $sid),
+                    'ready' => 0, 'incomplete' => 0, 'no_photo' => 0,
+                ];
+            }
+
+            foreach ($schools as $sid => $row) {
+                $slots = isset($slotRows[$sid]) ? (int) $slotRows[$sid]->slots_allocated : null;
+                $sent = (int) ($sentBySchool[$sid] ?? 0);
+                $students = $sent + (int) ($readyBySchoolYear[$sid][$slotYear] ?? 0);
+
+                $schools[$sid]['slots'] = $slots;
+                $schools[$sid]['students'] = $students;
+                $schools[$sid]['no_students'] = $slots !== null && $students === 0;
+            }
+
+            // ── Ordering: schools A-Z, students A-Z inside each school ────────────────────
+            $schools = collect($schools)->sortBy(fn($s) => mb_strtolower((string) $s['school_name']))->values()->all();
+
+            foreach ($ready as $sid => $list) {
+                usort($list, fn($a, $b) => strcasecmp((string) $a['name'], (string) $b['name']));
+                $ready[$sid] = $list;
+            }
+
+            usort($notReady, fn($a, $b) => strcasecmp((string) $a['school'], (string) $b['school'])
+                ?: strcasecmp((string) $a['name'], (string) $b['name']));
+
+            $filters = array_filter([
+                'School' => $request->filled('school_id') ? $nameOf((string) $request->school_id) : null,
+                'Admission year' => $request->filled('admission_year') ? (int) $request->admission_year : null,
+                'Category' => $request->filled('category') ? ($request->category === 'ID' ? 'Idaad' : 'Thanawi') : null,
+            ]);
+
+            $data = [
+                'schools' => $schools,
+                'ready' => $ready,
+                'notReady' => $notReady,
+                'totals' => $totals,
+                'slotYear' => $slotYear,
+                'strict' => $strict,
+                'filters' => $filters,
+                'generated_at' => now()->format('d-m-Y H:i'),
+            ];
+
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $pdf = Pdf::loadView('School.pdf.ready-students', $data);
+            $pdf->setPaper('A4', 'landscape');
+            $pdf->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isRemoteEnabled' => false,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'isJavascriptEnabled' => false,
+            ]);
+
+            $output = $pdf->output();
+
+            return response($output, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="ready_students_' . date('Y-m-d_His') . '.pdf"',
+                'Content-Length' => strlen($output),
+                'Cache-Control' => 'private, max-age=0, must-revalidate',
+                'Pragma' => 'public',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Ready Students PDF Error: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to generate PDF: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // =========================================================
     // SLOT MANAGEMENT METHODS
     // =========================================================
 
