@@ -1831,7 +1831,7 @@ use App\Http\Controllers\Helper;
 
                 $('#category').on('change', function () {
                     const cat = $(this).val();
-                    if (cat === 'ID') $('#student_class').val('Senior Four / ضصثقف');
+                    if (cat === 'ID') $('#student_class').val('Senior Four / اللإعدادية');
                     else if (cat === 'TH') $('#student_class').val('Senior Six / الثانوية');
                     else $('#student_class').val('');
                 });
@@ -2032,7 +2032,7 @@ use App\Http\Controllers\Helper;
                             $('#edit_student_nationality').val(r.registration.student_nationality || '');
                             $('#edit_birth_place').val(r.registration.birth_place || '');
                             $('#edit_birth_place_ar').val(r.registration.birth_place_ar || '');
-                            $('#edit_class').val(r.registration.category === 'ID' ? 'Senior Four / ضصثقف' : 'Senior Six / الثانوية');
+                            $('#edit_class').val(r.registration.category === 'ID' ? 'Senior Four / اللإعدادية' : 'Senior Six / الثانوية');
                             $('#edit_section').val(r.registration.section || '');
                             $('#edit_district').val(r.registration.district || '');
                             $('#edit_district_ar').val(r.registration.district_ar || '');
@@ -2044,7 +2044,7 @@ use App\Http\Controllers\Helper;
 
                 $(document).on('change', '#edit_category', function () {
                     const cat = $(this).val();
-                    $('#edit_class').val(cat === 'ID' ? 'Senior Four / ضصثقف' : cat === 'TH' ? 'Senior Six / الثانوية' : '');
+                    $('#edit_class').val(cat === 'ID' ? 'Senior Four / اللإعدادية' : cat === 'TH' ? 'Senior Six / الثانوية' : '');
                 });
 
                 // ── Edit Photo Preview ────────────────────────
@@ -2470,7 +2470,7 @@ use App\Http\Controllers\Helper;
                             $('#edit_student_nationality').val(r.registration.student_nationality || '');
                             $('#edit_birth_place').val(r.registration.birth_place || '');
                             $('#edit_birth_place_ar').val(r.registration.birth_place_ar || '');
-                            $('#edit_class').val(r.registration.category === 'ID' ? 'Senior Four / ضصثقف' : 'Senior Six / الثانوية');
+                            $('#edit_class').val(r.registration.category === 'ID' ? 'Senior Four / اللإعدادية' : 'Senior Six / الثانوية');
                             $('#edit_section').val(r.registration.section || '');
                             $('#edit_district').val(r.registration.district || '');
                             $('#edit_district_ar').val(r.registration.district_ar || '');

@@ -17,7 +17,7 @@
             color: #000;
             direction: rtl;
             font-family: 'Traditional Arabic', 'Times New Roman', Arial, Tahoma, sans-serif;
-            font-size: 13px;
+            font-size: 15px;
         }
 
         #toolbar {
@@ -57,54 +57,54 @@
 
         .bismillah {
             text-align: center;
-            font-size: 18px;
+            font-size: 22px;
             font-weight: bold;
-            margin: 0 0 4mm 0;
+            margin: 0 0 3mm 0;
         }
 
         table.masthead { width: 100%; border-collapse: collapse; margin-bottom: 3mm; }
         table.masthead td { width: 33.33%; vertical-align: middle; }
         table.masthead .en-title {
             direction: ltr; text-align: left; font-family: 'Times New Roman', serif;
-            font-weight: bold; font-size: 15px; line-height: 1.35;
+            font-weight: bold; font-size: 16px; line-height: 1.35;
         }
-        table.masthead .ar-title { text-align: right; font-weight: bold; font-size: 17px; line-height: 1.5; }
+        table.masthead .ar-title { text-align: right; font-weight: bold; font-size: 20px; line-height: 1.5; }
         table.masthead .logo-cell { text-align: center; }
-        table.masthead .logo-cell img { width: 24mm; height: 24mm; object-fit: contain; }
+        table.masthead .logo-cell img { width: 22mm; height: 22mm; object-fit: contain; }
 
         .sheet-title {
             border: 1px solid #000;
             text-align: center;
-            font-size: 15px;
+            font-size: 18px;
             font-weight: bold;
             padding: 2mm 0;
             margin: 0;
         }
 
         table.info { width: 100%; border-collapse: collapse; margin-bottom: 4mm; border: 1px solid #000; border-top: 0; }
-        table.info td { width: 50%; vertical-align: top; padding: 2mm 3mm; font-size: 13px; line-height: 1.7; }
+        table.info td { width: 50%; vertical-align: top; padding: 2mm 3mm; font-size: 16px; line-height: 1.55; }
         table.info b { font-weight: bold; }
 
         table.roster { width: 100%; border-collapse: collapse; }
         table.roster th, table.roster td {
             border: 1px solid #000;
             text-align: center;
-            font-size: 12px;
-            height: 6mm;
-            padding: 0 2mm;
+            font-size: 15px;
+            height: 6.5mm;
+            padding: 0 1.5mm;
         }
-        table.roster thead th { font-weight: bold; background: #fff; height: 7mm; }
-        table.roster td.name-cell { text-align: right; padding-right: 3mm; }
-        table.roster td.reg-cell { direction: ltr; font-family: Arial, sans-serif; font-size: 11.5px; }
+        table.roster thead th { font-weight: bold; background: #fff; height: 8mm; font-size: 14px; }
+        table.roster td.name-cell { text-align: right; padding-right: 3mm; white-space: nowrap; }
+        table.roster td.reg-cell { direction: ltr; font-family: Arial, sans-serif; font-size: 13px; }
 
         .col-no { width: 6%; }
-        .col-name { width: 34%; }
+        .col-name { width: 38%; }
         .col-reg { width: 22%; }
-        .col-sign { width: 19%; }
-        .col-booklet { width: 19%; }
+        .col-sign { width: 16%; }
+        .col-booklet { width: 18%; }
 
         table.footer { width: 100%; border-collapse: collapse; margin-top: 4mm; }
-        table.footer td { width: 50%; padding: 1.5mm 0; font-size: 13px; font-weight: bold; vertical-align: bottom; }
+        table.footer td { width: 50%; padding: 1.5mm 0; font-size: 15px; font-weight: bold; vertical-align: bottom; }
         .line { display: inline-block; border-bottom: 1px solid #000; width: 46mm; height: 4mm; }
     </style>
 </head>

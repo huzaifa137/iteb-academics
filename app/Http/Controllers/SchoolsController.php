@@ -993,6 +993,9 @@ class SchoolsController extends Controller
             return response()->json(['registrations' => [], 'slot' => null], 200);
         }
 
+        // Repair statuses of students whose photo is on disk but still show "Pending Photo"
+        $this->syncSchoolPhotoStatuses($schoolId);
+
         // Get all registrations for this school
         $registrations = StudentRegistration::where('school_id', $schoolId)
             ->orderBy('created_at', 'desc')
@@ -1214,6 +1217,8 @@ class SchoolsController extends Controller
         if (!$schoolId) {
             return response()->json(['students' => [], 'debug' => 'no session'], 200);
         }
+
+        $this->syncSchoolPhotoStatuses($schoolId);
 
         $year = (int) $request->year;
         $category = trim($request->category);
@@ -1741,6 +1746,363 @@ class SchoolsController extends Controller
             'approved' => $approved,
             'failed' => count($errors),
             'errors' => $errors,
+        ]);
+    }
+
+    // =========================================================
+    // PHOTO <-> STATUS SYNC
+    // =========================================================
+
+    /**
+     * True when a real (non-empty) photo file exists for the given student ID.
+     * The photo file on disk is the source of truth for "photo attached".
+     */
+    private function registrationPhotoExists(?string $studentId): bool
+    {
+        if (!$studentId) {
+            return false;
+        }
+
+        $file = public_path('assets/student_photos/' . basename($studentId) . '.jpg');
+
+        return is_file($file) && filesize($file) > 0;
+    }
+
+    /**
+     * Self-heal for ONE school: any registration still marked "Pending Photo Submission"
+     * whose photo is actually on disk is moved to "Attached Image, Pending Submission".
+     *
+     * Runs whenever the school opens its student list / Step 3, so photos that reached the
+     * server by any route (passlip uploader, FTP copy, older code) never show "Pending Photo"
+     * for a student who really has a photo. One-way only: it never removes or downgrades anything,
+     * and never touches submitted / approved / returned records.
+     */
+    private function syncSchoolPhotoStatuses($schoolId): int
+    {
+        if (!$schoolId) {
+            return 0;
+        }
+
+        try {
+            $ids = [];
+
+            StudentRegistration::where('school_id', (string) $schoolId)
+                ->where('status', 'Pending Photo Submission')
+                ->select('id', 'student_id')
+                ->orderBy('id')
+                ->chunkById(500, function ($rows) use (&$ids) {
+                    foreach ($rows as $row) {
+                        if ($this->registrationPhotoExists($row->student_id)) {
+                            $ids[] = $row->id;
+                        }
+                    }
+                });
+
+            $fixed = 0;
+            foreach (array_chunk($ids, 500) as $chunk) {
+                $fixed += StudentRegistration::whereIn('id', $chunk)
+                    ->where('status', 'Pending Photo Submission')
+                    ->update(['status' => 'Attached Image, Pending Submission']);
+            }
+
+            if ($fixed > 0) {
+                Log::info('School photo status auto-sync', ['school_id' => (string) $schoolId, 'fixed' => $fixed]);
+            }
+
+            return $fixed;
+        } catch (\Throwable $e) {
+            // Never let a repair problem break the school's page.
+            Log::warning('School photo status auto-sync failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Repair registrations whose photo is on disk but whose status never moved on.
+     *
+     *   Pending Photo Submission  + photo on disk  ->  Attached Image, Pending Submission
+     *
+     * Optionally (revert_missing=1) the opposite as well:
+     *
+     *   Attached Image, Pending Submission + NO photo on disk -> Pending Photo Submission
+     *
+     * Safe by default: without run=1 nothing is written, the endpoint only reports
+     * what it WOULD change. Never touches submitted / approved / returned records.
+     *
+     * Optional filters: school_id, admission_year
+     *
+     *   GET  /school/admin/student-approvals/sync-photo-status             (preview)
+     *   GET  /school/admin/student-approvals/sync-photo-status?run=1       (apply)
+     *   GET  /school/admin/student-approvals/sync-photo-status?run=1&revert_missing=1
+     */
+    public function adminSyncPhotoStatuses(Request $request)
+    {
+        $apply = $request->boolean('run');
+        $revert = $request->boolean('revert_missing');
+
+        $toAttach = [];   // registration id => student_id
+        $toRevert = [];
+
+        StudentRegistration::query()
+            ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+            ->when($request->filled('admission_year'), fn($q) => $q->where('admission_year', (int) $request->admission_year))
+            ->whereIn('status', ['Pending Photo Submission', 'Attached Image, Pending Submission'])
+            ->select('id', 'student_id', 'status')
+            ->orderBy('id')
+            ->chunkById(500, function ($rows) use (&$toAttach, &$toRevert) {
+                foreach ($rows as $row) {
+                    $hasPhoto = $this->registrationPhotoExists($row->student_id);
+
+                    if ($row->status === 'Pending Photo Submission' && $hasPhoto) {
+                        $toAttach[$row->id] = $row->student_id;
+                    } elseif ($row->status === 'Attached Image, Pending Submission' && !$hasPhoto) {
+                        $toRevert[$row->id] = $row->student_id;
+                    }
+                }
+            });
+
+        $attached = 0;
+        $reverted = 0;
+
+        if ($apply) {
+            foreach (array_chunk(array_keys($toAttach), 500) as $ids) {
+                $attached += StudentRegistration::whereIn('id', $ids)
+                    ->where('status', 'Pending Photo Submission')
+                    ->update(['status' => 'Attached Image, Pending Submission']);
+            }
+
+            if ($revert) {
+                foreach (array_chunk(array_keys($toRevert), 500) as $ids) {
+                    $reverted += StudentRegistration::whereIn('id', $ids)
+                        ->where('status', 'Attached Image, Pending Submission')
+                        ->update(['status' => 'Pending Photo Submission']);
+                }
+            }
+
+            Log::info('Photo status sync applied', [
+                'by' => session('LoggedStudent'),
+                'attached' => $attached,
+                'reverted' => $reverted,
+            ]);
+        }
+
+        return response()->json([
+            'mode' => $apply ? 'applied' : 'preview (nothing changed - add ?run=1 to apply)',
+            'photo_found_status_stuck' => count($toAttach),
+            'status_updated' => $attached,
+            'attached_but_photo_missing' => count($toRevert),
+            'reverted_to_pending_photo' => $reverted,
+            'sample_stuck_student_ids' => array_slice(array_values($toAttach), 0, 50),
+            'sample_missing_photo_student_ids' => array_slice(array_values($toRevert), 0, 50),
+        ]);
+    }
+
+    // =========================================================
+    // BULK SUBMIT TO ADMIN (for schools that never pressed "Submit")
+    // =========================================================
+
+    /** The minimum the school registration form itself insists on. */
+    private const BULK_SUBMIT_CORE_FIELDS = [
+        'student_id' => 'Student ID',
+        'student_name' => 'Name',
+        'student_sex' => 'Sex',
+        'category' => 'Category',
+        'admission_year' => 'Admission year',
+    ];
+
+    /** Extra details expected on a "complete" record (used unless strict=0). */
+    private const BULK_SUBMIT_PROFILE_FIELDS = [
+        'date_of_birth' => 'Date of birth',
+        'student_nationality' => 'Nationality',
+        'birth_place' => 'Place of birth',
+        'district' => 'District',
+    ];
+
+    /**
+     * Push every registration that is READY (details filled + photo on disk) into the
+     * normal approval queue, exactly as if the school had pressed Submit in step 3:
+     *
+     *   status -> Pending Admin Approval, is_locked -> true, submitted_at -> now
+     *
+     * Registrations that are not ready are skipped and reported with the reason.
+     * Returned (rejected by admin) and already submitted/approved records are never touched.
+     *
+     * Without run=1 it only PREVIEWS (nothing is written).
+     *
+     * Optional filters: school_id, admission_year, category (ID|SC...), strict=0
+     *
+     *   GET  /school/admin/student-approvals/bulk-submit            (preview)
+     *   GET  /school/admin/student-approvals/bulk-submit?run=1      (do it)
+     *   POST /school/admin/student-approvals/bulk-submit  run=1     (used by the UI button)
+     */
+    public function adminBulkSubmitReady(Request $request)
+    {
+        $apply = $request->boolean('run');
+        $strict = $request->has('strict') ? $request->boolean('strict') : true;
+
+        $required = self::BULK_SUBMIT_CORE_FIELDS + ($strict ? self::BULK_SUBMIT_PROFILE_FIELDS : []);
+
+        $readyIds = [];
+        $schools = [];          // school_id => counters
+        $skipped = [];          // detail rows for admin to chase (capped below)
+        $totals = ['scanned' => 0, 'ready' => 0, 'incomplete' => 0, 'no_photo' => 0, 'no_students_schools' => 0];
+        $readyBySchoolYear = [];   // school_id => [admission_year => ready count]
+
+        StudentRegistration::query()
+            ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+            ->when($request->filled('admission_year'), fn($q) => $q->where('admission_year', (int) $request->admission_year))
+            ->when($request->filled('category'), fn($q) => $q->where('category', trim($request->category)))
+            ->whereIn('status', ['Pending Photo Submission', 'Attached Image, Pending Submission'])
+            ->orderBy('id')
+            ->chunkById(500, function ($rows) use (&$readyIds, &$schools, &$skipped, &$totals, &$readyBySchoolYear, $required) {
+                foreach ($rows as $reg) {
+                    $totals['scanned']++;
+
+                    $sid = (string) $reg->school_id;
+                    if (!isset($schools[$sid])) {
+                        $schools[$sid] = [
+                            'school_id' => $sid,
+                            'school_name' => Helper::schoolNameByID($sid) ?? $sid,
+                            'ready' => 0,
+                            'incomplete' => 0,
+                            'no_photo' => 0,
+                        ];
+                    }
+
+                    $missing = [];
+                    foreach ($required as $field => $label) {
+                        if (trim((string) $reg->{$field}) === '') {
+                            $missing[] = $label;
+                        }
+                    }
+
+                    if ($missing) {
+                        $schools[$sid]['incomplete']++;
+                        $totals['incomplete']++;
+                        $skipped[] = [
+                            'student_id' => $reg->student_id,
+                            'name' => $reg->student_name,
+                            'school' => $schools[$sid]['school_name'],
+                            'reason' => 'Missing: ' . implode(', ', $missing),
+                        ];
+                        continue;
+                    }
+
+                    if (!$this->registrationPhotoExists($reg->student_id)) {
+                        $schools[$sid]['no_photo']++;
+                        $totals['no_photo']++;
+                        $skipped[] = [
+                            'student_id' => $reg->student_id,
+                            'name' => $reg->student_name,
+                            'school' => $schools[$sid]['school_name'],
+                            'reason' => 'No photo attached',
+                        ];
+                        continue;
+                    }
+
+                    $schools[$sid]['ready']++;
+                    $totals['ready']++;
+                    $readyIds[] = $reg->id;
+                    $yr = (int) $reg->admission_year;
+                    $readyBySchoolYear[$sid][$yr] = ($readyBySchoolYear[$sid][$yr] ?? 0) + 1;
+                }
+            });
+
+        $submitted = 0;
+
+        if ($apply && $readyIds) {
+            DB::transaction(function () use ($readyIds, &$submitted) {
+                foreach (array_chunk($readyIds, 500) as $ids) {
+                    // The status guard keeps this safe if a school submits at the same moment.
+                    $submitted += StudentRegistration::whereIn('id', $ids)
+                        ->whereIn('status', ['Pending Photo Submission', 'Attached Image, Pending Submission'])
+                        ->update([
+                            'status' => 'Pending Admin Approval',
+                            'is_locked' => true,
+                            'submitted_at' => now(),
+                            'submission_document_id' => null,
+                        ]);
+                }
+            });
+
+            Log::info('Bulk submit to admin applied', [
+                'by' => session('LoggedStudent'),
+                'submitted' => $submitted,
+                'filters' => $request->only(['school_id', 'admission_year', 'category', 'strict']),
+            ]);
+        }
+
+        // ── Slot overview: "students / (slots)" per school for the slot year ─────────
+        // students = already sent to admin (pending approval / approved / returned) + ready right now.
+        // Schools that were given slots but have NO students at all are flagged (shown red in the UI),
+        // including schools that never registered anyone and so are not in the scan above.
+        $slotYear = $request->filled('admission_year')
+            ? (int) $request->admission_year
+            : (int) (AcademicYear::where('status', 'Active')->value('year_en')
+                ?: SchoolRegistrationSlot::max('admission_year'));
+
+        $slotRows = SchoolRegistrationSlot::where('admission_year', $slotYear)
+            ->where('slots_allocated', '>', 0)
+            ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+            ->get()
+            ->keyBy(fn($r) => (string) $r->school_id);
+
+        $sentBySchool = StudentRegistration::where('admission_year', $slotYear)
+            ->whereIn('status', ['Pending Admin Approval', 'Approved', 'Returned'])
+            ->when($request->filled('school_id'), fn($q) => $q->where('school_id', (string) $request->school_id))
+            ->selectRaw('school_id, COUNT(*) as c')
+            ->groupBy('school_id')
+            ->pluck('c', 'school_id');
+
+        foreach ($slotRows as $sid => $slotRow) {
+            if (!isset($schools[$sid])) {
+                $schools[$sid] = [
+                    'school_id' => $sid,
+                    'school_name' => Helper::schoolNameByID($sid) ?? $sid,
+                    'ready' => 0,
+                    'incomplete' => 0,
+                    'no_photo' => 0,
+                ];
+            }
+        }
+
+        foreach ($schools as $sid => $row) {
+            $slots = isset($slotRows[$sid]) ? (int) $slotRows[$sid]->slots_allocated : null;
+            $sent = (int) ($sentBySchool[$sid] ?? 0);
+            $readyYear = (int) ($readyBySchoolYear[$sid][$slotYear] ?? 0);
+            $students = $sent + $readyYear;
+
+            $schools[$sid]['slots'] = $slots;
+            $schools[$sid]['sent'] = $sent;
+            $schools[$sid]['students'] = $students;
+            $schools[$sid]['no_students'] = $slots !== null && $students === 0;
+
+            if ($schools[$sid]['no_students']) {
+                $totals['no_students_schools']++;
+            }
+        }
+
+        // Red (slots but no students) first, then most ready first, then by name.
+        $schools = collect($schools)
+            ->sortBy([
+                fn($a, $b) => (int) $b['no_students'] <=> (int) $a['no_students'],
+                fn($a, $b) => $b['ready'] <=> $a['ready'],
+                fn($a, $b) => strcmp((string) $a['school_name'], (string) $b['school_name']),
+            ])
+            ->values()
+            ->all();
+
+        return response()->json([
+            'mode' => $apply ? 'applied' : 'preview',
+            'message' => $apply
+                ? "$submitted student(s) submitted for admin approval."
+                : "{$totals['ready']} student(s) are ready to be submitted.",
+            'totals' => $totals,
+            'slot_year' => $slotYear,
+            'submitted' => $submitted,
+            'schools' => $schools,
+            'skipped_total' => count($skipped),
+            'skipped' => array_slice($skipped, 0, 100),
         ]);
     }
 

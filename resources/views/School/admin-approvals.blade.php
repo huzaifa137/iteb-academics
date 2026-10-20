@@ -60,6 +60,30 @@
             cursor: not-allowed;
         }
 
+        .tab-btn-submit-ready {
+            background: #fff;
+            color: var(--forest);
+            border-color: var(--green);
+        }
+
+        .tab-btn-submit-ready:hover:not(:disabled) {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .tab-btn-submit-ready:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .bs-table { width: 100%; font-size: 13px; border-collapse: collapse; margin-top: 10px; text-align: left; }
+        .bs-table th, .bs-table td { padding: 6px 8px; border-bottom: 1px solid #e9ecef; }
+        .bs-table th { background: #f6f8f7; font-weight: 700; }
+        .bs-scroll { max-height: 260px; overflow-y: auto; }
+        .bs-skipped { font-size: 12px; color: #6c757d; }
+        .bs-table tr.bs-zero td { background: #fdecea; color: #b71c1c; font-weight: 700; }
+        .bs-zero-note { font-size: 12.5px; color: #b71c1c; font-weight: 600; margin-top: 6px; }
+
         .tab-pane {
             display: none;
         }
@@ -353,6 +377,13 @@
             font-size: 11px;
             font-weight: 600;
         }
+        
+        
+        .bs-table thead th {
+    background-color: #0E4D21 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+}
     </style>
 
     <div class="side-app">
@@ -390,6 +421,10 @@
             <button class="tab-btn" data-tab="tab-period"><i class="fas fa-calendar-alt mr-1"></i> Registration
                 Period</button>
             @php $totalPending = collect($schools)->sum('pending_count'); @endphp
+            <button type="button" id="bulkSubmitReadyBtn" class="tab-btn tab-btn-submit-ready"
+                title="Send every student whose details are filled and photo attached to the approval queue">
+                <i class="fas fa-paper-plane mr-1"></i> Submit Ready Students
+            </button>
             <button type="button" id="approveAllPendingBtn" class="tab-btn tab-btn-approve-all"
                 data-pending="{{ $totalPending }}" {{ $totalPending < 1 ? 'disabled' : '' }}>
                 <i class="fas fa-check-double mr-1"></i> Approve all Pending
@@ -806,6 +841,94 @@
                 }).then(() => location.reload());
             }).fail(xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong', 'error'));
         });
+    });
+
+    // ── Submit ready students to admin (for schools that never pressed Submit) ───
+    function bsEsc(v) {
+        return $('<div>').text(v == null ? '' : v).html();
+    }
+
+    $('#bulkSubmitReadyBtn').on('click', function () {
+        const url = '{{ route("admin.bulk.submit") }}';
+
+        Swal.fire({
+            title: 'Checking students...', allowOutsideClick: false, allowEscapeKey: false,
+            showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+        });
+
+        $.get(url, function (res) {
+            const t = res.totals;
+
+            if (t.ready < 1 && t.scanned < 1 && (res.schools || []).length < 1) {
+                Swal.fire({ icon: 'info', title: 'Nothing to submit', text: 'Every registered student has already been submitted.', confirmButtonColor: '#287C44' });
+                return;
+            }
+
+            let rows = '';
+            (res.schools || []).forEach(s => {
+                const slotCell = (s.slots === null || s.slots === undefined)
+                    ? s.students + ' / (–)'
+                    : s.students + ' / (' + s.slots + ')';
+                rows += '<tr class="' + (s.no_students ? 'bs-zero' : '') + '"><td>' + bsEsc(s.school_name) + '</td>' +
+                    '<td title="Students sent to admin + ready now, out of slots allocated">' + slotCell + '</td>' +
+                    '<td>' + s.ready + '</td><td>' + s.incomplete + '</td><td>' + s.no_photo + '</td></tr>';
+            });
+
+            let skippedHtml = '';
+            if (res.skipped_total > 0) {
+                skippedHtml = '<div class="bs-skipped mt-2">' + res.skipped_total + ' student(s) will be left with their schools (incomplete details or no photo).</div>';
+            }
+
+            let zeroHtml = '';
+            if (t.no_students_schools > 0) {
+                zeroHtml = '<div class="bs-zero-note">' + t.no_students_schools + ' school(s) have slots (' + res.slot_year + ') but no students at all - shown in red.</div>';
+            }
+
+            const html =
+                '<div style="text-align:left;">' +
+                '<p style="margin-bottom:4px;"><b>' + t.ready + '</b> ready &middot; ' + t.incomplete + ' incomplete &middot; ' + t.no_photo + ' without photo</p>' +
+                '<div class="bs-scroll"><table class="bs-table"><thead><tr><th>School</th><th>Students / (Slots)</th><th>Ready</th><th>Incomplete</th><th>No photo</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+                skippedHtml +
+                zeroHtml +
+                '<label class="mt-3" style="font-size:12px;"><input type="checkbox" id="bsLenient"> Also submit students missing optional details (date of birth, nationality, place of birth, district)</label>' +
+                '</div>';
+
+            if (t.ready < 1) {
+                Swal.fire({ icon: 'info', title: 'No student is ready', html: html, confirmButtonColor: '#287C44' });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Submit ' + t.ready + ' student(s) to admin?',
+                html: html,
+                width: 640,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#287C44',
+                confirmButtonText: 'Yes, Submit Them',
+                preConfirm: () => ({ lenient: $('#bsLenient').is(':checked') })
+            }).then(r => {
+                if (!r.isConfirmed) return;
+
+                Swal.fire({
+                    title: 'Submitting...', text: 'Please wait, this may take a moment.',
+                    allowOutsideClick: false, allowEscapeKey: false,
+                    showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+                });
+
+                $.post(url, {
+                    _token: '{{ csrf_token() }}',
+                    run: 1,
+                    strict: r.value.lenient ? 0 : 1
+                }, function (done) {
+                    Swal.fire({
+                        icon: 'success', title: 'Submitted',
+                        text: done.message + ' They are now waiting under Pending Approval.',
+                        confirmButtonColor: '#287C44'
+                    }).then(() => location.reload());
+                }).fail(xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Something went wrong', 'error'));
+            });
+        }).fail(xhr => Swal.fire('Error', xhr.responseJSON?.message || 'Could not load the preview', 'error'));
     });
 
     // ── Slot search ───────────────────────────────────────────────────────────────

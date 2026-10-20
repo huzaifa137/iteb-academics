@@ -231,6 +231,12 @@ class PasslipAndCertificatesController extends Controller
 
         $file->move($path, $studentId . '.jpg');
 
+        // Keep the school's registration record in step with the photo on disk,
+        // otherwise it stays "Pending Photo Submission" even though a photo exists.
+        \App\Models\StudentRegistration::where('student_id', $studentId)
+            ->where('status', 'Pending Photo Submission')
+            ->update(['status' => 'Attached Image, Pending Submission']);
+
         return response()->json(['success' => true])
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
