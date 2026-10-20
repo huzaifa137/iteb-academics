@@ -959,7 +959,9 @@
             }
 
             let rows = '';
-            (res.schools || []).forEach(s => {
+            // Only list schools that have students needing attention (incomplete details or no photo)
+            const problemSchools = (res.schools || []).filter(s => (s.incomplete > 0 || s.no_photo > 0));
+            problemSchools.forEach(s => {
                 const slotCell = (s.slots === null || s.slots === undefined)
                     ? s.students + ' / (–)'
                     : s.students + ' / (' + s.slots + ')';
@@ -974,8 +976,8 @@
             }
 
             let zeroHtml = '';
-            if (t.no_students_schools > 0) {
-                zeroHtml = '<div class="bs-zero-note">' + t.no_students_schools + ' school(s) have slots (' + res.slot_year + ') but no students at all - shown in red.</div>';
+            if (problemSchools.length < 1) {
+                rows = '<tr><td colspan="5" style="text-align:center;">No school has incomplete details or missing photos.</td></tr>';
             }
 
             const html =
