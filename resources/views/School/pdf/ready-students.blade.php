@@ -112,7 +112,7 @@
 </head>
 <body>
     <header>
-        <p class="title">ITEB ACADEMICS — Students Ready for Submission</p>
+        <p class="title">ITEB ACADEMICS — Schools with Incomplete Details / No Photo</p>
         <p class="subtitle">
             Generated {{ $generated_at }}
             &middot; Slot year {{ $slotYear }}
@@ -124,20 +124,20 @@
     </header>
 
     <footer>
-        ITEB ACADEMICS &middot; Ready students report &middot; <span class="page-number"></span>
+        ITEB ACADEMICS &middot; Incomplete / no-photo report &middot; <span class="page-number"></span>
     </footer>
 
     {{-- ═════════ SUMMARY ═════════ --}}
     <table class="cards">
         <tr>
-            <td><div class="card-n c-green">{{ number_format($totals['ready']) }}</div><div class="card-l">Ready to submit</div></td>
+            <td><div class="card-n c-green">{{ number_format($totals['ready']) }}</div><div class="card-l">Ready (all schools)</div></td>
             <td><div class="card-n c-amber">{{ number_format($totals['incomplete']) }}</div><div class="card-l">Incomplete details</div></td>
             <td><div class="card-n c-red">{{ number_format($totals['no_photo']) }}</div><div class="card-l">No photo</div></td>
-            <td><div class="card-n c-blue">{{ number_format(count($schools)) }}</div><div class="card-l">Schools covered</div></td>
+            <td><div class="card-n c-blue">{{ number_format(count($schools)) }}</div><div class="card-l">Schools listed</div></td>
         </tr>
     </table>
 
-    <h2 class="section">Schools overview</h2>
+    <h2 class="section">Schools with incomplete details / no photo</h2>
     <table class="grid">
         <thead>
             <tr>
@@ -160,71 +160,17 @@
                     <td class="num">{{ $s['no_photo'] }}</td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="empty">No schools found.</td></tr>
+                <tr><td colspan="6" class="empty">No school has incomplete details or missing photos.</td></tr>
             @endforelse
         </tbody>
     </table>
     <p class="note">
-        Students = already sent to admin + ready now, for {{ $slotYear }}. Rows in red are schools with slots allocated but no students at all.
+        Students = already sent to admin + ready now, for {{ $slotYear }}; Slots = allocated slots.
     </p>
-
-    {{-- ═════════ READY STUDENTS, PER SCHOOL ═════════ --}}
-    <h2 class="section" style="page-break-before: always;">Ready students ({{ number_format($totals['ready']) }})</h2>
-
-    @php $hasReady = false; @endphp
-    @foreach($schools as $s)
-        @php $list = $ready[$s['school_id']] ?? []; @endphp
-        @continue(empty($list))
-        @php $hasReady = true; @endphp
-
-        <div class="school-bar">
-            {{ $s['school_name'] }}
-            <span>&middot; {{ count($list) }} ready student(s)</span>
-        </div>
-
-        <table class="grid">
-            <thead>
-                <tr>
-                    <th class="num" style="width:3%;">#</th>
-                    <th style="width:12%;">Student ID</th>
-                    <th style="width:20%;">Name</th>
-                    <th class="num" style="width:5%;">Sex</th>
-                    <th style="width:7%;">Category</th>
-                    <th style="width:8%;">Date of birth</th>
-                    <th style="width:10%;">Nationality</th>
-                    <th style="width:12%;">Place of birth</th>
-                    <th style="width:10%;">District</th>
-                    <th style="width:7%;">Class</th>
-                    <th style="width:6%;">Section</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($list as $i => $st)
-                    <tr>
-                        <td class="num">{{ $i + 1 }}</td>
-                        <td>{{ $st['student_id'] }}</td>
-                        <td>{{ $st['name'] }}</td>
-                        <td class="num">{{ $st['sex'] ?: '—' }}</td>
-                        <td>{{ $st['category'] }}</td>
-                        <td>{{ $st['dob'] ?: '—' }}</td>
-                        <td>{{ $st['nationality'] ?: '—' }}</td>
-                        <td>{{ $st['birth_place'] ?: '—' }}</td>
-                        <td>{{ $st['district'] ?: '—' }}</td>
-                        <td>{{ $st['class'] ?: '—' }}</td>
-                        <td>{{ $st['section'] ?: '—' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endforeach
-
-    @unless($hasReady)
-        <div class="empty">No student is ready to be submitted.</div>
-    @endunless
 
     {{-- ═════════ NOT READY ═════════ --}}
     @if(count($notReady))
-        <h2 class="section" style="page-break-before: always;">Left with schools — not ready ({{ number_format(count($notReady)) }})</h2>
+        <h2 class="section" style="page-break-before: always;">Students needing attention ({{ number_format(count($notReady)) }})</h2>
         <table class="grid">
             <thead>
                 <tr>

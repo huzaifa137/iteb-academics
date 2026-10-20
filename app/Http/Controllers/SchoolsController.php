@@ -2197,7 +2197,6 @@ class SchoolsController extends Controller
 
                         $schools[$sid]['ready']++;
                         $totals['ready']++;
-                        $ready[$sid][] = $row;
                         $yr = (int) $reg->admission_year;
                         $readyBySchoolYear[$sid][$yr] = ($readyBySchoolYear[$sid][$yr] ?? 0) + 1;
                     }
@@ -2241,7 +2240,12 @@ class SchoolsController extends Controller
             }
 
             // ── Ordering: schools A-Z, students A-Z inside each school ────────────────────
-            $schools = collect($schools)->sortBy(fn($s) => mb_strtolower((string) $s['school_name']))->values()->all();
+            // Only schools that still have students needing attention (incomplete details / no photo)
+            $schools = collect($schools)
+                ->filter(fn($s) => ((int) $s['incomplete'] > 0) || ((int) $s['no_photo'] > 0))
+                ->sortBy(fn($s) => mb_strtolower((string) $s['school_name']))
+                ->values()
+                ->all();
 
             foreach ($ready as $sid => $list) {
                 usort($list, fn($a, $b) => strcasecmp((string) $a['name'], (string) $b['name']));
