@@ -384,6 +384,46 @@
     color: #ffffff !important;
     font-weight: 700;
 }
+
+.bs-table { 
+    width: 100%; 
+    font-size: 13px; 
+    border-collapse: collapse; 
+    margin-top: 10px; 
+    text-align: left; 
+}
+
+.bs-table th, .bs-table td { 
+    padding: 6px 8px; 
+    border-bottom: 1px solid #e9ecef; 
+}
+
+.bs-table th { 
+    background: #f6f8f7; 
+    font-weight: 700; 
+    white-space: nowrap;   /* ← keeps headers on one line */
+}
+
+.bs-table td { 
+    white-space: nowrap;   /* ← keeps cell values on one line too */
+}
+
+/* Allow the school-name column to wrap if names are long */
+.bs-table td:first-child,
+.bs-table th:first-child {
+    white-space: normal;
+    min-width: 160px;
+}
+
+.bs-scroll { 
+    max-height: 260px; 
+    overflow-y: auto; 
+}
+
+.bs-table th:not(:first-child),
+.bs-table td:not(:first-child) {
+    text-align: center;
+}
     </style>
 
     <div class="side-app">
@@ -899,15 +939,15 @@
             }
 
             Swal.fire({
-                title: 'Submit ' + t.ready + ' student(s) to admin?',
-                html: html,
-                width: 640,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#287C44',
-                confirmButtonText: 'Yes, Submit Them',
-                preConfirm: () => ({ lenient: $('#bsLenient').is(':checked') })
-            }).then(r => {
+    title: 'Submit ' + t.ready + ' student(s) to admin?',
+    html: html,
+    width: 780,            // ← was 640
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#287C44',
+    confirmButtonText: 'Yes, Submit Them',
+    preConfirm: () => ({ lenient: $('#bsLenient').is(':checked') })
+}).then(r => {
                 if (!r.isConfirmed) return;
 
                 Swal.fire({
