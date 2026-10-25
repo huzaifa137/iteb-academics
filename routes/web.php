@@ -340,6 +340,7 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
                 Route::get('/attendance-sheet', 'attendanceSheet')->name('students.attendance-sheet');
                 Route::get('/attendance-sheet/export/pdf', 'exportAttendanceSheetPDF')->name('students.attendance-sheet.export.pdf');
                 Route::get('/attendance-sheet/export/bulk', 'exportAttendanceSheetBulk')->name('students.attendance-sheet.export.bulk');
+                Route::post('/attendance-sheet/export/selected', 'exportAttendanceSheetSelected')->name('students.attendance-sheet.export.selected');
                 Route::get('/search/ajax', 'searchAjax')->name('students.search.ajax');
 
                 Route::get('/export/{schoolId}/{type}', 'exportStudents')->name('students.export');

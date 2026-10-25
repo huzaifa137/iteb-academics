@@ -726,6 +726,110 @@ class StudentController extends Controller
         ]);
     }
 
+    // Selected Attendance Sheets: the chosen timetable subjects x the chosen schools, as ONE
+    // print-ready document (same layout as the bulk export). Ids arrive as comma-separated
+    // strings so a long school list can never hit PHP's max_input_vars limit.
+    public function exportAttendanceSheetSelected(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|string',
+            'type' => 'required|in:idaad,thanawi',
+            'timetable_ids' => 'required|string',
+            'house_ids' => 'required|string',
+            'order' => 'nullable|in:subject,school',
+        ]);
+
+        $back = fn ($message) => redirect()
+            ->route('students.attendance-sheet', $request->only(['year', 'type']))
+            ->with('error', $message);
+
+        $toIds = fn ($csv) => collect(explode(',', (string) $csv))
+            ->map(fn ($v) => (int) trim($v))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $type = $request->type;
+        $timetableIds = $toIds($request->timetable_ids);
+        $houseIds = $toIds($request->house_ids);
+
+        if ($timetableIds->isEmpty() || $houseIds->isEmpty()) {
+            return $back('Please select at least one subject and one school.');
+        }
+
+        $entries = \App\Models\ExamTimetable::where('year', $request->year)
+            ->where('category', $type)
+            ->whereIn('id', $timetableIds)
+            ->orderBy('exam_date')->orderBy('start_time')->orderBy('id')
+            ->get();
+
+        if ($entries->isEmpty()) {
+            return $back('None of the selected timetable entries match the selected year and category.');
+        }
+
+        $selectedHouses = House::whereIn('ID', $houseIds)->orderBy('Number')->get();
+
+        if ($selectedHouses->isEmpty()) {
+            return $back('None of the selected schools were found.');
+        }
+
+        // One query for the students of every selected school, then split per school.
+        $studentsByHouse = StudentBasic::where('Student_ID', 'LIKE', '%-' . $request->year)
+            ->where('Student_ID', 'LIKE', $type === 'idaad' ? '%-ID-%' : '%-TH-%')
+            ->whereIn('House', $selectedHouses->pluck('House'))
+            ->orderBy('Student_ID', 'asc')
+            ->get()
+            ->groupBy('House');
+
+        $houses = $selectedHouses->filter(fn ($h) => $studentsByHouse->has($h->House))->values();
+        $skipped = $selectedHouses->reject(fn ($h) => $studentsByHouse->has($h->House))->values();
+
+        if ($houses->isEmpty()) {
+            return $back('None of the selected schools have students for the selected year and category.');
+        }
+
+        $sheets = [];
+        if ($request->input('order') === 'school') {
+            // All subjects of school A, then all subjects of school B ... (easy to hand out per school)
+            foreach ($houses as $house) {
+                foreach ($entries as $entry) {
+                    $sheets[] = [
+                        'house' => $house,
+                        'entry' => $entry,
+                        'students' => $studentsByHouse[$house->House]->values(),
+                    ];
+                }
+            }
+        } else {
+            // Subject by subject, every school within each subject (default, same as the bulk export)
+            foreach ($entries as $entry) {
+                foreach ($houses as $house) {
+                    $sheets[] = [
+                        'house' => $house,
+                        'entry' => $entry,
+                        'students' => $studentsByHouse[$house->House]->values(),
+                    ];
+                }
+            }
+        }
+
+        $logoPath = public_path('asset/images/logo.png');
+        $logoData = File::exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(File::get($logoPath))
+            : null;
+
+        return view('student.attendance-sheet-bulk-print', [
+            'sheets' => $sheets,
+            'year' => $request->year,
+            'type' => $type,
+            'stage' => $type === 'idaad' ? 'الإعدادية' : 'الثانوية',
+            'logoData' => $logoData,
+            'schoolCount' => $houses->count(),
+            'subjectCount' => $entries->count(),
+            'skippedHouses' => $skipped->map(fn ($h) => $h->Number . ' - ' . $h->House)->all(),
+        ]);
+    }
+
     // Shared filter logic for the Attendance Sheet: same school/year/category
     // filters as the All Students list, scoped to one school (House) at a time.
     private function attendanceSheetStudentsQuery(House $house, $year, $type)

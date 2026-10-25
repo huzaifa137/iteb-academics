@@ -94,14 +94,19 @@
             padding: 0 1.5mm;
         }
         table.roster thead th { font-weight: bold; background: #fff; height: 8mm; font-size: 14px; }
-        table.roster td.name-cell { text-align: right; padding-right: 3mm; white-space: nowrap; }
+        table.roster { table-layout: fixed; }
+        table.roster td.name-cell { text-align: right; padding-right: 3mm; white-space: nowrap; overflow: hidden; }
+        /* Long names shrink a little so the whole name stays visible on one line */
+        table.roster td.name-sm  { font-size: 13px; }
+        table.roster td.name-xs  { font-size: 11.5px; }
+        table.roster td.name-xxs { font-size: 10px; }
         table.roster td.reg-cell { direction: ltr; font-family: Arial, sans-serif; font-size: 13px; }
 
-        .col-no { width: 6%; }
-        .col-name { width: 38%; }
-        .col-reg { width: 22%; }
-        .col-sign { width: 16%; }
-        .col-booklet { width: 18%; }
+        .col-no { width: 5%; }
+        .col-name { width: 47%; }
+        .col-reg { width: 18%; }
+        .col-sign { width: 14%; }
+        .col-booklet { width: 16%; }
 
         table.footer { width: 100%; border-collapse: collapse; margin-top: 4mm; }
         table.footer td { width: 50%; padding: 1.5mm 0; font-size: 15px; font-weight: bold; vertical-align: bottom; }
@@ -170,10 +175,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($chunk as $i => $student)
+                    {{-- ->values() re-indexes the chunk from 0: chunk() keeps the original keys, which made page 2 start at 51 --}}
+                    @foreach($chunk->values() as $i => $student)
+                        @php
+                        $studentName = $student->Student_Name_AR ?: $student->Student_Name;
+                        $nameLen = mb_strlen((string) $studentName);
+                        $nameClass = $nameLen > 64 ? 'name-xxs' : ($nameLen > 54 ? 'name-xs' : ($nameLen > 44 ? 'name-sm' : ''));
+                        @endphp
                         <tr>
                             <td>{{ $pageIndex * $perPage + $i + 1 }}</td>
-                            <td class="name-cell">{{ $student->Student_Name_AR ?: $student->Student_Name }}</td>
+                            <td class="name-cell {{ $nameClass }}">{{ $studentName }}</td>
                             <td class="reg-cell">{{ $student->Student_ID }}</td>
                             <td></td>
                             <td></td>
