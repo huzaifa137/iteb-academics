@@ -523,9 +523,16 @@
     min-width: 160px;
 }
 
+/* Wide "Submit Ready Students" popup – no sideways scrolling */
+.swal2-popup.bs-wide-popup {
+    width: min(1200px, 95vw) !important;
+    max-width: 95vw !important;
+}
+
 .bs-scroll { 
-    max-height: 260px; 
+    max-height: 55vh;      /* grows with the screen; only scrolls for very long lists */
     overflow-y: auto; 
+    overflow-x: auto;
 }
 
 .bs-table th:not(:first-child),
@@ -1438,14 +1445,15 @@
                 '</div>';
 
             if (t.ready < 1) {
-                Swal.fire({ icon: 'info', title: 'No student is ready', html: html, confirmButtonColor: '#287C44' });
+                Swal.fire({ icon: 'info', title: 'No student is ready', html: html, width: '95vw', customClass: { popup: 'bs-wide-popup' }, confirmButtonColor: '#287C44' });
                 return;
             }
 
             Swal.fire({
     title: 'Submit ' + t.ready + ' student(s) to admin?',
     html: html,
-    width: 780,            // ← was 640
+    width: '95vw',         // real width is capped by .bs-wide-popup (1200px)
+    customClass: { popup: 'bs-wide-popup' },
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#287C44',

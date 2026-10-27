@@ -19,7 +19,39 @@
 </div> --}}
 
 
-<div class="row w-100 g-2">
+{{-- Quick-action buttons: no hover / focus / active effects (no radius change, border, shadow, fade) --}}
+<style>
+    .sb-nav .btn.btn-white,
+    .sb-nav .btn.btn-white:hover,
+    .sb-nav .btn.btn-white:focus,
+    .sb-nav .btn.btn-white:focus-visible,
+    .sb-nav .btn.btn-white:active,
+    .sb-nav .btn.btn-white.focus,
+    .sb-nav .btn.btn-white:not(:disabled):not(.disabled):active,
+    .sb-nav .btn.btn-white:not(:disabled):not(.disabled):active:focus {
+        background: #fff !important;
+        background-image: none !important;
+        color: #424e79 !important;
+        border: 1px solid transparent !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        outline: 0 !important;
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sb-nav .btn.btn-white::before,
+    .sb-nav .btn.btn-white::after {
+        content: none !important;
+        display: none !important;
+    }
+</style>
+
+<div class="row w-100 g-2 sb-nav">
     <div class="col-12 col-sm-3 mb-2">
         <a href="{{ route('students.individual.search') }}" class="btn btn-white text-dark w-100">
             <i class="fas fa-search me-2"></i> Search Student
