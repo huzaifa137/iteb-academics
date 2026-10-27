@@ -115,6 +115,53 @@
             gap: 18px;
         }
 
+        /* School overview search bar */
+        .school-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+            margin-bottom: 18px;
+        }
+
+        .school-filter-bar i {
+            color: var(--slate);
+        }
+
+        .school-filter-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .school-filter-count {
+            font-size: 12px;
+            color: var(--slate);
+            white-space: nowrap;
+        }
+
+        .school-filter-clear {
+            border: none;
+            background: #f1f5f9;
+            color: var(--slate);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            padding: 0;
+            cursor: pointer;
+            display: none;
+        }
+
+        #schoolNoMatch {
+            display: none;
+        }
+
         .school-card {
             border-radius: var(--radius);
             background: #fff;
@@ -500,9 +547,22 @@
                     <p class="text-muted">Once schools start registering students, they'll appear here.</p>
                 </div>
             @else
+                <div class="school-filter-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="schoolFilterInput" placeholder="Search by school name or school ID (e.g. IT-089)…" autocomplete="off">
+                    <button type="button" class="school-filter-clear" id="schoolFilterClear" title="Clear">&times;</button>
+                    <span class="school-filter-count" id="schoolFilterCount"></span>
+                </div>
+
+                <div class="text-center py-5" id="schoolNoMatch">
+                    <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                    <h6 class="text-muted">No schools match your search.</h6>
+                </div>
+
                 <div class="school-grid">
                     @foreach($schools as $school)
-                        <a href="{{ route('admin.student.approvals.detail', $school['prefix']) }}" class="school-card">
+                        <a href="{{ route('admin.student.approvals.detail', $school['prefix']) }}" class="school-card"
+                           data-search="{{ strtolower($school['prefix'] . ' ' . $school['school_name']) }}">
                             <div class="sc-head">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
@@ -865,6 +925,30 @@
         $(this).addClass('active');
         $('#' + $(this).data('tab')).addClass('active');
     });
+
+    // ── School overview filter ────────────────────────────────────────────────────
+    function filterSchoolCards() {
+        const q = ($('#schoolFilterInput').val() || '').toLowerCase().trim();
+        const cards = $('.school-grid .school-card');
+        let visible = 0;
+
+        cards.each(function () {
+            const match = !q || ($(this).data('search') || '').toString().indexOf(q) !== -1;
+            $(this).toggle(match);
+            if (match) visible++;
+        });
+
+        $('#schoolFilterClear').toggle(q.length > 0);
+        $('#schoolFilterCount').text(q ? visible + ' of ' + cards.length + ' schools' : cards.length + ' schools');
+        $('#schoolNoMatch').toggle(visible === 0 && cards.length > 0);
+    }
+
+    $(document).on('input', '#schoolFilterInput', filterSchoolCards);
+    $(document).on('click', '#schoolFilterClear', function () {
+        $('#schoolFilterInput').val('').focus();
+        filterSchoolCards();
+    });
+    $(function () { if ($('#schoolFilterInput').length) filterSchoolCards(); });
 
     // ── Approve all pending (all schools) ─────────────────────────────────────────
     $('#approveAllPendingBtn').on('click', function () {
