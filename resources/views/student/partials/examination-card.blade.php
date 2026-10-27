@@ -43,7 +43,8 @@
     <div class="c-foot">يجب إظهار هذه البطاقة للمراقب أثناء جريان الامتحانات.</div>
     <div class="c-foot-box"></div>
 
+    {{-- The stamp image is defined once in the page CSS (.c-stamp), not repeated inside every card. --}}
     @if($stampData)
-        <img class="c-stamp" src="{{ $stampData }}" alt="">
+        <div class="c-stamp"></div>
     @endif
 </div>

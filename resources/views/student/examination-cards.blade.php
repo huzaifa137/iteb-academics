@@ -76,9 +76,10 @@
 
                             <div class="row g-3 mt-1">
                                 <div class="col-12 col-md-3">
-                                    <label for="card_start" class="form-label">First Card No.</label>
+                                    <label for="card_start" class="form-label">First Card No. (whole year &amp; category)</label>
                                     <input type="number" min="0" name="card_start" id="card_start" class="form-control"
                                         value="{{ request('card_start', 1) }}">
+                                    <small class="text-muted">Number of the very first card of the year/category. Each school continues from the previous school automatically.</small>
                                 </div>
                                 <div class="col-12 col-md-3">
                                     <label for="card_step" class="form-label">Card No. Step</label>
@@ -108,6 +109,9 @@
                                 &middot; Year: {{ request('year') }}
                                 &middot; Category: {{ ucfirst(request('type')) }}
                                 &middot; {{ $students->count() }} student(s)
+                                @if ($students->isNotEmpty() && $firstCardNo !== null)
+                                    &middot; Card No. {{ number_format($firstCardNo) }} &ndash; {{ number_format($lastCardNo) }}
+                                @endif
                             </div>
 
                             <div class="table-responsive">

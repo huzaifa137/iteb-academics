@@ -22,6 +22,8 @@ class ExaminationCardController extends Controller
 
         $students = collect();
         $selectedHouse = null;
+        $firstCardNo = null;
+        $lastCardNo = null;
 
         if ($request->filled('house_id') && $request->filled('year') && $request->filled('type')) {
             $selectedHouse = House::find($request->house_id);
@@ -30,10 +32,20 @@ class ExaminationCardController extends Controller
                 $students = $this->studentsQuery($selectedHouse, $request->year, $request->type)
                     ->orderBy('Student_ID', 'asc')
                     ->get();
+
+                if ($students->isNotEmpty()) {
+                    $firstCardNo = $this->cardNumberFor(
+                        $students->first()->Student_ID, $request->year, $request->type,
+                        (int) $request->input('card_start', 1), max(1, (int) $request->input('card_step', 1))
+                    );
+                    $lastCardNo = $firstCardNo + (($students->count() - 1) * max(1, (int) $request->input('card_step', 1)));
+                }
             }
         }
 
-        return view('student.examination-cards', compact('houses', 'years', 'students', 'selectedHouse'));
+        return view('student.examination-cards', compact(
+            'houses', 'years', 'students', 'selectedHouse', 'firstCardNo', 'lastCardNo'
+        ));
     }
 
     /**
@@ -61,17 +73,29 @@ class ExaminationCardController extends Controller
             return back()->with('error', 'No students found for the selected school, year and category.');
         }
 
-        // Running card number (printed as 29,426 etc). Starts at card_start and goes up by
-        // card_step for every student, in Student_ID order.
+        // Card numbers run continuously for the whole year + category (all schools together),
+        // in Student_ID order: school IT-001's students first, then IT-002, and so on.
+        // This school therefore starts right after the last card of the previous school.
+        // card_start = number of the very first card of the year/category (default 1),
+        // card_step  = gap between consecutive cards (default 1).
         $cardStart = (int) $request->input('card_start', 1);
         $cardStep = max(1, (int) $request->input('card_step', 1));
+        $firstCardNo = $this->cardNumberFor($students->first()->Student_ID, $request->year, $type, $cardStart, $cardStep);
 
-        // Photos and stamp are embedded as data URIs so html2canvas can always draw them.
-        $cards = $students->values()->map(function ($student, $i) use ($cardStart, $cardStep) {
+        // One resized copy of the default photo is shared by every student without a photo.
+        $defaultPhoto = null;
+
+        $cards = $students->values()->map(function ($student, $i) use ($firstCardNo, $cardStep, &$defaultPhoto) {
+            $photo = $this->photoDataUri($student->Student_ID);
+            if ($photo === null) {
+                $defaultPhoto = $defaultPhoto ?? $this->defaultPhotoDataUri();
+                $photo = $defaultPhoto;
+            }
+
             return [
                 'student'  => $student,
-                'photo'    => $this->photoDataUri($student->Student_ID),
-                'cardNo'   => $cardStart + ($i * $cardStep),
+                'photo'    => $photo,
+                'cardNo'   => $firstCardNo + ($i * $cardStep),
             ];
         });
 
@@ -100,15 +124,76 @@ class ExaminationCardController extends Controller
             ->where('Student_ID', 'LIKE', $type === 'idaad' ? '%-ID-%' : '%-TH-%');
     }
 
+    /**
+     * Card number of a school's first student: cardStart + (number of students of the same
+     * year + category whose Student_ID sorts before it) * step.
+     */
+    private function cardNumberFor(string $firstStudentId, $year, string $type, int $cardStart, int $cardStep): int
+    {
+        $before = StudentBasic::where('Student_ID', 'LIKE', '%-' . $year)
+            ->where('Student_ID', 'LIKE', $type === 'idaad' ? '%-ID-%' : '%-TH-%')
+            ->where('Student_ID', '<', $firstStudentId)
+            ->count();
+
+        return $cardStart + ($before * $cardStep);
+    }
+
+    /**
+     * Small, cached JPEG of the student's photo as a data URI. Raw camera photos are several MB each,
+     * which is what made the browser run out of memory when building the PDF.
+     * Returns null when the student has no photo.
+     */
     private function photoDataUri(string $studentId): ?string
     {
         $photo = public_path('assets/student_photos/' . $studentId . '.jpg');
 
-        if (!File::exists($photo)) {
-            $photo = public_path('assets/images/default-user.jpg');
+        return File::exists($photo) ? $this->smallJpegDataUri($photo, 'student-' . $studentId) : null;
+    }
+
+    private function defaultPhotoDataUri(): ?string
+    {
+        $photo = public_path('assets/images/default-user.jpg');
+
+        return File::exists($photo) ? $this->smallJpegDataUri($photo, 'default-user') : null;
+    }
+
+    /** Max 300 x 300 px (card photo is 26 x 23 mm, so this is still ~290 dpi). */
+    private function smallJpegDataUri(string $path, string $cacheKey): ?string
+    {
+        $cache = storage_path('app/exam-card-photos/' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $cacheKey) . '.jpg');
+
+        if (File::exists($cache) && File::lastModified($cache) >= File::lastModified($path)) {
+            return 'data:image/jpeg;base64,' . base64_encode(File::get($cache));
         }
 
-        return $this->imageDataUri($photo);
+        try {
+            if (function_exists('imagecreatefromstring')) {
+                $src = @imagecreatefromstring(File::get($path));
+
+                if ($src !== false) {
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+                    $ratio = min(1, 300 / max($w, $h));
+                    $nw = max(1, (int) round($w * $ratio));
+                    $nh = max(1, (int) round($h * $ratio));
+
+                    $dst = imagecreatetruecolor($nw, $nh);
+                    imagefill($dst, 0, 0, imagecolorallocate($dst, 255, 255, 255));
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+
+                    File::ensureDirectoryExists(dirname($cache));
+                    imagejpeg($dst, $cache, 85);
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    return 'data:image/jpeg;base64,' . base64_encode(File::get($cache));
+                }
+            }
+        } catch (\Throwable $e) {
+            // fall through to the original file
+        }
+
+        return $this->imageDataUri($path);
     }
 
     private function imageDataUri(string $path): ?string

@@ -32,7 +32,7 @@
 
         /* A4 landscape, 2 columns x 3 rows = 6 cards per page, first card top-left */
         .cards-page {
-            width: 297mm; height: 209mm; padding: 7mm 7.3mm;
+            width: 297mm; height: 210mm; padding: 7mm 7.3mm;
             display: grid; grid-template-columns: 138mm 138mm; grid-template-rows: repeat(3, 61.5mm);
             column-gap: 6.4mm; row-gap: 5.7mm; align-content: start;
             page-break-after: always; overflow: hidden;
@@ -93,7 +93,10 @@
         .c-foot-box { position: absolute; left: 108.7mm; bottom: 0; right: 0; height: 6mm; border-top: 0.35mm solid #000; }
 
         /* round-diamond stamp over the lower right of the card */
-        .c-stamp { position: absolute; left: 99mm; top: 22mm; width: 42mm; height: 42mm; opacity: 0.95; pointer-events: none; }
+        .c-stamp {
+            position: absolute; left: 99mm; top: 22mm; width: 42mm; height: 42mm; opacity: 0.95; pointer-events: none;
+            @if($stampData) background: url('{{ $stampData }}') center / contain no-repeat; @endif
+        }
 
         @media print {
             #toolbar { display: none; }
@@ -129,29 +132,66 @@
     @endforeach
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-    function buildPdf() {
-        const status = document.getElementById('status');
-        status.textContent = 'Preparing PDF… it will download automatically.';
+    /*
+     * Each A4 page (6 cards) is drawn on its own small canvas and added to the PDF straight away,
+     * then released. The old code drew ALL pages as ONE huge canvas, which the browser cannot
+     * allocate for larger schools (cards missing / PDF failing) and was very slow.
+     */
+    const SCALE = 2.5;        // 2.5 x 96dpi = 240 dpi, sharp enough for printed cards
+    const JPEG_QUALITY = 0.9;
+    let building = false;
 
-        const opt = {
-            margin: 0,
-            filename: @json($fileName),
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 3, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-            pagebreak: { mode: ['css', 'legacy'] }
-        };
+    function setStatus(text) { document.getElementById('status').textContent = text; }
 
-        return html2pdf().set(opt).from(document.getElementById('sheets')).save().then(function () {
-            status.textContent = 'PDF downloaded. You can close this tab.';
-        });
+    function nextFrame() { return new Promise(function (r) { setTimeout(r, 0); }); }
+
+    function imagesReady() {
+        return Promise.all(Array.from(document.images).map(function (img) {
+            return img.decode ? img.decode().catch(function () {}) : Promise.resolve();
+        }));
     }
 
-    window.onload = function () {
-        (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(buildPdf);
-    };
+    async function buildPdf() {
+        if (building) return;
+        building = true;
+
+        try {
+            const pages = Array.from(document.querySelectorAll('#sheets .cards-page'));
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape', compress: true });
+
+            window.scrollTo(0, 0);
+            await (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve());
+            await imagesReady();
+
+            for (let i = 0; i < pages.length; i++) {
+                setStatus('Preparing PDF… page ' + (i + 1) + ' of ' + pages.length);
+                await nextFrame();   // let the status text paint
+
+                const canvas = await html2canvas(pages[i], {
+                    scale: SCALE, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, logging: false
+                });
+
+                if (i > 0) pdf.addPage('a4', 'landscape');
+                pdf.addImage(canvas.toDataURL('image/jpeg', JPEG_QUALITY), 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+
+                canvas.width = canvas.height = 0;   // free the memory before the next page
+            }
+
+            pdf.save(@json($fileName));
+            setStatus('PDF downloaded (' + pages.length + ' page' + (pages.length === 1 ? '' : 's') + '). You can close this tab.');
+        } catch (e) {
+            console.error(e);
+            setStatus('PDF failed: ' + (e && e.message ? e.message : e) + ' — click "Download again" or use Print.');
+        } finally {
+            building = false;
+        }
+    }
+
+    window.onload = buildPdf;
 
     document.getElementById('redownload').addEventListener('click', buildPdf);
     document.getElementById('printBtn').addEventListener('click', function () { window.print(); });

@@ -1527,49 +1527,63 @@ class SchoolsController extends Controller
 
     public function adminStudentApprovals()
     {
-        $allRegistrations = StudentRegistration::select('school_id', 'admission_year')
-            ->distinct()
-            ->get();
+        // One grouped query for every school/year that has registrations (replaces ~6 queries per school).
+        $regStats = StudentRegistration::selectRaw(
+            "school_id, admission_year, COUNT(*) AS total_registered, " .
+            "SUM(CASE WHEN status = 'Pending Admin Approval' THEN 1 ELSE 0 END) AS pending_count, " .
+            "SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS approved_count, " .
+            "MAX(updated_at) AS latest_submission, MIN(student_id) AS first_student_id"
+        )
+            ->groupBy('school_id', 'admission_year')
+            ->get()
+            ->keyBy(fn($r) => $r->school_id . '_' . $r->admission_year);
+
+        // Every slot allocation, including schools that were given slots but have not registered anyone yet.
+        $slotRows = SchoolRegistrationSlot::all()
+            ->keyBy(fn($r) => $r->school_id . '_' . $r->admission_year);
+
+        $keys = $regStats->keys()->merge($slotRows->keys())->unique();
+
+        $schoolIds = $regStats->pluck('school_id')->merge($slotRows->pluck('school_id'))->unique()->values();
+        $houses = House::whereIn('ID', $schoolIds)->get()->keyBy('ID');
 
         $schools = [];
-        $seen = [];
 
-        foreach ($allRegistrations as $row) {
-            $key = $row->school_id . '_' . $row->admission_year;
-            if (in_array($key, $seen))
-                continue;
-            $seen[] = $key;
+        foreach ($keys as $key) {
+            $reg = $regStats->get($key);
+            $slot = $slotRows->get($key);
 
-            $sid = $row->school_id;
-            $year = $row->admission_year;
+            $sid = $reg ? $reg->school_id : $slot->school_id;
+            $year = $reg ? $reg->admission_year : $slot->admission_year;
+            $house = $houses->get($sid);
 
-            $pending = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->where('status', 'Pending Admin Approval')->count();
-            $approved = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->where('status', 'Approved')->count();
-            $total = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->count();
-
-            $slot = SchoolRegistrationSlot::where('school_id', $sid)->where('admission_year', $year)->first();
-
-            $firstReg = StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->first();
-            $parts = $firstReg ? explode('-', $firstReg->student_id) : [];
-            $prefix = count($parts) >= 2 ? $parts[0] . '-' . $parts[1] : (string) $sid;
+            // Prefix used by the detail page (student_id LIKE 'IT-081-%').
+            // With registrations it comes from the real student ids; otherwise from the school number.
+            $parts = $reg && $reg->first_student_id ? explode('-', $reg->first_student_id) : [];
+            if (count($parts) >= 2) {
+                $prefix = $parts[0] . '-' . $parts[1];
+            } else {
+                $prefix = ($house && $house->Number) ? $house->Number : (string) $sid;
+            }
 
             $schools[] = [
                 'prefix' => $prefix,
                 'school_id' => $sid,
                 'admission_year' => $year,
-                'school_name' => Helper::schoolNameByID($sid) ?? $prefix,
-                'pending_count' => $pending,
-                'approved_count' => $approved,
-                'total_registered' => $total,
+                'school_name' => $house->House ?? $prefix,
+                'pending_count' => $reg ? (int) $reg->pending_count : 0,
+                'approved_count' => $reg ? (int) $reg->approved_count : 0,
+                'total_registered' => $reg ? (int) $reg->total_registered : 0,
                 'slots_allocated' => $slot ? $slot->slots_allocated : 0,
                 'slots_used' => $slot ? $slot->slots_used : 0,
                 'slots_remaining' => $slot ? $slot->slotsRemaining() : 0,
                 'school_reg_open' => $slot ? $slot->registration_open : false,
-                'latest_submission' => StudentRegistration::where('school_id', $sid)->where('admission_year', $year)->max('updated_at'),
+                'latest_submission' => $reg ? $reg->latest_submission : null,
             ];
         }
 
-        usort($schools, fn($a, $b) => $b['pending_count'] <=> $a['pending_count']);
+        usort($schools, fn($a, $b) => [$b['pending_count'], $a['school_name'], $b['admission_year']]
+            <=> [$a['pending_count'], $b['school_name'], $a['admission_year']]);
 
         $globalPeriod = RegistrationPeriod::active();
         $globalOpen = RegistrationPeriod::globallyOpen();
@@ -1598,6 +1612,12 @@ class SchoolsController extends Controller
             ->get();
 
         $schoolId = $registrations->first()->school_id ?? null;
+
+        // A school can hold slots without any registration yet: resolve it from its school number.
+        if (!$schoolId) {
+            $schoolId = House::where('Number', $schoolPrefix)->value('ID');
+        }
+
         $schoolName = $schoolId ? (Helper::schoolNameByID($schoolId) ?? $schoolPrefix) : $schoolPrefix;
 
         $slot = $schoolId
