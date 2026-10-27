@@ -1532,6 +1532,9 @@ class SchoolsController extends Controller
             "school_id, admission_year, COUNT(*) AS total_registered, " .
             "SUM(CASE WHEN status = 'Pending Admin Approval' THEN 1 ELSE 0 END) AS pending_count, " .
             "SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS approved_count, " .
+            "SUM(CASE WHEN status = 'Returned' THEN 1 ELSE 0 END) AS returned_count, " .
+            "SUM(CASE WHEN status = 'Pending Photo Submission' THEN 1 ELSE 0 END) AS no_photo_count, " .
+            "SUM(CASE WHEN status = 'Attached Image, Pending Submission' THEN 1 ELSE 0 END) AS unsubmitted_count, " .
             "MAX(updated_at) AS latest_submission, MIN(student_id) AS first_student_id"
         )
             ->groupBy('school_id', 'admission_year')
@@ -1573,6 +1576,10 @@ class SchoolsController extends Controller
                 'school_name' => $house->House ?? $prefix,
                 'pending_count' => $reg ? (int) $reg->pending_count : 0,
                 'approved_count' => $reg ? (int) $reg->approved_count : 0,
+                'returned_count' => $reg ? (int) $reg->returned_count : 0,
+                // still with the school: no photo yet / photo attached but not sent to admin
+                'no_photo_count' => $reg ? (int) $reg->no_photo_count : 0,
+                'unsubmitted_count' => $reg ? (int) $reg->unsubmitted_count : 0,
                 'total_registered' => $reg ? (int) $reg->total_registered : 0,
                 'slots_allocated' => $slot ? $slot->slots_allocated : 0,
                 'slots_used' => $slot ? $slot->slots_used : 0,

@@ -162,6 +162,51 @@
             display: none;
         }
 
+        /* ── Schools overview: filter toolbar ───────────────────────────────── */
+        .sf-wrap { background:#fff; border-radius:var(--radius); box-shadow:0 2px 10px rgba(0,0,0,.06); padding:14px 16px; margin-bottom:18px; }
+        .sf-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+        .sf-field { display:flex; flex-direction:column; gap:3px; }
+        .sf-field label { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--slate); margin:0; }
+        .sf-field select, .sf-search { height:38px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; font-size:13.5px; }
+        .sf-field select { padding:0 28px 0 10px; min-width:130px; font-weight:600; color:#0f172a; }
+        .sf-field select:focus, .sf-search:focus-within { outline:none; border-color:var(--green); background:#fff; box-shadow:0 0 0 3px rgba(40,124,68,.12); }
+        .sf-search { flex:1; min-width:200px; display:flex; align-items:center; gap:8px; padding:0 10px; }
+        .sf-search i { color:var(--slate); }
+        .sf-search input { flex:1; border:none; outline:none; background:transparent; font-size:13.5px; min-width:0; }
+        .sf-btn { height:38px; border:1px solid #e2e8f0; background:#fff; border-radius:10px; padding:0 14px; font-size:13px; font-weight:600; color:#334155; cursor:pointer; white-space:nowrap; }
+        .sf-btn:hover { border-color:var(--green); color:var(--green); }
+        .sf-btn.on { background:#ecf7f0; border-color:var(--green); color:var(--green); }
+        .sf-badge { display:none; background:var(--green); color:#fff; border-radius:50px; font-size:10.5px; padding:1px 7px; margin-left:4px; }
+        .sf-badge.show { display:inline-block; }
+
+        .sf-quick { display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:2px; }
+        .sf-chip { border:1px solid #e2e8f0; background:#f8fafc; color:#334155; border-radius:50px; padding:6px 12px; font-size:12.5px; font-weight:600; white-space:nowrap; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:.15s; }
+        .sf-chip:hover { border-color:var(--green); }
+        .sf-chip .n { background:#e2e8f0; color:#475569; border-radius:50px; font-size:11px; padding:0 7px; min-width:22px; text-align:center; }
+        .sf-chip.active { background:var(--green); border-color:var(--green); color:#fff; }
+        .sf-chip.active .n { background:rgba(255,255,255,.25); color:#fff; }
+        .sf-chip.zero:not(.active) { opacity:.45; }
+
+        .sf-panel { display:none; margin-top:14px; padding-top:14px; border-top:1px dashed #e2e8f0; }
+        .sf-panel.open { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:18px 24px; }
+        .sf-group h6 { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--slate); margin:0 0 8px; }
+        .sf-group .sf-chips { display:flex; flex-wrap:wrap; gap:6px; }
+
+        .sf-results { display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-top:12px; font-size:12.5px; color:var(--slate); }
+        .sf-results strong { color:#0f172a; }
+        .sf-totals span { margin-right:10px; white-space:nowrap; }
+        .sf-active { display:flex; flex-wrap:wrap; gap:6px; }
+        .sf-pill { background:#ecf7f0; color:#166534; border-radius:50px; padding:2px 6px 2px 10px; font-size:11.5px; font-weight:600; cursor:pointer; border:none; }
+        .sf-pill:hover { background:#d6efdd; }
+        .sf-link { background:none; border:none; color:var(--green); font-weight:700; font-size:12.5px; cursor:pointer; padding:0; }
+        .sf-link:hover { text-decoration:underline; }
+        .sf-spacer { flex:1; }
+        .sc-flags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+        .sc-flag { font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:50px; background:#f1f5f9; color:#475569; }
+        .sc-flag.warn { background:#fef3c7; color:#92400e; }
+        .sc-flag.bad { background:#fee2e2; color:#b91c1c; }
+        .sc-flag.info { background:#e0f2fe; color:#075985; }
+
         .school-card {
             border-radius: var(--radius);
             background: #fff;
@@ -547,22 +592,101 @@
                     <p class="text-muted">Once schools start registering students, they'll appear here.</p>
                 </div>
             @else
-                <div class="school-filter-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="schoolFilterInput" placeholder="Search by school name or school ID (e.g. IT-089)…" autocomplete="off">
-                    <button type="button" class="school-filter-clear" id="schoolFilterClear" title="Clear">&times;</button>
-                    <span class="school-filter-count" id="schoolFilterCount"></span>
+                @php
+                    $filterYears = collect($schools)->pluck('admission_year')->unique()->sortDesc()->values();
+                    $yearCounts = collect($schools)->countBy('admission_year');
+                    $activeYearEn = $activeYear->year_en ?? null;
+                @endphp
+                <div class="sf-wrap" id="schoolFilters">
+                    <div class="sf-toolbar">
+                        <div class="sf-field">
+                            <label for="sfYear">Year</label>
+                            <select id="sfYear">
+                                <option value="">All years</option>
+                                @foreach($filterYears as $y)
+                                    <option value="{{ $y }}">{{ $y }}{{ (string) $y === (string) $activeYearEn ? ' (active)' : '' }} &middot; {{ $yearCounts[$y] ?? 0 }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="sf-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="schoolFilterInput" placeholder="Search by school name or number (e.g. IT-089)…" autocomplete="off">
+                            <button type="button" class="school-filter-clear" id="schoolFilterClear" title="Clear">&times;</button>
+                        </div>
+                        <div class="sf-field">
+                            <label for="sfSort">Sort by</label>
+                            <select id="sfSort">
+                                <option value="default">Most pending first</option>
+                                <option value="name">School name A–Z</option>
+                                <option value="number">School number</option>
+                                <option value="registered">Most students registered</option>
+                                <option value="unsub">Most students not yet submitted</option>
+                                <option value="rem">Most slots remaining</option>
+                                <option value="last">Latest activity</option>
+                            </select>
+                        </div>
+                        <button type="button" class="sf-btn" id="sfMoreBtn">
+                            <i class="fas fa-sliders-h mr-1"></i> More filters <span class="sf-badge" id="sfMoreBadge">0</span>
+                        </button>
+                    </div>
+
+                    {{-- Quick status chips (always visible) --}}
+                    <div class="sf-quick" id="sfQuick"></div>
+
+                    {{-- Advanced filters (collapsed by default) --}}
+                    <div class="sf-panel" id="sfPanel">
+                        <div class="sf-group"><h6>Needs attention</h6><div class="sf-chips" id="sfGroup-attn"></div></div>
+                        <div class="sf-group"><h6>Slots</h6><div class="sf-chips" id="sfGroup-slots"></div></div>
+                        <div class="sf-group"><h6>Registration for school</h6><div class="sf-chips" id="sfGroup-win"></div></div>
+                        <div class="sf-group">
+                            <h6>Last activity</h6>
+                            <div class="sf-field" style="margin:0;">
+                                <select id="sfAct">
+                                    <option value="">Any time</option>
+                                    <option value="7">In the last 7 days</option>
+                                    <option value="30">In the last 30 days</option>
+                                    <option value="old">More than 30 days ago</option>
+                                    <option value="never">No activity yet</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sf-results">
+                        <span id="schoolFilterCount"></span>
+                        <span class="sf-totals" id="sfTotals"></span>
+                        <span class="sf-active" id="sfActive"></span>
+                        <span class="sf-spacer"></span>
+                        <button type="button" class="sf-link" id="sfClearAll" style="display:none;"><i class="fas fa-undo mr-1"></i>Clear all filters</button>
+                        <button type="button" class="sf-link" id="sfCsv" title="Download the schools currently shown as a CSV (opens in Excel)"><i class="fas fa-file-csv mr-1"></i>Export list (CSV)</button>
+                    </div>
                 </div>
 
                 <div class="text-center py-5" id="schoolNoMatch">
                     <i class="fas fa-search fa-2x text-muted mb-2"></i>
-                    <h6 class="text-muted">No schools match your search.</h6>
+                    <h6 class="text-muted">No schools match your filters.</h6>
+                    <button type="button" class="sf-link" id="sfClearAll2">Clear all filters</button>
                 </div>
 
                 <div class="school-grid">
                     @foreach($schools as $school)
                         <a href="{{ route('admin.student.approvals.detail', $school['prefix']) }}" class="school-card"
-                           data-search="{{ strtolower($school['prefix'] . ' ' . $school['school_name']) }}">
+                           data-search="{{ strtolower($school['prefix'] . ' ' . $school['school_name'] . ' ' . $school['admission_year']) }}"
+                           data-order="{{ $loop->index }}"
+                           data-year="{{ $school['admission_year'] }}"
+                           data-prefix="{{ $school['prefix'] }}"
+                           data-name="{{ $school['school_name'] }}"
+                           data-total="{{ $school['total_registered'] }}"
+                           data-pending="{{ $school['pending_count'] }}"
+                           data-approved="{{ $school['approved_count'] }}"
+                           data-returned="{{ $school['returned_count'] }}"
+                           data-nophoto="{{ $school['no_photo_count'] }}"
+                           data-unsub="{{ $school['unsubmitted_count'] }}"
+                           data-alloc="{{ $school['slots_allocated'] }}"
+                           data-rem="{{ $school['slots_remaining'] }}"
+                           data-open="{{ $school['school_reg_open'] ? 1 : 0 }}"
+                           data-last="{{ $school['latest_submission'] ? \Carbon\Carbon::parse($school['latest_submission'])->timestamp : 0 }}"
+                           data-lasttext="{{ $school['latest_submission'] ? \Carbon\Carbon::parse($school['latest_submission'])->format('Y-m-d H:i') : '' }}">
                             <div class="sc-head">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
@@ -612,6 +736,25 @@
                                         <div class="l">Slots</div>
                                     </div>
                                 </div>
+                                @php
+                                    $withSchool = $school['no_photo_count'] + $school['unsubmitted_count'];
+                                @endphp
+                                @if($school['total_registered'] < 1 || $school['returned_count'] > 0 || $withSchool > 0)
+                                    <div class="sc-flags">
+                                        @if($school['total_registered'] < 1)
+                                            <span class="sc-flag bad">No students registered</span>
+                                        @endif
+                                        @if($school['no_photo_count'] > 0)
+                                            <span class="sc-flag warn">{{ $school['no_photo_count'] }} missing photo</span>
+                                        @endif
+                                        @if($school['unsubmitted_count'] > 0)
+                                            <span class="sc-flag info">{{ $school['unsubmitted_count'] }} not submitted</span>
+                                        @endif
+                                        @if($school['returned_count'] > 0)
+                                            <span class="sc-flag bad">{{ $school['returned_count'] }} returned</span>
+                                        @endif
+                                    </div>
+                                @endif
                                 <div class="mt-2" style="font-size:11px; color:var(--slate); text-align:right;">
                                     Last activity:
                                     {{ $school['latest_submission'] ? \Carbon\Carbon::parse($school['latest_submission'])->diffForHumans() : 'N/A' }}
@@ -926,29 +1069,250 @@
         $('#' + $(this).data('tab')).addClass('active');
     });
 
-    // ── School overview filter ────────────────────────────────────────────────────
-    function filterSchoolCards() {
-        const q = ($('#schoolFilterInput').val() || '').toLowerCase().trim();
-        const cards = $('.school-grid .school-card');
-        let visible = 0;
+    // ── School overview filters ───────────────────────────────────────────────────
+    // Groups: options inside a group are OR-ed, different groups (and year / search / activity) are AND-ed.
+    // Everything runs in the browser on data-* attributes, so filtering is instant.
+    (function () {
+        const grid = document.querySelector('.school-grid');
+        if (!grid) return;
 
-        cards.each(function () {
-            const match = !q || ($(this).data('search') || '').toString().indexOf(q) !== -1;
-            $(this).toggle(match);
-            if (match) visible++;
+        const GROUPS = {
+            progress: { label: 'Progress', opts: [
+                { key: 'pending',   label: 'Pending approval',        test: c => c.pending > 0 },
+                { key: 'submitted', label: 'Submitted to admin',      test: c => c.pending + c.approved + c.returned > 0 },
+                { key: 'approved',  label: 'Fully approved',          test: c => c.total > 0 && c.approved === c.total },
+                { key: 'notsent',   label: 'Nothing submitted yet',   test: c => c.total > 0 && c.pending + c.approved + c.returned === 0 },
+                { key: 'none',      label: 'No students registered',  test: c => c.total === 0 }
+            ]},
+            attn: { label: 'Needs attention', opts: [
+                { key: 'unsub',    label: 'Has students not yet submitted', test: c => c.nophoto + c.unsub > 0 },
+                { key: 'nophoto',  label: 'Students missing photo',         test: c => c.nophoto > 0 },
+                { key: 'ready',    label: 'Photo attached, not submitted',  test: c => c.unsub > 0 },
+                { key: 'returned', label: 'Returned to school',             test: c => c.returned > 0 }
+            ]},
+            slots: { label: 'Slots', opts: [
+                { key: 'noslots', label: 'No slots allocated',  test: c => c.alloc === 0 },
+                { key: 'avail',   label: 'Slots available',     test: c => c.rem > 0 },
+                { key: 'low',     label: 'Low (5 or fewer left)', test: c => c.rem > 0 && c.rem <= 5 },
+                { key: 'full',    label: 'All slots used',      test: c => c.alloc > 0 && c.rem === 0 }
+            ]},
+            win: { label: 'Registration', opts: [
+                { key: 'open',   label: 'Open for school',   test: c => c.open === 1 },
+                { key: 'closed', label: 'Closed for school', test: c => c.open === 0 }
+            ]}
+        };
+        const GROUP_BOX = { progress: 'sfQuick', attn: 'sfGroup-attn', slots: 'sfGroup-slots', win: 'sfGroup-win' };
+        const ACT_LABELS = { '7': 'Active in last 7 days', '30': 'Active in last 30 days', 'old': 'No activity for 30+ days', 'never': 'No activity yet' };
+        const DAY = 86400;
+
+        const cards = Array.from(grid.querySelectorAll('.school-card')).map(function (el) {
+            const d = el.dataset, n = k => parseInt(d[k], 10) || 0;
+            return {
+                el: el, order: n('order'), year: d.year, prefix: d.prefix, name: d.name, search: (d.search || '').toLowerCase(),
+                total: n('total'), pending: n('pending'), approved: n('approved'), returned: n('returned'),
+                nophoto: n('nophoto'), unsub: n('unsub'), alloc: n('alloc'), rem: n('rem'), open: n('open'),
+                last: n('last'), lasttext: d.lasttext || ''
+            };
         });
 
-        $('#schoolFilterClear').toggle(q.length > 0);
-        $('#schoolFilterCount').text(q ? visible + ' of ' + cards.length + ' schools' : cards.length + ' schools');
-        $('#schoolNoMatch').toggle(visible === 0 && cards.length > 0);
-    }
+        const st = { year: '', q: '', act: '', sort: 'default', sel: { progress: new Set(), attn: new Set(), slots: new Set(), win: new Set() } };
+        const $ = id => document.getElementById(id);
 
-    $(document).on('input', '#schoolFilterInput', filterSchoolCards);
-    $(document).on('click', '#schoolFilterClear', function () {
-        $('#schoolFilterInput').val('').focus();
-        filterSchoolCards();
-    });
-    $(function () { if ($('#schoolFilterInput').length) filterSchoolCards(); });
+        function actTest(c) {
+            const now = Date.now() / 1000;
+            if (st.act === 'never') return c.last === 0;
+            if (c.last === 0) return false;
+            if (st.act === '7')  return now - c.last <= 7 * DAY;
+            if (st.act === '30') return now - c.last <= 30 * DAY;
+            return now - c.last > 30 * DAY;   // 'old'
+        }
+
+        // skip = a group (or 'act') to ignore, used to compute the count shown on each chip
+        function passes(c, skip) {
+            if (st.year && c.year !== st.year) return false;
+            if (st.q && c.search.indexOf(st.q) === -1) return false;
+            for (const g in GROUPS) {
+                if (g === skip || st.sel[g].size === 0) continue;
+                if (!GROUPS[g].opts.some(o => st.sel[g].has(o.key) && o.test(c))) return false;
+            }
+            if (st.act && skip !== 'act' && !actTest(c)) return false;
+            return true;
+        }
+
+        // ---- build the chips once ----
+        function esc(t) { return String(t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])); }
+
+        Object.keys(GROUPS).forEach(function (g) {
+            let html = '';
+            if (g === 'progress') html += '<button type="button" class="sf-chip" data-g="progress" data-k="">All schools <span class="n">0</span></button>';
+            GROUPS[g].opts.forEach(function (o) {
+                html += '<button type="button" class="sf-chip" data-g="' + g + '" data-k="' + o.key + '">' + esc(o.label) + ' <span class="n">0</span></button>';
+            });
+            $(GROUP_BOX[g]).innerHTML = html;
+        });
+
+        // ---- URL (so a refresh / shared link keeps the filters) ----
+        function writeUrl() {
+            const p = new URLSearchParams();
+            if (st.year) p.set('y', st.year);
+            if (st.q) p.set('q', st.q);
+            if (st.act) p.set('act', st.act);
+            if (st.sort !== 'default') p.set('sort', st.sort);
+            [['progress', 'p'], ['attn', 'a'], ['slots', 's'], ['win', 'w']].forEach(function (m) {
+                if (st.sel[m[0]].size) p.set(m[1], Array.from(st.sel[m[0]]).join(','));
+            });
+            const qs = p.toString();
+            history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+        }
+
+        function readUrl() {
+            const p = new URLSearchParams(location.search);
+            st.year = p.get('y') || '';
+            st.q = (p.get('q') || '').toLowerCase();
+            st.act = ACT_LABELS[p.get('act')] ? p.get('act') : '';
+            st.sort = p.get('sort') || 'default';
+            [['progress', 'p'], ['attn', 'a'], ['slots', 's'], ['win', 'w']].forEach(function (m) {
+                const valid = GROUPS[m[0]].opts.map(o => o.key);
+                (p.get(m[1]) || '').split(',').forEach(function (k) { if (valid.indexOf(k) !== -1) st.sel[m[0]].add(k); });
+            });
+            if (st.year && !Array.from($('sfYear').options).some(o => o.value === st.year)) st.year = '';
+            if (!Array.from($('sfSort').options).some(o => o.value === st.sort)) st.sort = 'default';
+            $('sfYear').value = st.year;
+            $('sfSort').value = st.sort;
+            $('sfAct').value = st.act;
+            $('schoolFilterInput').value = st.q;
+        }
+
+        // ---- sorting ----
+        const SORTS = {
+            default:    (a, b) => a.order - b.order,
+            name:       (a, b) => a.name.localeCompare(b.name) || b.year - a.year,
+            number:     (a, b) => a.prefix.localeCompare(b.prefix, undefined, { numeric: true }) || b.year - a.year,
+            registered: (a, b) => b.total - a.total || a.name.localeCompare(b.name),
+            unsub:      (a, b) => (b.nophoto + b.unsub) - (a.nophoto + a.unsub) || a.name.localeCompare(b.name),
+            rem:        (a, b) => b.rem - a.rem || a.name.localeCompare(b.name),
+            last:       (a, b) => b.last - a.last || a.name.localeCompare(b.name)
+        };
+        function sortCards() {
+            const frag = document.createDocumentFragment();
+            cards.slice().sort(SORTS[st.sort] || SORTS.default).forEach(c => frag.appendChild(c.el));
+            grid.appendChild(frag);
+        }
+
+        // ---- apply ----
+        function apply() {
+            let shown = 0, tot = { total: 0, pending: 0, approved: 0, returned: 0, rem: 0 };
+
+            cards.forEach(function (c) {
+                const ok = passes(c, null);
+                c.el.style.display = ok ? '' : 'none';
+                if (ok) { shown++; tot.total += c.total; tot.pending += c.pending; tot.approved += c.approved; tot.returned += c.returned; tot.rem += c.rem; }
+            });
+
+            // chip counts + active state
+            document.querySelectorAll('#schoolFilters .sf-chip').forEach(function (chip) {
+                const g = chip.dataset.g, k = chip.dataset.k;
+                let count, active;
+                if (k === '') { count = cards.filter(c => passes(c, g)).length; active = st.sel[g].size === 0; }
+                else {
+                    const o = GROUPS[g].opts.find(x => x.key === k);
+                    count = cards.filter(c => passes(c, g) && o.test(c)).length;
+                    active = st.sel[g].has(k);
+                }
+                chip.classList.toggle('active', active);
+                chip.classList.toggle('zero', count === 0);
+                chip.querySelector('.n').textContent = count;
+            });
+
+            // pills for everything that is switched on
+            const pills = [];
+            if (st.year) pills.push({ t: 'Year ' + st.year, g: 'year' });
+            Object.keys(GROUPS).forEach(g => st.sel[g].forEach(k => pills.push({ t: GROUPS[g].opts.find(o => o.key === k).label, g: g, k: k })));
+            if (st.act) pills.push({ t: ACT_LABELS[st.act], g: 'act' });
+            $('sfActive').innerHTML = pills.map(p =>
+                '<button type="button" class="sf-pill" data-g="' + p.g + '" data-k="' + (p.k || '') + '">' + esc(p.t) + ' &times;</button>').join('');
+
+            const advanced = st.sel.attn.size + st.sel.slots.size + st.sel.win.size + (st.act ? 1 : 0);
+            $('sfMoreBadge').textContent = advanced;
+            $('sfMoreBadge').classList.toggle('show', advanced > 0);
+
+            const anyFilter = pills.length > 0 || st.q !== '';
+            $('sfClearAll').style.display = anyFilter ? '' : 'none';
+            $('schoolFilterClear').style.display = st.q ? 'block' : 'none';
+            $('schoolFilterCount').innerHTML = anyFilter
+                ? '<strong>' + shown + '</strong> of ' + cards.length + ' schools'
+                : '<strong>' + cards.length + '</strong> schools';
+            $('sfTotals').innerHTML = shown
+                ? '<span>Registered <strong>' + tot.total + '</strong></span><span>Pending <strong>' + tot.pending + '</strong></span>'
+                  + '<span>Approved <strong>' + tot.approved + '</strong></span><span>Slots left <strong>' + tot.rem + '</strong></span>'
+                : '';
+            $('schoolNoMatch').style.display = shown === 0 && cards.length > 0 ? 'block' : 'none';
+            writeUrl();
+        }
+
+        function clearAll() {
+            st.year = ''; st.q = ''; st.act = '';
+            Object.keys(st.sel).forEach(g => st.sel[g].clear());
+            $('sfYear').value = ''; $('sfAct').value = ''; $('schoolFilterInput').value = '';
+            apply();
+        }
+
+        // ---- events ----
+        document.getElementById('schoolFilters').addEventListener('click', function (e) {
+            const chip = e.target.closest('.sf-chip');
+            if (!chip) return;
+            const g = chip.dataset.g, k = chip.dataset.k;
+            if (k === '') st.sel[g].clear();
+            else if (st.sel[g].has(k)) st.sel[g].delete(k);
+            else st.sel[g].add(k);
+            apply();
+        });
+        $('sfActive').addEventListener('click', function (e) {
+            const pill = e.target.closest('.sf-pill');
+            if (!pill) return;
+            const g = pill.dataset.g;
+            if (g === 'year') { st.year = ''; $('sfYear').value = ''; }
+            else if (g === 'act') { st.act = ''; $('sfAct').value = ''; }
+            else st.sel[g].delete(pill.dataset.k);
+            apply();
+        });
+        $('sfYear').addEventListener('change', function () { st.year = this.value; apply(); });
+        $('sfAct').addEventListener('change', function () { st.act = this.value; apply(); });
+        $('sfSort').addEventListener('change', function () { st.sort = this.value; sortCards(); apply(); });
+        $('schoolFilterInput').addEventListener('input', function () { st.q = this.value.toLowerCase().trim(); apply(); });
+        $('schoolFilterClear').addEventListener('click', function () { st.q = ''; $('schoolFilterInput').value = ''; $('schoolFilterInput').focus(); apply(); });
+        $('sfClearAll').addEventListener('click', clearAll);
+        $('sfClearAll2').addEventListener('click', clearAll);
+        $('sfMoreBtn').addEventListener('click', function () {
+            const open = $('sfPanel').classList.toggle('open');
+            this.classList.toggle('on', open);
+        });
+
+        // CSV of the schools currently shown (in the order currently shown)
+        $('sfCsv').addEventListener('click', function () {
+            const rows = [['School No.', 'School', 'Year', 'Registered', 'Pending approval', 'Approved', 'Returned',
+                           'Missing photo', 'Photo attached, not submitted', 'Slots allocated', 'Slots remaining', 'Registration open', 'Last activity']];
+            const byEl = new Map(cards.map(c => [c.el, c]));
+            Array.from(grid.children).forEach(function (el) {
+                const c = byEl.get(el);
+                if (!c || el.style.display === 'none') return;
+                rows.push([c.prefix, c.name, c.year, c.total, c.pending, c.approved, c.returned, c.nophoto, c.unsub, c.alloc, c.rem, c.open ? 'Yes' : 'No', c.lasttext]);
+            });
+            const csv = '\uFEFF' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = 'schools-' + (st.year || 'all-years') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+            document.body.appendChild(a); a.click(); a.remove();
+        });
+
+        // ---- start: default view = exactly as before (no filters, "most pending first") ----
+        readUrl();
+        sortCards();
+        if (st.sel.attn.size + st.sel.slots.size + st.sel.win.size + (st.act ? 1 : 0) > 0) {
+            $('sfPanel').classList.add('open'); $('sfMoreBtn').classList.add('on');
+        }
+        apply();
+    })();
 
     // ── Approve all pending (all schools) ─────────────────────────────────────────
     $('#approveAllPendingBtn').on('click', function () {
