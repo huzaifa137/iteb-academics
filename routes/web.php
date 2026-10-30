@@ -439,6 +439,7 @@ Route::controller(ItebController::class)->group(function () {
 
     Route::get('/about', 'about')->name('about.us');
     Route::get('/contact', 'contact')->name('contact.us');
+    Route::post('/contact', 'contactSubmit')->name('contact.submit');
 
     Route::post('iteb/exam-statistics/download', 'downloadExamStatistics')->name('iteb.exam.statistics.download');
     Route::post('iteb/exam-statistics/download-excel', 'downloadExamStatisticsExcel')->name('iteb.exam.statistics.download.excel');

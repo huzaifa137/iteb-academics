@@ -883,7 +883,106 @@ class ItebController extends Controller
 
     public function contact()
     {
-        return view('contact');
+        return view('contact', ['site' => config('landing')]);
+    }
+
+    /**
+     * Public contact form. The message is stored (so nothing is lost if mail is down)
+     * and emailed to the board's inbox. Either one succeeding counts as delivered.
+     */
+    public function contactSubmit(Request $request)
+    {
+        // Honeypot: people never see this field. Pretend it worked so bots learn nothing.
+        if (filled($request->input('website'))) {
+            return redirect()->route('contact.us')->with('contact_sent', ['ref' => null]);
+        }
+
+        $topics = config('landing.contact_topics', []);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'email' => ['required', 'email:rfc', 'max:190'],
+            'phone' => ['nullable', 'string', 'max:40', 'regex:/^[0-9+()\-\s.]{6,40}$/'],
+            'school' => ['nullable', 'string', 'max:190'],
+            'topic' => ['required', \Illuminate\Validation\Rule::in(array_keys($topics))],
+            'message' => ['required', 'string', 'min:10', 'max:3000'],
+        ], [
+            'name.required' => 'Please tell us your name.',
+            'email.required' => 'Please enter your email address so we can reply.',
+            'email.email' => 'That email address does not look right.',
+            'phone.regex' => 'Use digits only, with an optional + and spaces (for example +256 700 000000).',
+            'topic.required' => 'Please choose what your message is about.',
+            'topic.in' => 'Please choose what your message is about.',
+            'message.required' => 'Please write your message.',
+            'message.min' => 'Please give us a little more detail (at least 10 characters).',
+            'message.max' => 'Please keep your message under 3,000 characters.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect(route('contact.us') . '#send-message')->withErrors($validator)->withInput();
+        }
+
+        // At most 5 messages per visitor every 10 minutes.
+        $limiterKey = 'contact-form:' . $request->ip();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($limiterKey, 5)) {
+            $minutes = max(1, (int) ceil(\Illuminate\Support\Facades\RateLimiter::availableIn($limiterKey) / 60));
+
+            return redirect(route('contact.us') . '#send-message')->withInput()->withErrors([
+                'form' => "You have sent several messages in a short time. Please try again in {$minutes} minute" . ($minutes === 1 ? '' : 's') . '.',
+            ]);
+        }
+
+        $clean = fn($v) => trim(preg_replace('/[ \t]+/', ' ', (string) $v));
+
+        $data = [
+            'name' => $clean($request->input('name')),
+            'email' => trim((string) $request->input('email')),
+            'phone' => $clean($request->input('phone')) ?: null,
+            'school' => $clean($request->input('school')) ?: null,
+            'topic' => $request->input('topic'),
+            'message' => trim((string) $request->input('message')),
+        ];
+
+        $reference = null;
+        $saved = false;
+
+        try {
+            $id = DB::table('contact_messages')->insertGetId($data + [
+                'status' => 'new',
+                'ip_address' => $request->ip(),
+                'user_agent' => Str::limit((string) $request->userAgent(), 250, ''),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $reference = 'ITEB-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT);
+            $saved = true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Contact message could not be stored: ' . $e->getMessage());
+        }
+
+        $mailed = false;
+        $inbox = config('landing.contact.inbox') ?: config('landing.contact.email');
+
+        if ($inbox) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($inbox)->send(
+                    new \App\Mail\ContactMessageMail($data + ['topic_label' => $topics[$data['topic']] ?? $data['topic']], $reference)
+                );
+                $mailed = true;
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Contact message email failed: ' . $e->getMessage());
+            }
+        }
+
+        if (!$saved && !$mailed) {
+            return redirect(route('contact.us') . '#send-message')->withInput()->withErrors([
+                'form' => 'Sorry, we could not send your message just now. Please try again shortly, or email or call us using the details on this page.',
+            ]);
+        }
+
+        \Illuminate\Support\Facades\RateLimiter::hit($limiterKey, 600);
+
+        return redirect(route('contact.us') . '#send-message')->with('contact_sent', ['ref' => $reference]);
     }
     public function examStatistics(Request $request)
     {

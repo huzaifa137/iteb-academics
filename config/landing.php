@@ -9,6 +9,7 @@
 |
 | .env keys (all optional):
 |   LANDING_PHONE, LANDING_EMAIL, LANDING_ADDRESS
+|   LANDING_CONTACT_INBOX           where contact-form messages are emailed (defaults to LANDING_EMAIL)
 |   LANDING_FACEBOOK, LANDING_X, LANDING_YOUTUBE, LANDING_WHATSAPP   (full URLs; hidden when empty)
 |   LANDING_SHOW_STATS=true         show the live headline numbers
 |   LANDING_SHOW_TIMETABLE=true     show upcoming papers from the exam timetable
@@ -25,6 +26,18 @@ return [
         'phone' => env('LANDING_PHONE', '+256 702 595 554'),
         'email' => env('LANDING_EMAIL', 'info@iteb-ug.org'),
         'address' => env('LANDING_ADDRESS', 'Kawempe, Kampala, Uganda'),
+        // Where contact-form messages are emailed. Falls back to the public email above.
+        'inbox' => env('LANDING_CONTACT_INBOX'),
+    ],
+
+    // Topics offered in the contact form (key => label).
+    'contact_topics' => [
+        'registration' => 'School or candidate registration',
+        'examinations' => 'Examinations and timetables',
+        'results' => 'Results and certificates',
+        'recognition' => 'School recognition',
+        'portal' => 'Portal login or technical help',
+        'other' => 'Something else',
     ],
 
     'social' => [
