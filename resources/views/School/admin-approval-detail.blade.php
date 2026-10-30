@@ -177,21 +177,25 @@ tr.locked-row   { background:#f0fdf4 !important; }
         <i class="fas fa-eye"></i>
     </button>
 
-    {{-- Unlock is ALWAYS available for a locked record, whatever its status, so a stuck
-         student (e.g. locked + "Pending Photo Submission") can never be a dead end again. --}}
+    {{-- Every row ALWAYS has a decision button, whatever the status:
+         locked   -> Unlock (school can edit / attach the photo and resubmit)
+         unlocked -> Lock   (school cannot change anything) --}}
+    @php $noPhoto = in_array($reg->student_id, $missingPhotos ?? []); @endphp
     @if($reg->is_locked)
         <button class="btn btn-sm btn-warning btn-toggle-lock"
             data-id="{{ $reg->id }}"
             data-lock="0"
+            data-no-photo="{{ $noPhoto ? 1 : 0 }}"
             data-student-id="{{ $reg->student_id }}"
             title="Unlock so school can edit"
             style="border-radius:6px;">
             <i class="fas fa-unlock-alt mr-1"></i>Unlock
         </button>
-    @elseif(in_array($reg->status, ['Pending Admin Approval', 'Attached Image, Pending Submission', 'Returned', 'Approved']) && !in_array($reg->student_id, $missingPhotos ?? []))
+    @else
         <button class="btn btn-sm btn-secondary btn-toggle-lock"
             data-id="{{ $reg->id }}"
             data-lock="1"
+            data-no-photo="{{ $noPhoto ? 1 : 0 }}"
             data-student-id="{{ $reg->student_id }}"
             title="Lock to prevent editing"
             style="border-radius:6px;">
@@ -331,6 +335,7 @@ $(document).on('click', '.btn-toggle-lock', function () {
     const id        = $(this).data('id');
     const lock      = $(this).data('lock');   // 0 = unlock, 1 = lock
     const studentId = $(this).data('student-id');
+    const noPhoto  = $(this).data('no-photo') == 1;
     const action    = lock == 1 ? 'lock' : 'unlock';
     const $btn      = $(this);
 
@@ -338,7 +343,8 @@ $(document).on('click', '.btn-toggle-lock', function () {
         title: lock == 1 ? 'Lock this student?' : 'Unlock this student?',
         html: lock == 1
             ? `<b>${studentId}</b> will be locked — the school will not be able to edit.`
-            : `<b>${studentId}</b> will be unlocked — the school can edit and resubmit.`,
+                + (noPhoto ? `<br><br><span style="color:#dc2626;"><b>Warning:</b> this student has no photo on the server. While locked, the school cannot attach one.</span>` : '')
+            : `<b>${studentId}</b> will be unlocked — the school can edit` + (noPhoto ? `, attach the photo` : '') + ` and resubmit.`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: lock == 1 ? '#64748b' : '#f59e0b',

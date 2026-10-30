@@ -2722,13 +2722,8 @@ class SchoolsController extends Controller
         $reg = StudentRegistration::findOrFail($request->id);
         $hasPhoto = $this->registrationPhotoExists($reg->student_id);
 
-        // A record without a photo must stay editable, otherwise nobody can fix it.
-        if ((bool) $request->lock && !$hasPhoto) {
-            return response()->json([
-                'message' => 'Cannot lock: this student has no photo on the server.',
-            ], 422);
-        }
-
+        // The admin decides: a student may be locked even without a photo (the admin page warns
+        // about it first). It is never a dead end because Unlock is always available on that page.
         $reg->is_locked = (bool) $request->lock;
 
         if (!$reg->is_locked) {
