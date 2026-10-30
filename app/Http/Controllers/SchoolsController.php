@@ -1001,6 +1001,15 @@ class SchoolsController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Tell the page whether the photo file really exists, and give it a version number
+        // (file modified time) so a replaced / deleted photo is never shown from a stale browser cache.
+        $registrations->each(function ($r) {
+            $file = public_path('assets/student_photos/' . basename((string) $r->student_id) . '.jpg');
+            $has = $this->registrationPhotoExists($r->student_id);
+            $r->setAttribute('has_photo', $has);
+            $r->setAttribute('photo_v', $has ? (int) @filemtime($file) : 0);
+        });
+
         // Slot info for the active year
         $activeYear = AcademicYear::where('status', 'Active')->first();
         $year = $activeYear ? $activeYear->year_en : date('Y');

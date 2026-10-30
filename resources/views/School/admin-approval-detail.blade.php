@@ -127,8 +127,9 @@ tr.locked-row   { background:#f0fdf4 !important; }
                                         </td>
                                         <td>{{ $i + 1 }}</td>
                                         <td>
-                                            <img src="/assets/student_photos/{{ $reg->student_id }}.jpg"
-                                                onerror="this.src='/assets/images/default-user.jpg';"
+                                            @php $photoMissing = in_array($reg->student_id, $missingPhotos ?? []); @endphp
+                                            <img src="{{ $photoMissing ? '/assets/images/default-user.jpg' : '/assets/student_photos/' . $reg->student_id . '.jpg?v=' . @filemtime(public_path('assets/student_photos/' . $reg->student_id . '.jpg')) }}"
+                                                onerror="this.onerror=null;this.src='/assets/images/default-user.jpg';"
                                                 style="width:44px;height:56px;object-fit:cover;border-radius:6px;border:2px solid #e9ecef;">
                                         </td>
                                         <td><code>{{ $reg->student_id }}</code></td>

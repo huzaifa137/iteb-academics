@@ -1858,9 +1858,10 @@ use App\Http\Controllers\Helper;
                                                     <tr>
                                                         <td>${index + 1}</td>
                                                         <td class="${reg.is_locked ? '' : 'clickable-photo'}" style="cursor: ${reg.is_locked ? 'default' : 'pointer'};" data-id="${reg.id}" data-student-id="${reg.student_id}">
-                                                            <img src="/assets/student_photos/${reg.student_id}.jpg"
-                                                                 onerror="this.src='/assets/images/default-user.jpg';"
+                                                            <img src="/assets/student_photos/${reg.student_id}.jpg?v=${reg.photo_v || 0}"
+                                                                 onerror="this.onerror=null;this.src='/assets/images/default-user.jpg';"
                                                                  style="width:46px;height:58px;object-fit:cover;border-radius:8px;border:2px solid #e9ecef;">
+                                                            ${reg.has_photo ? '' : '<div style="font-size:10px;font-weight:700;color:#dc2626;margin-top:2px;">No photo</div>'}
                                                         </td>
                                                         <td><code style="font-size:12px;color:var(--forest);background:var(--mint);padding:3px 7px;border-radius:6px;">${reg.student_id}</code></td>
                                                         <td>
