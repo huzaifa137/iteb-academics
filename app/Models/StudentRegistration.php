@@ -42,6 +42,23 @@ class StudentRegistration extends Model
         'is_locked' => 'boolean',
     ];
 
+    /**
+     * INVARIANT: a record that goes (back) to a pre-submission status can never stay locked.
+     * A locked record with no photo is a dead end: the school cannot edit it and the admin
+     * had no Unlock button. Mass ->update() calls bypass this hook, so they set is_locked themselves.
+     */
+    protected static function booted()
+    {
+        static::saving(function (StudentRegistration $reg) {
+            if (
+                $reg->isDirty('status')
+                && in_array($reg->status, ['Pending Photo Submission', 'Attached Image, Pending Submission'], true)
+            ) {
+                $reg->is_locked = false;
+            }
+        });
+    }
+
     public function school()
     {
         return $this->belongsTo(House::class, 'school_id', 'ID');

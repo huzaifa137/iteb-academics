@@ -1031,12 +1031,27 @@ class SchoolsController extends Controller
             'student_id' => 'required'
         ]);
 
-        $deleted = StudentRegistration::where('student_id', $request->student_id)->first();
+        $schoolId = session('LoggedSchool');
+
+        if (!$schoolId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // A school may only delete its OWN registrations, and never a locked (submitted) one.
+        $deleted = StudentRegistration::where('student_id', $request->student_id)
+            ->where('school_id', (string) $schoolId)
+            ->first();
 
         if (!$deleted) {
             return response()->json([
                 'message' => 'Student not found'
             ], 404);
+        }
+
+        if ($deleted->is_locked) {
+            return response()->json([
+                'message' => 'This student record is locked after submission. Contact admin to make changes.'
+            ], 403);
         }
 
         $deleted->delete();
@@ -1156,6 +1171,13 @@ class SchoolsController extends Controller
             return response()->json(['message' => 'Registration not found'], 404);
         }
 
+        // Submitted / approved records are locked: the photo must not change behind the admin's back.
+        if ($registration->is_locked) {
+            return response()->json([
+                'message' => 'This student record is locked after submission. Contact admin to unlock it before changing the photo.'
+            ], 403);
+        }
+
         $path = public_path('assets/student_photos');
 
         if (!file_exists($path)) {
@@ -1195,6 +1217,14 @@ class SchoolsController extends Controller
 
         if (!$registration) {
             return response()->json(['message' => 'Registration not found'], 404);
+        }
+
+        // ROOT CAUSE GUARD: this endpoint used to work on locked (submitted / approved) students,
+        // deleting the photo file and resetting the status while is_locked stayed true.
+        if ($registration->is_locked) {
+            return response()->json([
+                'message' => 'This student record is locked after submission. Contact admin to unlock it before removing the photo.'
+            ], 403);
         }
 
         $image = public_path('assets/student_photos/' . $request->student_id . '.jpg');
@@ -1253,11 +1283,41 @@ class SchoolsController extends Controller
         }
 
         $ids = json_decode($request->ids, true);
+        $ids = is_array($ids) ? array_values(array_unique(array_filter(array_map('intval', $ids)))) : [];
 
         if (empty($ids)) {
             return response()->json(['message' => 'No students selected.'], 422);
         }
 
+        // Only this school's students that are really ready to be sent.
+        $eligible = StudentRegistration::whereIn('id', $ids)
+            ->where('school_id', (string) $schoolId)
+            ->whereIn('status', [
+                'Attached Image, Pending Submission',
+                'Returned'
+            ])
+            ->get();
+
+        // SAFETY NET: the photo file on disk is the source of truth. A student whose photo is
+        // not on the server is never sent to admin (the status alone can be stale).
+        $ready = $eligible->filter(fn($r) => $this->registrationPhotoExists($r->student_id));
+        $noPhoto = $eligible->reject(fn($r) => $this->registrationPhotoExists($r->student_id));
+
+        if ($noPhoto->isNotEmpty()) {
+            StudentRegistration::whereIn('id', $noPhoto->pluck('id')->all())
+                ->where('status', 'Attached Image, Pending Submission')
+                ->update(['status' => 'Pending Photo Submission', 'is_locked' => false]);
+        }
+
+        if ($ready->isEmpty()) {
+            return response()->json([
+                'message' => 'No student could be submitted: the photo is missing for '
+                    . $noPhoto->pluck('student_id')->take(10)->implode(', ')
+                    . '. Please attach the photo again.',
+            ], 422);
+        }
+
+        $readyIds = $ready->pluck('id')->all();
         $submissionDocument = null;
 
         if ($request->hasFile('document')) {
@@ -1280,14 +1340,14 @@ class SchoolsController extends Controller
                 'file_path' => 'submission_docs/' . $fileName,
                 'file_type' => $fileType,
                 'file_size' => $fileSize,
-                'student_ids' => json_encode($ids),
+                'student_ids' => json_encode($readyIds),
                 'school_id' => $schoolId,
             ]);
         }
 
         // Update student statuses and lock records
-        StudentRegistration::whereIn('id', $ids)
-            ->where('school_id', $schoolId)
+        StudentRegistration::whereIn('id', $readyIds)
+            ->where('school_id', (string) $schoolId)
             ->whereIn('status', [
                 'Attached Image, Pending Submission',
                 'Returned'
@@ -1299,9 +1359,16 @@ class SchoolsController extends Controller
                 'submission_document_id' => $submissionDocument ? $submissionDocument->id : null
             ]);
 
+        $message = count($readyIds) . ' student(s) submitted for admin approval successfully.';
+        if ($noPhoto->isNotEmpty()) {
+            $message .= ' ' . $noPhoto->count() . ' skipped because the photo is missing ('
+                . $noPhoto->pluck('student_id')->take(10)->implode(', ') . ').';
+        }
+
         return response()->json([
-            'message' => count($ids) . ' student(s) submitted for admin approval successfully.',
-            'document' => $submissionDocument
+            'message' => $message,
+            'document' => $submissionDocument,
+            'skipped_no_photo' => $noPhoto->pluck('student_id')->values(),
         ]);
     }
 
@@ -1631,7 +1698,14 @@ class SchoolsController extends Controller
             ? SchoolRegistrationSlot::where('school_id', $schoolId)->orderByDesc('admission_year')->first()
             : null;
 
-        return view('School.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName', 'slot'));
+        // Students whose photo file is not on the server (shown as a warning in the admin table).
+        $missingPhotos = $registrations
+            ->filter(fn($r) => !$this->registrationPhotoExists($r->student_id))
+            ->pluck('student_id')
+            ->values()
+            ->all();
+
+        return view('School.admin-approval-detail', compact('registrations', 'schoolPrefix', 'schoolName', 'slot', 'missingPhotos'));
     }
 
     public function adminUpdateApprovalStatus(Request $request)
@@ -1696,6 +1770,11 @@ class SchoolsController extends Controller
      */
     private function approveRegistrationRecord(StudentRegistration $reg): void
     {
+        // Never approve a student whose photo is not on the server.
+        if (!$this->registrationPhotoExists($reg->student_id)) {
+            throw new \RuntimeException('Photo missing on the server - unlock the student so the school can re-attach it.');
+        }
+
         // Remove existing record first so we always re-insert the latest approved data
         DB::table('students_basic')->where('Student_ID', $reg->student_id)->delete();
 
@@ -1902,7 +1981,7 @@ class SchoolsController extends Controller
                 foreach (array_chunk(array_keys($toRevert), 500) as $ids) {
                     $reverted += StudentRegistration::whereIn('id', $ids)
                         ->where('status', 'Attached Image, Pending Submission')
-                        ->update(['status' => 'Pending Photo Submission']);
+                        ->update(['status' => 'Pending Photo Submission', 'is_locked' => false]);
                 }
             }
 
@@ -2632,12 +2711,28 @@ class SchoolsController extends Controller
         ]);
 
         $reg = StudentRegistration::findOrFail($request->id);
+        $hasPhoto = $this->registrationPhotoExists($reg->student_id);
+
+        // A record without a photo must stay editable, otherwise nobody can fix it.
+        if ((bool) $request->lock && !$hasPhoto) {
+            return response()->json([
+                'message' => 'Cannot lock: this student has no photo on the server.',
+            ], 422);
+        }
+
         $reg->is_locked = (bool) $request->lock;
 
-        // If unlocking, revert status so school can edit and resubmit
-        if (!$reg->is_locked && $reg->status === 'Pending Admin Approval') {
-            $reg->status = 'Attached Image, Pending Submission';
-            $reg->submitted_at = null;
+        if (!$reg->is_locked) {
+            // Unlocking: put the status back in step with what is really on disk so the
+            // school can edit / attach the photo and resubmit.
+            if ($reg->status === 'Pending Admin Approval') {
+                $reg->status = $hasPhoto ? 'Attached Image, Pending Submission' : 'Pending Photo Submission';
+                $reg->submitted_at = null;
+            } elseif ($reg->status === 'Attached Image, Pending Submission' && !$hasPhoto) {
+                $reg->status = 'Pending Photo Submission';
+            } elseif ($reg->status === 'Pending Photo Submission' && $hasPhoto) {
+                $reg->status = 'Attached Image, Pending Submission';
+            }
         }
 
         $reg->save();

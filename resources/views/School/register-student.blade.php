@@ -1857,7 +1857,7 @@ use App\Http\Controllers\Helper;
                                     html += `
                                                     <tr>
                                                         <td>${index + 1}</td>
-                                                        <td class="clickable-photo" style="cursor: pointer;" data-id="${reg.id}" data-student-id="${reg.student_id}">
+                                                        <td class="${reg.is_locked ? '' : 'clickable-photo'}" style="cursor: ${reg.is_locked ? 'default' : 'pointer'};" data-id="${reg.id}" data-student-id="${reg.student_id}">
                                                             <img src="/assets/student_photos/${reg.student_id}.jpg"
                                                                  onerror="this.src='/assets/images/default-user.jpg';"
                                                                  style="width:46px;height:58px;object-fit:cover;border-radius:8px;border:2px solid #e9ecef;">

@@ -159,6 +159,9 @@ tr.locked-row   { background:#f0fdf4 !important; }
                                             @else
                                                 <span class="badge-photo">{{ $reg->status }}</span>
                                             @endif
+                                            @if(in_array($reg->student_id, $missingPhotos ?? []) && $reg->status !== 'Pending Photo Submission')
+                                                <br><span class="badge badge-danger mt-1" title="The photo file is not on the server. Unlock the student so the school can attach it again."><i class="fas fa-exclamation-triangle mr-1"></i>No photo on server</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @if($reg->is_locked)
@@ -173,26 +176,26 @@ tr.locked-row   { background:#f0fdf4 !important; }
         <i class="fas fa-eye"></i>
     </button>
 
-    @if(in_array($reg->status, ['Pending Admin Approval', 'Attached Image, Pending Submission', 'Returned', 'Approved']))
-        @if($reg->is_locked)
-            <button class="btn btn-sm btn-warning btn-toggle-lock"
-                data-id="{{ $reg->id }}"
-                data-lock="0"
-                data-student-id="{{ $reg->student_id }}"
-                title="Unlock so school can edit"
-                style="border-radius:6px;">
-                <i class="fas fa-unlock-alt mr-1"></i>Unlock
-            </button>
-        @else
-            <button class="btn btn-sm btn-secondary btn-toggle-lock"
-                data-id="{{ $reg->id }}"
-                data-lock="1"
-                data-student-id="{{ $reg->student_id }}"
-                title="Lock to prevent editing"
-                style="border-radius:6px;">
-                <i class="fas fa-lock mr-1"></i>Lock
-            </button>
-        @endif
+    {{-- Unlock is ALWAYS available for a locked record, whatever its status, so a stuck
+         student (e.g. locked + "Pending Photo Submission") can never be a dead end again. --}}
+    @if($reg->is_locked)
+        <button class="btn btn-sm btn-warning btn-toggle-lock"
+            data-id="{{ $reg->id }}"
+            data-lock="0"
+            data-student-id="{{ $reg->student_id }}"
+            title="Unlock so school can edit"
+            style="border-radius:6px;">
+            <i class="fas fa-unlock-alt mr-1"></i>Unlock
+        </button>
+    @elseif(in_array($reg->status, ['Pending Admin Approval', 'Attached Image, Pending Submission', 'Returned', 'Approved']) && !in_array($reg->student_id, $missingPhotos ?? []))
+        <button class="btn btn-sm btn-secondary btn-toggle-lock"
+            data-id="{{ $reg->id }}"
+            data-lock="1"
+            data-student-id="{{ $reg->student_id }}"
+            title="Lock to prevent editing"
+            style="border-radius:6px;">
+            <i class="fas fa-lock mr-1"></i>Lock
+        </button>
     @endif
 </td>
                                     </tr>
