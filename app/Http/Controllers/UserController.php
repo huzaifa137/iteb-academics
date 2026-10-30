@@ -615,11 +615,12 @@ class UserController extends Controller
         return view('users.user-register', compact(['user_supervisors']));
     }
 
-    public function homePage()
+    public function homePage(\App\Services\LandingPageService $landing)
     {
-        $allCourses = [];
-
-        return view('home-page', compact(['allCourses']));
+        return view('landing', [
+            'page' => $landing->build(),
+            'site' => config('landing'),
+        ]);
     }
 
     public function editUserInformation()

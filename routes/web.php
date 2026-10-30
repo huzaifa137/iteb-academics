@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
@@ -193,7 +194,8 @@ Route::controller(StudentController::class)->group(function () {
 Route::controller(StudentController::class)->group(function () {
     Route::group(['middleware' => ['StudentAuth']], function () {
         Route::group(['prefix' => '/student'], function () {
-            Route::get('/dashboard', 'studentDashboard')->name('student.dashboard');
+            Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('student.dashboard');
+            Route::get('/dashboard/data', [AdminDashboardController::class, 'data'])->name('admin.dashboard.data');
             Route::get('/profile', 'studentProfile')->name('student.profile');
             Route::get('/edit-student-profile', 'editStudentProfile');
         });

@@ -207,60 +207,6 @@ class StudentController extends Controller
         }
     }
 
-    public function studentDashboard(GradingService $gradingService)
-    {
-        // Dummy student
-        $student = (object) [
-            'id' => 1,
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-        ];
-
-        // Dummy exams data
-        $exams = collect([
-            (object) [
-                'exam_id' => 1,
-                'exam_name' => 'Midterm Exam',
-                'academic_year' => '2024/2025',
-                'exam_type' => 'Midterm',
-                'total_subjects' => 5,
-                'aggregate' => 375,
-                'division' => 'I',
-                'grade' => 'A',
-                'examsTaken' => 1,
-                'averageGrade' => 'A',
-                'passPercentage' => 100,
-            ],
-            (object) [
-                'exam_id' => 2,
-                'exam_name' => 'Final Exam',
-                'academic_year' => '2024/2025',
-                'exam_type' => 'Final',
-                'total_subjects' => 5,
-                'aggregate' => 320,
-                'division' => 'II',
-                'grade' => 'B',
-                'examsTaken' => 1,
-                'averageGrade' => 'B',
-                'passPercentage' => 80,
-            ],
-        ]);
-
-        // Overall stats
-        $overallExamsTaken = $exams->sum('examsTaken');
-        $overallAggregate = $exams->sum('aggregate');
-        $overallPassPercentage = $exams->avg('passPercentage');
-        $overallAverageGrade = 'A'; // Dummy value
-
-        return view('student.dashboard', compact(
-            'student',
-            'exams',
-            'overallExamsTaken',
-            'overallAggregate',
-            'overallPassPercentage',
-            'overallAverageGrade'
-        ));
-    }
 
 
     private function getSubjectIdsForCategory($category)
