@@ -4,6 +4,13 @@
 composer config --global policy.advisories.block false
 composer update
 
+php artisan registrations:repair-photos
+php artisan registrations:repair-photos --run
+
+php artisan registrations:repair-photos --run unlocks any locked student who is still before submission.
+If you deliberately lock one of those students, that command would unlock them again.
+The default run only previews, so just don’t use --run on students you locked on purpose.
+
 use App\Http\Controllers\Helper;
 
 <!-- USE FULL QUERIES IN THIS PROJECT -->

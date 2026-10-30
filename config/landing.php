@@ -19,7 +19,7 @@ return [
 
     'name' => 'Idaad & Thanawi Examination Board',
     'short_name' => 'ITEB',
-    'parent' => 'Uganda Muslim Supreme Council (UMSC)',
+    'parent' => 'Idaad & Thanawi Examination Board  (ITEB)',
 
     'contact' => [
         'phone' => env('LANDING_PHONE', '+256 702 595 554'),
@@ -52,7 +52,7 @@ return [
 
     'leadership' => [
         ['name' => 'Prof. Dr. Ziyad Swaleh Lubanga', 'role' => 'Executive Secretary'],
-        ['name' => 'Sheikh Hatimu Wamala', 'role' => 'Board Chairperson'],
-        ['name' => 'Dr. Shaban Mubaje', 'role' => 'Mufti'],
+        ['name' => 'Sheikh Katumba Sowedi', 'role' => 'Board Member'],
+        ['name' => 'Sheikh Umar', 'role' => 'Board Member'],
     ],
 ];

@@ -304,7 +304,7 @@
                 <div class="split-copy" data-reveal>
                     <p class="eyebrow">About ITEB</p>
                     <h2>The official examination board for Islamic secondary education</h2>
-                    <p class="lead">The {{ $site['name'] }} is based in Kawempe, Kampala, and conducts examinations under the {{ $site['parent'] }}. It is responsible for standardising, administering and certifying Islamic secondary education at both the Idaad and Thanawi stages.</p>
+                    <p class="lead">The {{ $site['name'] }} is based in Kawempe, Kampala, and conducts examinations under the Uganda Muslim Supreme Council (UMSC). It is responsible for standardising, administering and certifying Islamic secondary education at both the Idaad and Thanawi stages.</p>
                     <p>Our work is rooted in authentic sources and a commitment to transparency and quality: structured curricula covering Qur’anic recitation, Hadith verification and jurisprudence, delivered through processes schools and families can trust.</p>
                     <div class="callout">
                         <svg class="icon"><use href="#i-graduation"/></svg>
@@ -342,7 +342,7 @@
                         <h3>Idaad</h3>
                         <p>The O-Level stage of secondary education, specialising in Islamic theology and building the foundations every later study depends on.</p>
                         <ul class="ticks">
-                            <li><svg class="icon"><use href="#i-clock"/></svg> <span>Generally a <strong>4-year</strong> programme</span></li>
+                            <li><svg class="icon"><use href="#i-clock"/></svg> <span>Generally a <strong>3-year</strong> programme</span></li>
                             <li><svg class="icon"><use href="#i-book-open"/></svg> <span>Monotheism, exegesis, jurisprudence, Hadith, Qur’anic orals, Arabic and history</span></li>
                             <li><svg class="icon"><use href="#i-calendar"/></svg> <span>Results released in {{ $release['Idaad'] ?? 'March' }}</span></li>
                         </ul>
@@ -358,7 +358,7 @@
                         <h3>Thanawi</h3>
                         <p>The A-Level stage: deeper specialisation in the Islamic sciences, preparing students for university-level Islamic scholarship.</p>
                         <ul class="ticks">
-                            <li><svg class="icon"><use href="#i-clock"/></svg> <span>Generally a <strong>2-year</strong> programme</span></li>
+                            <li><svg class="icon"><use href="#i-clock"/></svg> <span>Generally a <strong>3-year</strong> programme</span></li>
                             <li><svg class="icon"><use href="#i-book-open"/></svg> <span>Qur’an exegesis, rituals, religion &amp; sects, rhetoric, grammar and morphology</span></li>
                             <li><svg class="icon"><use href="#i-calendar"/></svg> <span>Results released in {{ $release['Thanawi'] ?? 'May' }}</span></li>
                         </ul>
@@ -367,9 +367,9 @@
 
                 <ol class="pathway" data-reveal aria-label="Education pathway">
                     <li><span><svg class="icon"><use href="#i-book-open"/></svg></span><b>Primary Islamic education</b><small>Where students begin</small></li>
-                    <li><span><svg class="icon"><use href="#i-school"/></svg></span><b>Idaad</b><small>O-Level · 4 years</small></li>
-                    <li><span><svg class="icon"><use href="#i-graduation"/></svg></span><b>Thanawi</b><small>A-Level · 2 years</small></li>
-                    <li><span><svg class="icon"><use href="#i-landmark"/></svg></span><b>University</b><small>Including IUIU</small></li>
+                    <li><span><svg class="icon"><use href="#i-school"/></svg></span><b>Idaad</b><small>O-Level · 3 years</small></li>
+                    <li><span><svg class="icon"><use href="#i-graduation"/></svg></span><b>Thanawi</b><small>A-Level · 3 years</small></li>
+                    <li><span><svg class="icon"><use href="#i-landmark"/></svg></span><b>University</b><small>Certification for Studies Abroad.</small></li>
                 </ol>
             </div>
         </section>
@@ -434,6 +434,7 @@
         <section class="section section-cream" id="schools">
             <div class="container split split-reverse">
                 <div class="portal-grid">
+                    
                     @foreach ($portal as $i => [$icon, $title, $text])
                         <article class="feature" data-reveal style="--d:{{ $i * 60 }}ms">
                             <span class="feature-icon"><svg class="icon"><use href="#i-{{ $icon }}"/></svg></span>
