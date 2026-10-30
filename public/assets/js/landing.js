@@ -92,14 +92,15 @@
 
     function runCount(el) {
         var to = parseFloat(el.getAttribute('data-to'));
+        var sfx = el.getAttribute('data-suffix') || '';
         if (isNaN(to)) { return; }
-        if (reduced) { el.textContent = fmt(to); return; }
+        if (reduced) { el.textContent = fmt(to) + sfx; return; }
         var t0 = performance.now(), dur = 1600;
         (function step(t) {
             var p = Math.min(1, (t - t0) / dur);
             var e = 1 - Math.pow(1 - p, 4);
-            el.textContent = fmt(to * e);
-            if (p < 1) { requestAnimationFrame(step); } else { el.textContent = fmt(to); }
+            el.textContent = fmt(to * e) + (p < 1 ? '' : sfx);
+            if (p < 1) { requestAnimationFrame(step); } else { el.textContent = fmt(to) + sfx; }
         })(t0);
     }
 

@@ -289,7 +289,7 @@
                         @foreach ($stats as $s)
                             <div class="stat" data-reveal>
                                 <span class="stat-icon"><svg class="icon"><use href="#i-{{ $s['icon'] }}"/></svg></span>
-                                <div class="stat-num"><span class="count" data-to="{{ $s['value'] }}">{{ number_format($s['value']) }}</span></div>
+                                <div class="stat-num"><span class="count" data-to="{{ $s['value'] }}" data-suffix="{{ $s['suffix'] ?? '' }}">{{ number_format($s['value']) }}{{ $s['suffix'] ?? '' }}</span></div>
                                 <div class="stat-label">{{ $s['label'] }}</div>
                             </div>
                         @endforeach

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  */
 class LandingPageService
 {
-    private const CACHE_KEY = 'landing_page:v1';
+    private const CACHE_KEY = 'landing_page:v2';
     private const CACHE_TTL = 300;
 
     public function build(): array
@@ -47,23 +47,14 @@ class LandingPageService
 
     private function stats(): array
     {
-        $schools = (int) DB::table('houses')->count();
-
-        $students = (int) DB::table('students_basic')
-            ->whereRaw("COALESCE(state, 'Active') = 'Active'")
-            ->count();
-
         $results = (int) DB::table('student_results')->count();
 
-        $recognised = (int) DB::table('houses')
-            ->whereIn('Number', DB::table('school_recognition_certificates')->where('status', 'active')->select('house_number'))
-            ->count();
-
         $stats = [
-            ['key' => 'schools', 'label' => 'Registered schools', 'value' => $schools, 'icon' => 'school'],
-            ['key' => 'students', 'label' => 'Students enrolled', 'value' => $students, 'icon' => 'users'],
+            // Display-only placeholder figures (real counts are confidential). Shown as "200+", "20,000+", "200+".
+            ['key' => 'schools', 'label' => 'Registered schools', 'value' => 200, 'suffix' => '+', 'icon' => 'school'],
+            ['key' => 'students', 'label' => 'Students enrolled', 'value' => 20000, 'suffix' => '+', 'icon' => 'users'],
             ['key' => 'results', 'label' => 'Results processed', 'value' => $results, 'icon' => 'bar-chart'],
-            ['key' => 'recognised', 'label' => 'Recognised schools', 'value' => $recognised, 'icon' => 'award'],
+            ['key' => 'recognised', 'label' => 'Recognised schools', 'value' => 200, 'suffix' => '+', 'icon' => 'award'],
         ];
 
         // A zero would look odd on a public page: only show what has something to show.
