@@ -80,7 +80,7 @@ $controller = new Controller();
 
         .student-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
             gap: 12px;
             margin-top: 20px;
         }
@@ -113,7 +113,7 @@ $controller = new Controller();
         /* Compact Stats Overview */
         .stats-overview {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
             gap: 18px;
             margin-bottom: 25px;
         }
@@ -370,7 +370,7 @@ $controller = new Controller();
         /* Compact Performance Grid */
         .performance-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
@@ -468,7 +468,7 @@ $controller = new Controller();
         /* Compact Quick Actions */
         .quick-actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
             gap: 15px;
             margin-bottom: 25px;
         }
@@ -596,7 +596,8 @@ $controller = new Controller();
                 flex-direction: column;
             }
 
-            .btn {
+            /* scoped: this used to stretch EVERY .btn on the page (modals, DataTables, dropdowns) */
+            .section-actions .btn {
                 width: 100%;
                 text-align: center;
             }
@@ -742,6 +743,10 @@ $controller = new Controller();
 
         .text-primary {
             color: var(--primary);
+        }
+        /* Mobile: phone layout */
+        @media (max-width: 575.98px) {
+            .welcome-header { padding: 18px 16px; }
         }
     </style>
     </head>

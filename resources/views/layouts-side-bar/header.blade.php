@@ -38,14 +38,14 @@
                 <div class="display-name">
                     @if (Session('LoggedSchool'))
                         <span style="line-height:40px;">
-                            School :
+                            <span class="ra-dn-prefix">School :</span>
                             <span class="text-primary font-weight-bold">
                                 {{ Helper::schoolNameByID(Session('LoggedSchool')) }}
                             </span>
                         </span>
                     @else
                         <span style="line-height:40px;">
-                            Role :
+                            <span class="ra-dn-prefix">Role :</span>
                             <span class="text-primary font-weight-bold">
                                 {{ Helper::logged_admin_user() }}
                             </span>

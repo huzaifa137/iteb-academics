@@ -185,12 +185,12 @@
                     <div class="card-body">
                         <div class="tab-content" id="analyticsTabContent">
                             <div class="tab-pane fade show active" id="grade-dist" role="tabpanel">
-                                <div id="gradeDistributionChart" style="height: 400px;">
+                                <div id="gradeDistributionChart" class="ra-chart-lg" style="height: 400px;">
                                     <canvas id="gradeDistCanvas"></canvas>
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="trends" role="tabpanel">
-                                <div id="trendsChart" style="height: 400px;">
+                                <div id="trendsChart" class="ra-chart-lg" style="height: 400px;">
                                     <canvas id="trendsCanvas"></canvas>
                                 </div>
                             </div>
@@ -710,6 +710,10 @@ function downloadReport(format) {
 .table-responsive { scrollbar-width: thin; }
 .table-responsive::-webkit-scrollbar { width: 6px; }
 .table-responsive::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    /* Mobile: phone layout */
+    @media (max-width: 575.98px) {
+        .ra-chart-lg { height: 300px !important; }
+    }
 </style>
 
 @push('scripts')

@@ -1159,6 +1159,13 @@ use App\Http\Controllers\Helper;
         .document-preview.excel i {
             color: #217346;
         }
+        /* Mobile: phone layout */
+        @media (max-width: 575.98px) {
+            .reg-hero { padding: 22px 18px; }
+            .reg-card-body { padding: 18px 14px; }
+            .btn-primary-reg { padding: 12px 18px; }
+            .empty-state { padding: 32px 12px; }
+        }
     </style>
 
     <div class="side-app" style="padding: 20px;">

@@ -375,6 +375,10 @@
                     padding: 8px 10px;
                 }
             }
+            /* Mobile: phone layout */
+            @media (max-width: 575.98px) {
+                .stats-card .card-body { padding: 1.25rem 1rem; min-height: 0; }
+            }
         </style>
 
 

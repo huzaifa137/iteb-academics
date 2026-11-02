@@ -29,6 +29,8 @@
 @yield('js')
 <!-- Custom js-->
 <script src="{{URL::asset('assets/js/custom.js')}}"></script>
+<!-- Responsive helpers (scrollable tables, menu overlay) -->
+<script src="{{ URL::asset('assets/js/responsive.js') }}?v={{ @filemtime(public_path('assets/js/responsive.js')) }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 

@@ -52,12 +52,12 @@ use App\Helpers\PermissionHelper;
             </li>
 
 
-            <li class="slide">
+            <!-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('/enter-marks') }}">
                     <i class="fas fa-balance-scale-right fa-2x mr-3"></i>
                     Grading & Marks
                 </a>
-            </li>
+            </li> -->
 
             <li class="slide">
                 <a class="side-menu__item" href="{{ route('school.passwords.setup') }}">
@@ -168,15 +168,36 @@ use App\Helpers\PermissionHelper;
 
 <script>
     $(document).ready(function () {
-        const sidebarState = localStorage.getItem('sidebar-state');
+        // The saved "collapsed" preference belongs to the desktop layout only.
+        // On phones/tablets the menu is a slide-in drawer and must start closed
+        // on every page, otherwise a desktop preference (or a previous tap on the
+        // menu button) makes the drawer cover the page as soon as it loads.
+        const desktopQuery = window.matchMedia('(min-width: 992px)');
 
-        if (sidebarState === 'closed') {
-            $('body').addClass('sidenav-toggled');
-        } else {
-            $('body').removeClass('sidenav-toggled');
+        function applySidebarState() {
+            if (desktopQuery.matches) {
+                if (localStorage.getItem('sidebar-state') === 'closed') {
+                    $('body').addClass('sidenav-toggled');
+                } else {
+                    $('body').removeClass('sidenav-toggled');
+                }
+            } else {
+                $('body').removeClass('sidenav-toggled');
+            }
+        }
+
+        applySidebarState();
+
+        if (desktopQuery.addEventListener) {
+            desktopQuery.addEventListener('change', applySidebarState);
+        } else if (desktopQuery.addListener) {
+            desktopQuery.addListener(applySidebarState);
         }
 
         $(document).on('click', '[data-toggle="sidebar"]', function () {
+            if (!desktopQuery.matches) {
+                return; // only remember the collapsed state on desktop
+            }
             setTimeout(function () {
                 if ($('body').hasClass('sidenav-toggled')) {
                     localStorage.setItem('sidebar-state', 'closed');

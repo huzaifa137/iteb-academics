@@ -1,0 +1,673 @@
+/* ==========================================================================
+   ITEB Academics - Responsive layer  (public/assets/css/responsive.css)
+
+   Loaded AFTER the theme (bootstrap / style.css / skins.css / sidemenu.css)
+   and after each page's @yield('css'), from every head partial in
+   resources/views/layouts and resources/views/layouts-side-bar.
+
+   Rules of the road
+   -----------------
+   * Bootstrap 4 breakpoints:  xs < 576 | sm >= 576 | md >= 768 | lg >= 992
+   * Anything that changes layout lives inside a max-width media query, so the
+     desktop rendering (>= 992px) is not affected by this file.
+   * Selectors are generic (cards, tables, forms, modals, DataTables, ...), so
+     every page that uses the shared layouts is covered without editing it.
+   * Page-specific fixes stay in the page's own <style> block.
+
+   Sections
+   --------
+   1.  Foundations (safe at all sizes)
+   2.  Tablet & phone  (<= 991.98px)
+   3.  Phone           (<= 575.98px)
+   4.  Small phone     (<= 374.98px)
+   5.  Landscape phones
+   6.  Helper classes for page authors
+   7.  Bootstrap 5 utility polyfills (the views use BS5 class names on a BS4 theme)
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. FOUNDATIONS
+   -------------------------------------------------------------------------- */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Wrapper added by responsive.js around tables that are not already scrollable */
+.ra-table-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ra-table-scroll > table {
+    margin-bottom: 0;
+}
+
+/* Overlay behind the slide-in menu on phones/tablets (created by responsive.js) */
+.ra-overlay {
+    display: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. TABLET & PHONE  (<= 991.98px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+
+    /* Safety net: the page itself should never scroll sideways. Wide content
+       (tables, charts) scrolls inside its own container instead. */
+    body {
+        overflow-x: hidden;
+    }
+
+    .app-content,
+    .side-app,
+    .page-body,
+    .container,
+    .container-fluid {
+        max-width: 100%;
+    }
+
+    /* Media and form controls never exceed their container (tablet/phone only:
+       on desktop this would change table column sizing) */
+    img,
+    video,
+    canvas,
+    iframe,
+    embed,
+    object,
+    select,
+    textarea,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+        max-width: 100%;
+    }
+
+    /* ---- Header ---------------------------------------------------------- */
+    .app-header .container,
+    .app-header .container-fluid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .app-header .header-brand-img {
+        max-width: 150px;
+        height: auto;
+        max-height: 44px;
+    }
+
+    .app-header .logo-wrapper {
+        max-width: 150px;
+    }
+
+    .app-header .d-flex.ml-auto {
+        min-width: 0;
+    }
+
+    /* "School : <name>" / "Role : <name>" label in the top bar */
+    .app-header .display-name {
+        min-width: 0;
+        max-width: 50vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: .9rem;
+    }
+
+    .dropdown-menu {
+        max-width: calc(100vw - 1rem);
+    }
+
+    #back-to-top {
+        right: 12px;
+        bottom: 12px;
+    }
+
+    /* ---- Top-menu layout (layouts/hr-menu): "Logout" has an inline float:right,
+            which makes no sense inside the mobile drawer ------------------------ */
+    .horizontalMenu-list > li.logout-item {
+        float: none !important;
+    }
+
+    /* ---- Slide-in menu: dim overlay (see responsive.js) -------------------- */
+    .ra-overlay {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1020;
+        background: rgba(0, 0, 0, .45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .2s ease;
+    }
+
+    .ra-overlay.is-visible {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .app-sidebar {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ---- Page header ------------------------------------------------------- */
+    .page-header {
+        flex-wrap: wrap;
+        row-gap: .5rem;
+    }
+
+    .page-header .page-title {
+        font-size: 1.25rem;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+    .page-header .breadcrumb {
+        flex-wrap: wrap;
+        margin-bottom: 0;
+        padding-left: 0;
+    }
+
+    /* ---- Cards ------------------------------------------------------------- */
+    .card-header {
+        flex-wrap: wrap;
+        row-gap: .5rem;
+        column-gap: .75rem;
+    }
+
+    .card-header .card-title,
+    .card-header .modal-title {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* Button groups that sit in a card header may wrap instead of overflowing */
+    .card-header > .d-flex,
+    .card-header > .btn-list,
+    .card-header > .card-options {
+        flex-wrap: wrap;
+        row-gap: .35rem;
+    }
+
+    .card-body {
+        overflow-wrap: break-word;
+    }
+
+    /* ---- Tables ------------------------------------------------------------ */
+    .table-responsive > .table,
+    .ra-table-scroll > .table {
+        margin-bottom: 0;
+    }
+
+    .table th,
+    .table td {
+        padding: .55rem .6rem;
+    }
+
+    .table-responsive::-webkit-scrollbar,
+    .ra-table-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb,
+    .ra-table-scroll::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, .25);
+        border-radius: 3px;
+    }
+
+    /* ---- Forms ------------------------------------------------------------- */
+    /* 16px stops iOS Safari from zooming the page when a field gets focus */
+    .form-control:not(.form-control-sm),
+    .custom-select:not(.custom-select-sm),
+    select.form-control:not(.form-control-sm),
+    textarea.form-control,
+    .select2-search--dropdown .select2-search__field {
+        font-size: 16px;
+    }
+
+    .form-control:not(.form-control-sm):not(textarea) {
+        min-height: 42px;
+    }
+
+    .custom-file {
+        width: 100%;
+    }
+
+    .btn-group,
+    .btn-toolbar {
+        flex-wrap: wrap;
+    }
+
+    /* ---- Modals ------------------------------------------------------------ */
+    .modal-dialog {
+        max-width: calc(100% - 1rem);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .modal-header .modal-title {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .modal-body {
+        overflow-wrap: break-word;
+    }
+
+    .modal-body table {
+        max-width: 100%;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    /* ---- DataTables -------------------------------------------------------- */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        float: none !important;
+        text-align: center !important;
+        width: 100%;
+        margin: .25rem 0;
+    }
+
+    .dataTables_wrapper .dataTables_filter label,
+    .dataTables_wrapper .dataTables_length label {
+        display: block;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        display: block;
+        width: 100% !important;
+        margin: .25rem 0 0 !important;
+    }
+
+    .dataTables_wrapper .dt-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        float: none;
+        gap: .25rem;
+        margin-bottom: .5rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* ---- Pagination -------------------------------------------------------- */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* ---- Select2 / date pickers -------------------------------------------- */
+    .select2-container {
+        max-width: 100%;
+    }
+
+    .select2-dropdown {
+        max-width: calc(100vw - 16px);
+    }
+
+    .daterangepicker {
+        max-width: calc(100vw - 16px);
+    }
+
+    /* ---- Charts ------------------------------------------------------------ */
+    .chart-wrapper,
+    .chart-container,
+    .chart-circle {
+        max-width: 100%;
+    }
+
+    /* ---- Long text must wrap rather than push the layout wider -------------- */
+    .alert,
+    .breadcrumb-item,
+    .dropdown-item,
+    .list-group-item {
+        overflow-wrap: anywhere;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   3. PHONE  (<= 575.98px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 575.98px) {
+
+    /* 15px = the negative margin of a bare .row, so rows never poke out */
+    .side-app {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    /* Many views wrap their content in ANOTHER .side-app and/or .container,
+       which stacks gutters to ~45px per side on a phone. Only the outermost
+       wrapper keeps its padding. */
+    .side-app .side-app {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .side-app > .container,
+    .side-app > .container-fluid {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* The "School :" / "Role :" prefix is dropped so the name gets the room */
+    .app-header .display-name .ra-dn-prefix {
+        display: none;
+    }
+
+    .app-header .display-name {
+        max-width: 42vw;
+        font-size: .85rem;
+    }
+
+    h1, .h1 { font-size: 1.6rem; }
+    h2, .h2 { font-size: 1.4rem; }
+    h3, .h3 { font-size: 1.25rem; }
+    h4, .h4 { font-size: 1.1rem; }
+
+    .card-header {
+        padding: .75rem 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Buttons in a card header share the full row instead of overflowing it */
+    .card-header > .d-flex,
+    .card-header > .btn-list {
+        width: 100%;
+    }
+
+    .card-header > .d-flex > .btn,
+    .card-header > .d-flex > a.btn,
+    .card-header > .btn-list > .btn {
+        flex: 1 1 auto;
+        text-align: center;
+    }
+
+    .form-inline {
+        display: block;
+    }
+
+    .form-inline .form-group,
+    .form-inline .form-control,
+    .form-inline .custom-select,
+    .form-inline .input-group {
+        width: 100%;
+        margin-bottom: .5rem;
+    }
+
+    /* Long labels wrap instead of running off the screen */
+    .btn {
+        white-space: normal;
+    }
+
+    .btn:not(.btn-sm):not(.btn-lg) {
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+    }
+
+    .btn-sm {
+        padding: .4rem .7rem;
+    }
+
+    /* Long labels inside badges / pills (e.g. permission names) must wrap */
+    .badge {
+        max-width: 100%;
+        white-space: normal;
+        text-align: left;
+    }
+
+    .modal-dialog {
+        margin: .5rem auto;
+    }
+
+    /* 5 one-digit OTP boxes (inline width:50px) must fit a 320px screen */
+    .otp-input {
+        flex: 1 1 0;
+        width: auto !important;
+        min-width: 0;
+        max-width: 50px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-footer > .btn {
+        flex: 1 1 auto;
+        margin: .25rem;
+    }
+
+    .table th,
+    .table td {
+        font-size: .85rem;
+        padding: .5rem;
+    }
+
+    .nav-tabs .nav-link,
+    .nav-pills .nav-link {
+        padding: .5rem .75rem;
+    }
+
+    /* Pagination: slightly tighter so more pages fit per row */
+    .page-link {
+        padding: .4rem .65rem;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   4. SMALL PHONE  (<= 374.98px)  - iPhone SE / 320px Androids
+   -------------------------------------------------------------------------- */
+@media (max-width: 374.98px) {
+
+    .app-header .header-brand-img,
+    .app-header .logo-wrapper {
+        max-width: 110px;
+    }
+
+    .app-header .display-name {
+        max-width: 34vw;
+    }
+
+    h1, .h1 { font-size: 1.45rem; }
+    h2, .h2 { font-size: 1.3rem; }
+}
+
+
+/* --------------------------------------------------------------------------
+   5. LANDSCAPE PHONES  (short viewports)
+   -------------------------------------------------------------------------- */
+@media (max-height: 500px) and (orientation: landscape) {
+    .modal-dialog {
+        margin: .25rem auto;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   6. HELPER CLASSES for page authors
+   -------------------------------------------------------------------------- */
+.ra-scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+/* Row of buttons/filters that wraps and shares the line evenly */
+.ra-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+@media (max-width: 575.98px) {
+    .ra-stack-xs {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .ra-full-xs {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .ra-hide-xs {
+        display: none !important;
+    }
+
+    .ra-actions > .btn,
+    .ra-actions > a.btn {
+        flex: 1 1 auto;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   7. BOOTSTRAP 5 UTILITY POLYFILLS
+   --------------------------------------------------------------------------
+   Many views use Bootstrap 5 class names (me-2, ms-3, g-3, fw-bold, form-select,
+   ...) but the admin theme ships Bootstrap 4, where they do nothing - which is
+   why spacing between stacked fields/icons disappears on phones. The most
+   common ones are defined here, for tablets and phones only so the desktop
+   look stays exactly as it is.
+   To get them on desktop too, move this block out of the media query.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+
+    /* Close button that has no content (BS5 .btn-close) is otherwise invisible */
+    .btn-close:empty {
+        box-sizing: content-box;
+        width: 1em;
+        height: 1em;
+        padding: .25em;
+        color: #000;
+        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center / 1em auto no-repeat;
+        border: 0;
+        border-radius: .25rem;
+        opacity: .5;
+        cursor: pointer;
+    }
+
+    .btn-close:empty:hover {
+        opacity: .85;
+    }
+
+    .btn-close-white:empty {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* spacing: start / end (left / right) */
+    .ms-0 { margin-left: 0 !important; }       .me-0 { margin-right: 0 !important; }
+    .ms-1 { margin-left: .25rem !important; }  .me-1 { margin-right: .25rem !important; }
+    .ms-2 { margin-left: .5rem !important; }   .me-2 { margin-right: .5rem !important; }
+    .ms-3 { margin-left: 1rem !important; }    .me-3 { margin-right: 1rem !important; }
+    .ms-4 { margin-left: 1.5rem !important; }  .me-4 { margin-right: 1.5rem !important; }
+    .ms-5 { margin-left: 3rem !important; }    .me-5 { margin-right: 3rem !important; }
+    .ms-auto { margin-left: auto !important; } .me-auto { margin-right: auto !important; }
+
+    .ps-0 { padding-left: 0 !important; }      .pe-0 { padding-right: 0 !important; }
+    .ps-1 { padding-left: .25rem !important; } .pe-1 { padding-right: .25rem !important; }
+    .ps-2 { padding-left: .5rem !important; }  .pe-2 { padding-right: .5rem !important; }
+    .ps-3 { padding-left: 1rem !important; }   .pe-3 { padding-right: 1rem !important; }
+    .ps-4 { padding-left: 1.5rem !important; } .pe-4 { padding-right: 1.5rem !important; }
+    .ps-5 { padding-left: 3rem !important; }   .pe-5 { padding-right: 3rem !important; }
+
+    /* flex gap */
+    .gap-0 { gap: 0 !important; }
+    .gap-1 { gap: .25rem !important; }
+    .gap-2 { gap: .5rem !important; }
+    .gap-3 { gap: 1rem !important; }
+    .gap-4 { gap: 1.5rem !important; }
+    .gap-5 { gap: 3rem !important; }
+
+    /* grid gutters:  <div class="row g-3"> (adds the vertical gap BS4 lacks) */
+    .row.g-0 { margin-left: 0; margin-right: 0; }
+    .row.g-0 > * { padding-left: 0; padding-right: 0; }
+
+    .row.g-1 { margin: -.25rem -.125rem 0; }  .row.g-1 > * { padding: 0 .125rem; margin-top: .25rem; }
+    .row.g-2 { margin: -.5rem -.25rem 0; }    .row.g-2 > * { padding: 0 .25rem; margin-top: .5rem; }
+    .row.g-3 { margin: -1rem -.5rem 0; }      .row.g-3 > * { padding: 0 .5rem; margin-top: 1rem; }
+    .row.g-4 { margin: -1.5rem -.75rem 0; }   .row.g-4 > * { padding: 0 .75rem; margin-top: 1.5rem; }
+    .row.g-5 { margin: -3rem -1.5rem 0; }     .row.g-5 > * { padding: 0 1.5rem; margin-top: 3rem; }
+
+    .row.gy-1 { margin-top: -.25rem; } .row.gy-1 > * { margin-top: .25rem; }
+    .row.gy-2 { margin-top: -.5rem; }  .row.gy-2 > * { margin-top: .5rem; }
+    .row.gy-3 { margin-top: -1rem; }   .row.gy-3 > * { margin-top: 1rem; }
+    .row.gy-4 { margin-top: -1.5rem; } .row.gy-4 > * { margin-top: 1.5rem; }
+    .row.gy-5 { margin-top: -3rem; }   .row.gy-5 > * { margin-top: 3rem; }
+
+    /* typography */
+    .fw-bold { font-weight: 700 !important; }
+    .fw-bolder { font-weight: bolder !important; }
+    .fw-semibold { font-weight: 600 !important; }
+    .fw-normal { font-weight: 400 !important; }
+    .fw-light { font-weight: 300 !important; }
+
+    .fs-1 { font-size: 2.5rem !important; }
+    .fs-2 { font-size: 2rem !important; }
+    .fs-3 { font-size: 1.75rem !important; }
+    .fs-4 { font-size: 1.5rem !important; }
+    .fs-5 { font-size: 1.25rem !important; }
+    .fs-6 { font-size: 1rem !important; }
+
+    .text-start { text-align: left !important; }
+    .text-end { text-align: right !important; }
+
+    /* forms */
+    .form-label {
+        display: inline-block;
+        margin-bottom: .5rem;
+    }
+
+    .form-select {
+        display: block;
+        width: 100%;
+        min-height: 42px;
+        padding: .375rem 1.75rem .375rem .75rem;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+    }
+
+    .visually-hidden {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
+}

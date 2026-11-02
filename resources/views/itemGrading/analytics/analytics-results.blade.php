@@ -212,6 +212,10 @@
         .progress-bar-danger {
             background: linear-gradient(90deg, #e74c3c, #c0392b);
         }
+        /* Mobile: phone layout */
+        @media (max-width: 575.98px) {
+            .report-header { padding: 18px; border-radius: 16px; margin-bottom: 20px; }
+        }
     </style>
 @endsection
 

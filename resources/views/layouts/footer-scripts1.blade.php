@@ -30,3 +30,5 @@
 
 <!-- Custom js-->
 <script src="{{URL::asset('assets/js/custom.js')}}"></script>
+<!-- Responsive helpers (scrollable tables, menu overlay) -->
+<script src="{{ URL::asset('assets/js/responsive.js') }}?v={{ @filemtime(public_path('assets/js/responsive.js')) }}"></script>

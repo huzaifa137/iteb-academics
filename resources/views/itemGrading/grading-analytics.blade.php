@@ -343,6 +343,19 @@
         height: 50px;
         padding: 0.5rem 1rem;
     }
+    /* Mobile: phone layout */
+    @media (max-width: 575.98px) {
+        .gradient-header { padding: 1.25rem; border-radius: 16px 16px 0 0; }
+        .filter-section { padding: 1.25rem 1rem; border-radius: 16px; margin-bottom: 1.25rem; }
+        .glass-card { border-radius: 16px; }
+        .stat-card { padding: 1.1rem; }
+        .filter-grid { gap: 1.1rem; margin-bottom: 1.25rem; }
+        .sort-group { grid-template-columns: 1fr; }
+        .range-group { gap: .5rem; }
+        .modern-input { padding: .75rem 1rem; }
+        .modern-btn { padding: .8rem 1.25rem; }
+        .filter-actions { margin-top: 1.25rem; padding-top: 1.25rem; }
+    }
 </style>
 
 @section('content')

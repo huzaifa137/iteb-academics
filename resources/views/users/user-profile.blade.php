@@ -128,7 +128,7 @@
                                         $LL = strtoupper(substr($user->lastname, 0, 1));
                                     @endphp
 
-                                    <div class="d-flex align-items-center p-4">
+                                    <div class="d-flex align-items-center flex-wrap p-4">
 
                                         @if ($user->firstname != null && $user->lastname != null)
                                             <div class="google-avatar">

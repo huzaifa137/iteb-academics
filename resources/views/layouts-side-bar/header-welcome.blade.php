@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div>
-                <h4 class="mt-4 font-weight-bold"><span class="display-name">Iteb Academics</h4>
+                <h4 class="mt-4 font-weight-bold"><span class="display-name">Iteb Academics</span></h4>
             </div>
 
         </div>

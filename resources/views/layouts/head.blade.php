@@ -22,5 +22,7 @@
 <link href="{{ URL::asset('assets/plugins/web-fonts/plugin.css') }}" rel="stylesheet" />
 
 @yield('css')
+<!-- Responsive layer (mobile / tablet) - keep last so it can override theme + page css -->
+<link href="{{ URL::asset('assets/css/responsive.css') }}?v={{ @filemtime(public_path('assets/css/responsive.css')) }}" rel="stylesheet" />
 
 

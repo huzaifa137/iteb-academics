@@ -55,7 +55,7 @@
                                 <option value="thanawi" {{ request('category') == 'thanawi' ? 'selected' : '' }}>Thanawi (ث)</option>
                             </select>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end flex-nowrap gap-2" style="gap: .5rem;">
+                        <div class="col-md-4 d-flex align-items-end flex-wrap flex-lg-nowrap gap-2 mt-3 mt-md-0" style="gap: .5rem;">
     <button type="submit" class="btn btn-primary text-nowrap"><i class="fas fa-filter"></i> Filter</button>
     <a href="{{ route('students.timetable') }}" class="btn btn-secondary text-nowrap"><i class="fas fa-undo"></i> Reset</a>
     <a href="{{ route('students.attendance-sheet') }}" class="btn btn-success text-nowrap">

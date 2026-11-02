@@ -90,7 +90,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -832,6 +832,19 @@
             padding-bottom: 1rem;
             font-size: 0.8rem;
         }
+                /* Mobile: phone layout */
+                @media (max-width: 575.98px) {
+                    .modern-card,
+                    .filter-wrapper { border-radius: 16px; }
+                    .modern-card .card-header { padding: 1rem; }
+                    .modern-card .card-body { padding: 1rem; }
+                    .filter-wrapper { padding: 1.25rem 1rem; margin-bottom: 1.25rem; }
+                    .stat-card { padding: 1.25rem; border-radius: 16px; }
+                    .stat-value { font-size: 1.75rem; }
+                    .stats-grid,
+                    .summary-grid,
+                    .subject-grid { gap: 1rem; }
+                }
             </style>
 
     <div class="side-app">

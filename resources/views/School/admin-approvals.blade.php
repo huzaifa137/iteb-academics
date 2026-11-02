@@ -111,7 +111,7 @@
         /* School cards */
         .school-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
             gap: 18px;
         }
 
@@ -188,7 +188,7 @@
         .sf-chip.zero:not(.active) { opacity:.45; }
 
         .sf-panel { display:none; margin-top:14px; padding-top:14px; border-top:1px dashed #e2e8f0; }
-        .sf-panel.open { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:18px 24px; }
+        .sf-panel.open { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap:18px 24px; }
         .sf-group h6 { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--slate); margin:0 0 8px; }
         .sf-group .sf-chips { display:flex; flex-wrap:wrap; gap:6px; }
 
@@ -539,6 +539,15 @@
 .bs-table td:not(:first-child) {
     text-align: center;
 }
+        /* Mobile: phone layout */
+        @media (max-width: 575.98px) {
+            .page-hero { padding-left: 16px; padding-right: 16px; }
+            .sf-wrap { padding: 12px; }
+            .sf-field { flex: 1 1 100%; min-width: 0; }
+            .sf-field select { width: 100%; min-width: 0; max-width: 100%; }
+            .sf-search { flex: 1 1 100%; min-width: 0; }
+            .sf-btn { flex: 1 1 auto; }
+        }
     </style>
 
     <div class="side-app">
