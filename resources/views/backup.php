@@ -11,6 +11,13 @@ php artisan registrations:repair-photos --run unlocks any locked student who is 
 If you deliberately lock one of those students, that command would unlock them again.
 The default run only previews, so just don’t use --run on students you locked on purpose.
 
+cd ~/domains/iteb-ug.org/public_html
+git status                      # only the leftovers below should appear
+git pull origin main
+php artisan optimize:clear
+php artisan migrate --force     # if there are new migrations
+composer install --no-dev --optimize-autoloader   # if composer.lock changed
+
 use App\Http\Controllers\Helper;
 
 <!-- USE FULL QUERIES IN THIS PROJECT -->
