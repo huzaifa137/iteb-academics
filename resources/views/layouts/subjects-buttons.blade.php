@@ -77,6 +77,12 @@
     </div>
 
     <div class="col-12 col-sm-3 mb-2">
+        <a href="{{ route('students.marks-sheet') }}" class="btn btn-white text-dark w-100">
+            <i class="fas fa-pen-square me-2"></i> Marks Sheet
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-3 mb-2">
         <a href="{{ route('students.timetable') }}" class="btn btn-white text-dark w-100">
             <i class="fas fa-calendar-alt me-2"></i> Exam Timetable
         </a>

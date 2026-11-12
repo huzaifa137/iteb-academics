@@ -19,6 +19,7 @@ use App\Http\Controllers\HouseController;
 use App\Http\Controllers\ExaminationCardController;
 use App\Http\Controllers\SchoolAlbumController;
 use App\Http\Controllers\ExamTimetableController;
+use App\Http\Controllers\MarksSheetController;
 
 use App\Models\House;
 use App\Models\SchoolPassword;
@@ -309,6 +310,15 @@ Route::controller(UserRightsAndPreviledges::class)->group(function () {
             Route::post('/timetable/update/{id}', 'update')->name('students.timetable.update');
             Route::delete('/timetable/delete/{id}', 'destroy')->name('students.timetable.delete');
             Route::post('/timetable/import-sample', 'importSample')->name('students.timetable.import-sample');
+        });
+
+    // Marks Sheet — per school, or all Idaad / all Thanawi schools
+    Route::controller(MarksSheetController::class)
+        ->prefix('students')
+        ->middleware('StudentAuth')
+        ->group(function () {
+            Route::get('/marks-sheet', 'index')->name('students.marks-sheet');
+            Route::get('/marks-sheet/print', 'print')->name('students.marks-sheet.print');
         });
 
     // School Album (admin: any school)
